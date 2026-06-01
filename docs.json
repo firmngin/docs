@@ -119,7 +119,9 @@
       "linkedin": "https://linkedin.com/company/mintlify"
     }
   },
-  "fonts": {
-    "family": "Plus Jakarta Sans"
+  "thumbnails": {
+    "fonts": {
+      "family": "Plus Jakarta Sans"
+    }
   }
 }
