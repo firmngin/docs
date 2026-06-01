@@ -76,7 +76,7 @@
         {
           "anchor": "Documentation",
           "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "icon": "layout-list"
         },
         {
           "anchor": "Blog",
@@ -92,12 +92,7 @@
     "href": "https://firmngin.dev/docs"
   },
   "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
+    "links": [],
     "primary": {
       "type": "button",
       "label": "Dashboard",
