@@ -4,10 +4,13 @@
   "name": "Mint Starter Kit",
   "colors": {
     "primary": "#5F4CFE",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "light": "#8B7CFF",
+    "dark": "#4937D6"
   },
-  "favicon": "/favicon.svg",
+  "favicon": {
+    "light": "/favicon.svg",
+    "dark": "/images/favicon_firmngin.svg"
+  },
   "navigation": {
     "tabs": [
       {
@@ -84,8 +87,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/images/firmngin-text-logo-light.svg",
+    "dark": "/images/firmngin-text-logo-dark.svg"
   },
   "navbar": {
     "links": [
@@ -128,5 +131,8 @@
     "heading": {
       "family": "Plus Jakarta Sans"
     }
+  },
+  "icons": {
+    "library": "lucide"
   }
 }
