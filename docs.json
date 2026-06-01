@@ -88,7 +88,7 @@
   },
   "logo": {
     "light": "/images/firmngin-text-logo-light.svg",
-    "dark": "/images/firmngin-text-logo-dark(1).svg"
+    "dark": "/images/firmngin-text-logo-light(1).svg"
   },
   "navbar": {
     "links": [
@@ -129,6 +129,9 @@
   },
   "fonts": {
     "heading": {
+      "family": "Plus Jakarta Sans"
+    },
+    "body": {
       "family": "Plus Jakarta Sans"
     }
   },
