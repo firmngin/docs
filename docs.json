@@ -87,8 +87,8 @@
     }
   },
   "logo": {
-    "light": "/images/firmngin-text-logo-light.svg",
-    "dark": "/images/firmngin-text-logo-dark.svg",
+    "light": "/images/firmngin-textlogo-light.svg",
+    "dark": "/images/firmngin-textlogo-dark.svg",
     "href": "https://firmngin.dev/docs"
   },
   "navbar": {
@@ -134,5 +134,5 @@
   "icons": {
     "library": "lucide"
   },
-  "description": "AIoT platform for your hardware business. Build, deploy, analyze and monetize on a production-ready platform built for scale."
+  "description": "AIoT platform for your hardware business. Build, deploy, analyze and monetize on a production-ready platform built for scale.s"
 }
