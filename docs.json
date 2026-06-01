@@ -87,8 +87,8 @@
     }
   },
   "logo": {
-    "light": "/images/firmngin-textlogo-light.svg",
-    "dark": "/images/firmngin-textlogo-dark.svg",
+    "light": "/images/firmngin-textlogo-dark.svg",
+    "dark": "/images/firmngin-textlogo-light.svg",
     "href": "https://firmngin.dev/docs"
   },
   "navbar": {
