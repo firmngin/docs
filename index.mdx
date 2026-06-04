@@ -3,95 +3,54 @@ title: "Introduction"
 description: "Welcome to the new home for your documentation"
 ---
 
-## Setting up
+**firmngin.dev** is an **AIoT** (Artificial Intelligence \+ Internet of Things) platform for hardware businesses. One place to connect firmware to the cloud, monitor devices in real time, run automations, and manage paid services—from prototype to production.
 
-Get your documentation site up and running in minutes.
+## What is firmngin.dev?
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+Firmngin brings **device management**, **firmware & OTA**, **rule-based automation**, and **monetization** into a single workflow. You create a workspace, register boards (e.g. ESP32/ESP8266), integrate the official libraries, and operate devices from the dashboard—without stitching together multiple services.
 
-## Make it yours
+The platform fits IoT product builders, hardware teams, and businesses that want to sell device access or metered services directly from firmware.
 
-Design a docs site that looks great and empowers your users.
+## Key features
 
 <Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+  <Card title="Device management" icon="microchip">
+    Register devices, track online/offline status, control GPIO/entities, and sync state over MQTT with real-time updates in the dashboard.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+
+  <Card title="Firmware & OTA" icon="cloud-arrow-up">
+    Upload firmware, track deployment history, and push over-the-air updates to registered devices.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+
+  <Card title="Automation" icon="diagram-project">
+    Build visual automation flows: conditional logic, device control, AI vision integrations, and triggers from device events.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+
+  <Card title="Monetization & merchants" icon="credit-card">
+    Service/product catalogs, integrated payments, metered usage, feature access enforced at the firmware level, and public menus for guests.
+  </Card>
+
+  <Card title="SDKs & libraries" icon="code">
+    Official libraries for embedded (Arduino/PlatformIO) and server-side integrations (Go, Python, JavaScript).
+  </Card>
+
+  <Card title="Workspace & security" icon="shield">
+    Multi-workspace setup, JWT authentication, device E2EE, plan-based rate limits, and production observability.
   </Card>
 </Columns>
 
-## Create beautiful pages
+## What you can do
 
-Everything you need to create world-class documentation.
+- **Connect devices** — generate MQTT credentials, publish telemetry and state, and see changes live in the dashboard or over WebSocket.
+- **Control & automate** — configure entities, run rules/automations, and link device events to cloud or cross-device actions.
+- **Deploy firmware** — prepare OTA artifacts and monitor rollouts across your device fleet.
+- **Sell device services** — create merchants (sandbox and live), catalog items, link devices to merchants, and expose a public menu for end users.
+- **Build integrations** — use the REST API, webhooks, MQTT topics, and API reference docs for your own systems.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Next steps
 
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
+<Card title="Quickstart" icon="rocket" horizontal href="/quickstart">
+  Follow the short guide: account, first device, library install, and cloud connection.
 </Card>
+
+Need platform access? Sign up at [firmngin.dev](https://firmngin.dev/register) and open the dashboard to get started.
