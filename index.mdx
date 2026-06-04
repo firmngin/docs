@@ -3,95 +3,54 @@ title: "Introduction"
 description: "Welcome to the new home for your documentation"
 ---
 
-## Setting up
+**firmngin.dev** adalah platform **AIoT** (Artificial Intelligence \+ Internet of Things) untuk bisnis perangkat keras. Satu tempat untuk menghubungkan firmware ke cloud, memantau perangkat secara real-time, menjalankan otomasi, dan mengelola layanan berbayar — dari prototipe hingga produksi.
 
-Get your documentation site up and running in minutes.
+## Apa itu firmngin.dev?
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+Firmngin menggabungkan **manajemen perangkat**, **firmware & OTA**, **otomasi berbasis aturan**, dan **monetisasi** dalam satu alur kerja. Anda mendaftar workspace, mendaftarkan board (misalnya ESP32/ESP8266), mengintegrasikan library resmi, lalu mengoperasikan perangkat lewat dashboard — tanpa merakit banyak layanan terpisah.
 
-## Make it yours
+Platform ini cocok untuk pembuat produk IoT, tim hardware, dan bisnis yang ingin menjual akses perangkat atau layanan metered langsung dari firmware.
 
-Design a docs site that looks great and empowers your users.
+## Fitur utama
 
 <Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+  <Card title="Manajemen perangkat" icon="microchip">
+    Daftarkan perangkat, pantau status online/offline, kendalikan GPIO/entity, dan sinkronkan state lewat MQTT dengan update real-time di dashboard.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+
+  <Card title="Firmware & OTA" icon="cloud-arrow-up">
+    Unggah firmware, lacak riwayat deployment, dan kirim pembaruan over-the-air ke perangkat terdaftar.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+
+  <Card title="Otomasi" icon="diagram-project">
+    Bangun alur otomasi visual: logika kondisional, kontrol perangkat, integrasi AI vision, dan trigger dari event perangkat.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+
+  <Card title="Monetisasi & merchant" icon="credit-card">
+    Katalog layanan/produk, pembayaran terintegrasi, usage metered, kontrol akses fitur di level firmware, serta menu publik untuk tamu.
+  </Card>
+
+  <Card title="SDK & library" icon="code">
+    Library resmi untuk embedded (Arduino/PlatformIO) serta integrasi server-side (Go, Python, JavaScript).
+  </Card>
+
+  <Card title="Workspace & keamanan" icon="shield">
+    Multi-workspace, autentikasi JWT, enkripsi komunikasi perangkat (E2EE), rate limit sesuai plan, dan observability untuk operasi produksi.
   </Card>
 </Columns>
 
-## Create beautiful pages
+## Apa yang bisa Anda lakukan?
 
-Everything you need to create world-class documentation.
+- **Menghubungkan perangkat** — generate kredensial MQTT, publish telemetri/state, dan lihat perubahan langsung di dashboard atau WebSocket.
+- **Mengontrol & mengotomasi** — atur entity, jalankan rule/automation, dan hubungkan event perangkat ke aksi cloud atau perangkat lain.
+- **Mendeploy firmware** — siapkan artifact OTA dan pantau rollout ke fleet perangkat.
+- **Menjual layanan perangkat** — buat merchant (sandbox & live), katalog item, tautkan perangkat ke merchant, dan buka menu publik untuk pengguna akhir.
+- **Membangun integrasi** — gunakan REST API, webhook, MQTT topics, dan dokumentasi API untuk sistem Anda sendiri.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Langkah berikutnya
 
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
+<Card title="Quickstart" icon="rocket" horizontal href="/quickstart">
+  Ikuti panduan singkat: akun, perangkat pertama, library, dan koneksi ke cloud.
 </Card>
+
+Butuh akses platform? Daftar di [firmngin.dev](https://firmngin.dev/register) dan buka dashboard untuk memulai.
