@@ -72,35 +72,50 @@ This guide walks you through creating an account, registering your first device,
 
 Copy and upload this example sketch to your board:
 
-```arduino
-#include <FirmnginIoT.h>
+```cpp
+#include <Arduino.h>
+#include <firmngin.h>
 
-// Replace with your credentials from Step 2
-#define SECRET_ID   "your_device_secret_id"
-#define SECRET_KEY  "your_device_secret_key"
+#if defined(ESP8266)
+#include <ESP8266WiFi.h>
+#elif defined(ESP32)
+#include <WiFi.h>
+#endif
 
-FirmnginIoT firmngin;
+#define DEVICE_ID   "YOUR_DEVICE_ID"
+#define DEVICE_KEY  "YOUR_DEVICE_SECRET_KEY"
+
+const char *ssid = "YOUR_SSID";
+const char *password = "YOUR_PASSWORD";
+
+Firmngin fngin(DEVICE_ID, DEVICE_KEY);
+
+Entity temperature("temperature");
 
 void setup() {
   Serial.begin(115200);
-  firmngin.begin(SECRET_ID, SECRET_KEY);
+
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi connected");
+
+  fngin.setDebug(true);
+  fngin.begin();
 }
 
 void loop() {
-  firmngin.loop();
+  fngin.loop();
 
-  // Send telemetry every 5 seconds
-  static unsigned long lastSend = 0;
-  if (millis() - lastSend > 5000) {
-    lastSend = millis();
-
-    float temperature = 25.5; // replace with real sensor reading
-    firmngin.telemetry("temperature", temperature);
-    Serial.print("Temperature sent: ");
-    Serial.println(temperature);
+  // Push entity state every 10 seconds
+  static unsigned long lastPush = 0;
+  if (millis() - lastPush > 10000) {
+    lastPush = millis();
+    fngin.pushEntity(temperature, "25.5");
   }
-
-  delay(100);
 }
 ```
 
@@ -109,7 +124,7 @@ void loop() {
     1. Select your board and port in Arduino IDE.
     2. Click **Upload**.
     3. Open the **Serial Monitor** at `115200` baud.
-    4. You should see connection messages and telemetry being sent.
+    4. You should see WiFi connection messages and device status.
     5. Go to your **Dashboard** — the device should appear as **Online** with live data.
   </Accordion>
 </AccordionGroup>
@@ -121,10 +136,9 @@ void loop() {
     Once your device is connected:
 
     - **Status** — Online/offline indicator updates in real-time via MQTT LWT
-    - **Telemetry** — Values from `firmngin.telemetry()` appear on the device card
-    - **Entities** — GPIO states, sensor readings, and custom entities are synced
+    - **Entities** — GPIO states, sensor readings, and custom entities are synced via `pushEntity()`
 
-    The dashboard uses **WebSocket** to push updates instantly — no page refresh needed.
+    Use `Entity` objects to define typed keys for your data, and `pushEntity()` to send state updates to the dashboard.
   </Accordion>
 </AccordionGroup>
 
