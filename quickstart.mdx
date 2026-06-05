@@ -38,10 +38,11 @@ This guide walks you through creating an account, registering your first device,
     3. Provide a device name and optional description.
     4. Once created, you will receive:
        - **Secret ID** — your device identifier
-       - **Secret Key** — authentication key (shown once, save it securely)
+       - **Secret Key** — authentication key
+    5. Download the **`keys.h`** file from your device page — this contains your mTLS credentials.
 
     <Warning>
-      The secret key is only displayed during creation. Store it somewhere safe — you will need it in your firmware.
+      Never commit `keys.h` to a public repository. Add it to `.gitignore` to prevent accidental exposure.
     </Warning>
   </Accordion>
 </AccordionGroup>
