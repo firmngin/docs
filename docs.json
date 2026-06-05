@@ -112,5 +112,8 @@
   "icons": {
     "library": "lucide"
   },
-  "description": "AIoT platform for your hardware business. Build, deploy, analyze and monetize on a production-ready platform built for scale.s"
+  "description": "AIoT platform for your hardware business. Build, deploy, analyze and monetize on a production-ready platform built for scale.s",
+  "fonts": {
+    "family": "Geist"
+  }
 }
