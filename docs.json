@@ -21,31 +21,23 @@
             "pages": [
               "index",
               "quickstart",
-              "development"
+              "architecture"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Core concepts",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "devices",
+              "firmware",
+              "ota-updates",
+              "monetization"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Libraries",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "libraries/arduino",
+              "libraries/javascript"
             ]
           }
         ]
@@ -57,15 +49,6 @@
             "group": "API documentation",
             "pages": [
               "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoint examples",
-            "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
             ]
           }
         ]
@@ -82,7 +65,7 @@
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://firmngin.dev/login"
     }
   },
   "contextual": {
@@ -112,7 +95,7 @@
   "icons": {
     "library": "lucide"
   },
-  "description": "AIoT platform for your hardware business. Build, deploy, analyze and monetize on a production-ready platform built for scale.s",
+  "description": "AIoT platform for your hardware business. Build, deploy, analyze, and monetize connected devices on a production-ready platform.",
   "fonts": {
     "family": "Poppins"
   }

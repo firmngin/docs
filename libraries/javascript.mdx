@@ -1,0 +1,27 @@
+---
+title: "JavaScript Library"
+description: "Node.js integration notes for tools, gateways, and simulators"
+---
+
+Use the JavaScript library for Node.js tools, simulators, gateways, and service integrations that need to interact with firmngin device or platform APIs.
+
+## Use this library for
+
+- Device simulators.
+- Gateway processes that bridge non-MQTT devices.
+- Internal tools that read device state.
+- Automation helpers that need API access.
+
+## Security note
+
+Do not ship backend API tokens to browser code. Browser UI should call the firmngin backend through authenticated user sessions, not through service tokens embedded in JavaScript bundles.
+
+## Basic client setup
+
+[code:create JavaScript client with base URL and token, then list devices]
+
+## Standard errors
+
+[code:handle standard API error fields error and message]
+
+Always prefer the standard `error` and `message` fields when displaying API errors.

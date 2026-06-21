@@ -1,0 +1,43 @@
+---
+title: "Monetization"
+description: "Device monetization, public pages, orders, payments, and sessions"
+---
+
+Monetization turns connected devices into paid services. A merchant can publish a public page, let customers start paid sessions, accept invoice or QR payments, and review orders, sessions, revenue, and device-level logs.
+
+[image:monetization dashboard with revenue, orders, sessions, and merchant public page status]
+
+<Note>
+  Monetization is currently available for Indonesia-focused payment flows. Do not assume every country or payment method is enabled until the payment manager configuration confirms it.
+</Note>
+
+## Main objects
+
+| Object | Meaning |
+| --- | --- |
+| Merchant | Workspace-owned monetization profile and public page settings. |
+| Item | Sellable product or service attached to one or more devices. |
+| Order | Customer purchase intent and payment lifecycle. |
+| Session | Time-bound or usage-bound access to a device or service. |
+| Payment | Invoice, QR, or provider-specific payment record. |
+
+## Payment state
+
+Payment state must come from backend/payment manager truth. The frontend should avoid overwriting a newer state with stale local or WebSocket data.
+
+[code:payment status priority example showing paid higher than processing and pending]
+
+## Session detail
+
+Session detail should distinguish start time, end time, device, item, payment source, who ended the session, and whether the session is still active.
+
+Raw backend identifiers should not be shown as user-facing labels unless they are intended to be visible.
+
+## Public pages
+
+Public pages should:
+
+- Show only device names allowed by workspace settings.
+- Keep availability real-time.
+- Preserve guest/payer session state during offline to online refreshes.
+- Avoid exposing internal device secrets or backend errors.

@@ -1,33 +1,52 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: "REST API Overview"
+description: "Authentication, error format, and endpoint groups for firmngin APIs"
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+firmngin APIs are served by backend services. The main dashboard-facing API is `firmnginbe` under `/api/v1`.
 
-## Welcome
+## Base URL
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+Development:
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+[code:development REST API base URL]
+
+Production should use the configured firmngin API domain for the deployment.
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+Most dashboard APIs require a bearer token.
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
-```
+[code:bearer token authorization header]
+
+Service-to-service APIs may use dedicated API keys. Do not expose service API keys in frontend code, public screenshots, or device firmware examples.
+
+## Error format
+
+Gin backend and payment manager errors should use:
+
+[code:standard Gin or payment manager error response with error and message fields]
+
+FastAPI automation errors may be wrapped:
+
+[code:FastAPI wrapped error response with detail.error and detail.message fields]
+
+Rules:
+
+- Use `error`, not `code` or `error_code`.
+- Use `UPPER_SNAKE_CASE` error codes.
+- Return human-readable messages.
+- Never expose raw internal errors to clients.
+
+## Common endpoint groups
+
+| Group | Example path | Purpose |
+| --- | --- | --- |
+| Auth | `/auth/login` | Login, OTP, OAuth, profile session. |
+| Workspaces | `/workspaces` | Workspace selection and team scope. |
+| Devices | `/devices`, `/devices/{device_id}` | Device registry and detail. |
+| Device entities | `/device-entities` | Entity values, logs, grouped entity data. |
+| Dashboards | `/dashboards`, `/dashboards/device/{device_id}` | Workspace dashboards and device overview dashboards. |
+| Firmware | `/firmware...` | Firmware artifacts, releases, rollout state. |
+| Automations | `/automations/graphs` | Automation graph CRUD and execution data. |
+| Orders | `/orders`, `/orders/{order_id}/stop-session` | Monetization order and session management. |

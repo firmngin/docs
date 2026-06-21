@@ -1,0 +1,29 @@
+---
+title: "Arduino Library"
+description: "Firmware integration notes for Arduino, ESP32, and ESP8266 devices"
+---
+
+Use the Arduino library for firmware that connects ESP-class boards to firmngin.
+
+## Use this library for
+
+- New ESP32 or ESP8266 devices.
+- Devices that publish structured entity values.
+- Devices that need command handling from the dashboard.
+- Firmware that must report availability and reconnect reliably.
+
+## Core responsibilities
+
+The firmware integration should authenticate with device credentials, connect to MQTT, publish entity values, subscribe to command topics, report lifecycle state, and reconnect after network or broker interruption.
+
+## Minimal integration
+
+[code:minimal Arduino firmware setup with Wi-Fi connection, device credentials, MQTT lifecycle, and temperature publish]
+
+## Legacy v1
+
+Use v1 only when maintaining an existing device that already depends on the v1 protocol or payload shape.
+
+<Warning>
+  Do not assume v2 snippets are compatible with v1 firmware. Verify the exact installed library version before publishing final code.
+</Warning>

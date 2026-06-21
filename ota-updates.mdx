@@ -1,0 +1,38 @@
+---
+title: "OTA Updates"
+description: "Safe over-the-air firmware rollout practices"
+---
+
+OTA updates deliver firmware to devices without physical access. In firmngin, OTA should be treated as a controlled rollout, not a simple file download.
+
+[image:OTA rollout dashboard with phases, target devices, and per-device results]
+
+## OTA rollout phases
+
+| Phase | Purpose |
+| --- | --- |
+| Draft | Define version, artifact, policy, and target segment. |
+| Scheduled | Prepare rollout timing and batch size. |
+| Running | Devices are receiving or applying updates. |
+| Monitoring | Verify per-device result and fleet health. |
+| Completed | Rollout reached its intended target set. |
+| Failed or paused | Stop rollout and investigate device logs or artifact compatibility. |
+
+## Safe rollout practice
+
+- Start with a small canary group.
+- Keep batch size conservative until the firmware is proven.
+- Monitor failure rate before expanding.
+- Keep rollback firmware available.
+- Avoid mixing unrelated firmware changes in one rollout.
+
+## Device requirements
+
+Firmware should support secure artifact download, version reporting, install result reporting, reconnect behavior after reboot, and failure reporting that can be shown in logs.
+
+## Common mistakes
+
+- Using one rollout for multiple hardware revisions without compatibility checks.
+- Assuming a device updated because it downloaded the artifact.
+- Losing device availability state during reboot and treating it as a business-session reset.
+- Reusing manual upload permissions for automated CI/CD upload.

@@ -1,0 +1,52 @@
+---
+title: "Architecture"
+description: "How firmngin services work together across devices, MQTT, API, payment, automation, and dashboards"
+---
+
+firmngin is a multi-service AIoT SaaS platform. The frontend is the operator surface, but device truth, payment truth, automation execution, and availability are owned by backend services.
+
+[image:architecture diagram showing IoT device to MQTT broker to firmnginbe, PostgreSQL, Redis, WebSocket, firmnginv1 dashboard, payment_manager, and firmngin-rule]
+
+## Service responsibilities
+
+| Service | Responsibility |
+| --- | --- |
+| `firmnginv1` | Dashboard UI, public pages, docs UI, and browser WebSocket handling. |
+| `firmnginbe` | REST API, authentication, workspace data, device registry, MQTT integration, Redis cache, WebSocket broadcast, and payment state intake. |
+| `payment_manager` | Payment provider integration and webhook forwarding. |
+| `firmngin-rule` | Rule and graph execution, scheduled triggers, and automation trace output. |
+| MQTT broker | Device command, telemetry, and availability lifecycle. |
+
+## Source-of-truth rules
+
+- Device availability comes from MQTT lifecycle/LWT state. Default state should remain `unknown` until a real broker event arrives.
+- Public menu cache must not cache availability. Availability should be merged from real-time entity cache.
+- Payment state comes from the payment backend and webhook flow. The frontend should not downgrade a newer paid or processing state with stale browser data.
+- Device overview dashboards use the dedicated device overview scope and endpoint, not a hidden workspace dashboard.
+- Map views store configuration, filters, and template selectors. They should not store expanded snapshots of every device.
+
+## Data planes
+
+### Device data
+
+Device telemetry starts at firmware, moves through MQTT, then reaches backend caches, persisted logs, and WebSocket subscribers. Dashboard widgets should subscribe to the resulting state instead of polling aggressively.
+
+### Payment data
+
+Public order flows create payment records, payment manager receives provider events, and `firmnginbe` updates order and session state. UI pages display the latest backend state.
+
+### Automation data
+
+Automation rules are authored in the frontend, persisted through backend or rule-service contracts, executed by `firmngin-rule`, and reported back through event streams and WebSocket messages.
+
+## Failure modes to avoid
+
+<Warning>
+  Do not show `online` before the device actually publishes broker availability. Do not cache public availability. Do not overwrite paid payment state with older pending events.
+</Warning>
+
+Other high-risk mistakes:
+
+- Treating a saved map view as a device snapshot.
+- Mixing master plan/catalog data with a user's current subscription snapshot.
+- Exposing internal backend errors or secrets in API responses.

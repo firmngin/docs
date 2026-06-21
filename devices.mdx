@@ -1,0 +1,54 @@
+---
+title: "Devices"
+description: "Device identity, availability, entities, logs, and public visibility"
+---
+
+Devices are the primary runtime unit in firmngin. A device has credentials, protocol metadata, entity values, availability, logs, dashboards, map metadata, firmware state, and optional monetization settings.
+
+[image:device detail screen with availability, credentials, entities, and logs]
+
+## Device lifecycle
+
+1. Create a device in a workspace.
+2. Generate or copy device credentials.
+3. Configure firmware with the credentials.
+4. Connect through MQTT.
+5. Publish entity values and receive commands.
+6. Monitor state through dashboard, logs, map, and automation views.
+
+## Device identity
+
+| Field | Use |
+| --- | --- |
+| Device ID | Stable backend identifier for API and dashboard references. |
+| Secret ID | Device-facing identifier when the firmware protocol uses a separate public credential handle. |
+| Secret key | Private credential for device authentication. Never expose it in docs, screenshots, or browser logs. |
+| Display name | Human-readable name shown in dashboards and public pages when allowed. |
+
+## Entities
+
+Entities represent values or controls on a device. Examples:
+
+- Sensor readings: `temperature`, `humidity`, `voltage`.
+- Actuator state: `relay`, `fan`, `door_lock`.
+- Operational state: `mode`, `battery`, `fault_code`.
+
+Use stable entity keys. Renaming entity keys can break dashboards, automations, map rules, and public pages that reference the old key.
+
+## Availability
+
+Availability is real-time operational state from the MQTT lifecycle path.
+
+| State | Meaning |
+| --- | --- |
+| `unknown` | No reliable MQTT lifecycle event has been seen yet. |
+| `online` | Broker/backend received the online lifecycle state. |
+| `offline` | Broker/backend received the offline lifecycle state. |
+
+<Warning>
+  Do not mark a device online just because it exists in the database or has old telemetry.
+</Warning>
+
+## Public visibility
+
+Public pages may hide device names depending on workspace or merchant settings. If a public API returns an empty device name, the frontend should hide the name instead of inventing a replacement label.

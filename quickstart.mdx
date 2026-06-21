@@ -1,9 +1,7 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Connect your first device to firmngin and verify live state"
 ---
-
-## Overview
 
 This guide walks you through creating an account, registering your first device, and seeing live telemetry in the dashboard.
 
@@ -58,67 +56,13 @@ This guide walks you through creating an account, registering your first device,
   </Accordion>
 
   <Accordion title="PlatformIO" icon="code">
-    Add the following to your `platformio.ini`:
-
-    ```ini
-    lib_deps =
-      firmngin/Firmngin-Arduino
-    ```
-
-    Or use the PlatformIO Library Registry to search for `firmngin`.
+    [code:PlatformIO dependency entry for the Firmngin Arduino library]
   </Accordion>
 </AccordionGroup>
 
 ## Step 4: Connect your device
 
-Copy and upload this example sketch to your board:
-
-```cpp
-#include <Arduino.h>
-#include <firmngin.h>
-
-#if defined(ESP8266)
-#include <ESP8266WiFi.h>
-#elif defined(ESP32)
-#include <WiFi.h>
-#endif
-
-#define DEVICE_ID   "YOUR_DEVICE_ID"
-#define DEVICE_KEY  "YOUR_DEVICE_SECRET_KEY"
-
-const char *ssid = "YOUR_SSID";
-const char *password = "YOUR_PASSWORD";
-
-Firmngin fngin(DEVICE_ID, DEVICE_KEY);
-
-Entity temperature("temperature");
-
-void setup() {
-  Serial.begin(115200);
-
-  // Connect to WiFi
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nWiFi connected");
-
-  fngin.setDebug(true);
-  fngin.begin();
-}
-
-void loop() {
-  fngin.loop();
-
-  // Push entity state every 10 seconds
-  static unsigned long lastPush = 0;
-  if (millis() - lastPush > 10000) {
-    lastPush = millis();
-    fngin.pushEntity(temperature, "25.5");
-  }
-}
-```
+[code:minimal Arduino firmware sketch that connects Wi-Fi, authenticates with firmngin credentials, and publishes a temperature entity]
 
 <AccordionGroup>
   <Accordion title="Upload and verify" icon="check">
@@ -129,6 +73,8 @@ void loop() {
     5. Go to your **Dashboard** — the device should appear as **Online** with live data.
   </Accordion>
 </AccordionGroup>
+
+[image:device detail page showing availability and live entity updates]
 
 ## Step 5: See it live
 
@@ -146,27 +92,23 @@ void loop() {
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Automation" icon="diagram-project" href="/automation">
-    Build visual rules: conditional logic, device control, AI vision integrations, and triggers from device events.
+  <Card title="Architecture" icon="network" href="/architecture">
+    Understand the device, MQTT, API, Redis, WebSocket, payment, and automation service boundaries.
+  </Card>
+
+  <Card title="Devices" icon="microchip" href="/devices">
+    Learn how device identity, availability, entities, and public visibility work.
   </Card>
 
   <Card title="Monetization" icon="credit-card" href="/monetization">
-    Create service catalogs, integrated payments, and public menus for guests.
-
-    <Note>
-      Monetization is currently only available for **Indonesia** region.
-    </Note>
+    Create service catalogs, integrated payments, sessions, and public pages for guests.
   </Card>
 
   <Card title="Firmware & OTA" icon="cloud-arrow-up" href="/firmware">
-    Upload firmware binaries and push over-the-air updates to your device fleet.
-  </Card>
-
-  <Card title="API Reference" icon="code" href="/api-reference/introduction">
-    Full REST API documentation for server-side integrations.
+    Track firmware artifacts and plan controlled OTA rollouts for your fleet.
   </Card>
 </CardGroup>
 
 <Note>
-  **Need help?** Join our [community](https://firmngin.dev/community) or check the [full documentation](https://firmngin.dev/docs).
+  Monetization is currently only available for the **Indonesia** region.
 </Note>
