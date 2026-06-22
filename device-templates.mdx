@@ -1,0 +1,97 @@
+---
+title: "Device Templates"
+description: "Reusable device contracts for hardware, entities, protocols, and rollout rules"
+---
+
+Device templates help you standardize how a group of devices should be configured. Use a template when multiple devices share the same hardware type, entity structure, connection options, or firmware rollout rules.
+
+[image:device template list with search, assignment filter, version badge, and device count]
+
+## When to use templates
+
+Use device templates when:
+
+- You sell or operate many devices with the same board or model.
+- Devices should expose the same entity keys, units, icons, and value types.
+- You want a clear contract between firmware, dashboard, automations, and monitoring.
+- You need reusable firmware OTA rules for devices using the same template.
+- You want device setup to be more consistent across a workspace.
+
+Do not use a template just to rename one device. Templates are more useful when they describe a reusable device type.
+
+## Template list
+
+The Device Templates page shows the workspace template registry. From this page, you can:
+
+- Search templates by name.
+- Filter templates by whether they are assigned to devices.
+- Open template details.
+- Edit template identity.
+- Delete a template when it is safe to remove.
+- See the current version, revision, assigned device count, and last updated time.
+
+[image:device template detail drawer showing overview, entity contract, copy key, and Arduino example]
+
+## What a template contains
+
+| Section | What it defines |
+| --- | --- |
+| Identity | Template name and description. |
+| Board and runtime | Board family and board model, such as ESP32 or ESP8266 options. |
+| Protocols | Connectivity features selected for this device type. |
+| Entity contract | Entity keys, names, value types, units, ranges, icons, and descriptions. |
+| Firmware OTA policy | Optional rollout rule for firmware published for devices using this template. |
+
+The entity contract is the most important part. It tells firmware developers and dashboard users which values a device should send or receive.
+
+## Entities
+
+Templates can include custom entities for telemetry, state, controls, or device-specific values. Each custom entity can define:
+
+- Name and key.
+- Entity type.
+- Value type, such as boolean, enum, number, or string.
+- GPIO pin and pin type when relevant.
+- Default value, range, unit, prefix, suffix, and icon.
+- Description for the people configuring or maintaining the device.
+
+Selected protocols can also generate protocol entities automatically. Avoid creating a custom entity with the same key as a generated protocol entity.
+
+<Note>
+  Keep entity keys stable. Renaming an entity key can affect dashboards, automations, firmware examples, and monitoring that already use the old key.
+</Note>
+
+## Versions and edits
+
+Creating a template starts with version 1. Editing the hardware or entity contract publishes a new immutable template version. This helps existing device definitions stay understandable over time.
+
+Simple identity edits, such as name or description, can be changed from the template list. Contract changes should be treated as a new version.
+
+## Device assignment
+
+Templates are optional for devices. Creating a template does not automatically change existing devices. A device only uses a template after it is explicitly assigned.
+
+The template list can show assigned and unassigned templates, so you can quickly see which templates are already in use.
+
+## Firmware OTA policy
+
+A template can include one firmware OTA policy. The current UI supports:
+
+- Latest compatible firmware selection.
+- Immediate rollout after firmware publish.
+- Scheduled rollout by selected days and time window.
+- Timezone selection.
+- Maximum devices per batch.
+
+Use OTA policy carefully. Start with conservative rollout settings when a template is used by many devices.
+
+## Before publishing
+
+Before creating or publishing a template version:
+
+- Confirm the board and model are correct.
+- Review selected protocols.
+- Check each custom entity key and value type.
+- Make sure enum options, numeric ranges, and default values are valid.
+- Review firmware OTA policy timing if a policy is attached.
+- Use a clear description so other workspace members know when to use the template.

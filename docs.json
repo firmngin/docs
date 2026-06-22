@@ -27,6 +27,7 @@
             "group": "Core concepts",
             "pages": [
               "devices",
+              "device-templates",
               "automations",
               "plans",
               "firmware",
