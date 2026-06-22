@@ -3,27 +3,47 @@ title: "Arduino Library"
 description: "Firmware integration notes for Arduino, ESP32, and ESP8266 devices"
 ---
 
-Use the Arduino library for firmware that connects ESP-class boards to firmngin.
+Use the Firmngin Arduino library to connect ESP32 and ESP8266 devices to Firmngin. The library covers secure device connection, entity state updates, command handling, OTA firmware updates, image upload, GPS location updates, and monetization flows.
 
-## Use this library for
+[image:ESP32 device connected to Firmngin dashboard with entity state and command controls]
 
-- New ESP32 or ESP8266 devices.
-- Devices that publish structured entity values.
-- Devices that need command handling from the dashboard.
-- Firmware that must report availability and reconnect reliably.
+<Note>
+  Source checked from the public Firmngin Arduino repository on GitHub. The current library metadata shows version 1.0.2 and support for ESP32 and ESP8266.
+</Note>
+
+## When to use it
+
+Use this library for:
+
+- ESP32 or ESP8266 firmware connected to Firmngin.
+- Devices that publish structured entity values such as temperature, relay state, energy, or GPS position.
+- Devices that receive entity commands from the dashboard.
+- Devices that need secure mTLS connection using downloaded device credentials.
+- Firmware that participates in paid session, payment, or verification flows.
+- Devices that need remote OTA firmware update support.
 
 ## Core responsibilities
 
-The firmware integration should authenticate with device credentials, connect to MQTT, publish entity values, subscribe to command topics, report lifecycle state, and reconnect after network or broker interruption.
+The firmware should connect to Wi-Fi or another supported network client, authenticate with device credentials, keep the Firmngin connection alive, send entity state updates, receive entity commands, and handle optional flows such as OTA, location, image upload, and monetization events.
 
-## Minimal integration
+## Main capabilities
 
-[code:minimal Arduino firmware setup with Wi-Fi connection, device credentials, MQTT lifecycle, and temperature publish]
+| Capability | What it does |
+| --- | --- |
+| Secure connection | Uses device credentials and mTLS for platform connection. |
+| Entity state | Sends single or batch entity values from firmware to Firmngin. |
+| Entity commands | Receives dashboard commands and routes them to the correct GPIO or component. |
+| Typed callbacks | Provides typed objects for payments, verifications, device state, init, usage, and active sessions. |
+| OTA updates | Checks for remote firmware updates, verifies them, and installs them on device. |
+| Location | Sends GPS coordinates through a builder-style API. |
+| Image upload | Uploads camera/image data and links it to an entity key. |
 
-## Legacy v1
+## Minimal lifecycle
 
-Use v1 only when maintaining an existing device that already depends on the v1 protocol or payload shape.
+Most sketches follow this shape:
 
-<Warning>
-  Do not assume v2 snippets are compatible with v1 firmware. Verify the exact installed library version before publishing final code.
-</Warning>
+[code:minimal Arduino sketch with firmngin.h, keys.h, Wi-Fi connection, Firmngin constructor, begin in setup, loop in loop, and pushEntity on interval]
+
+## Source repository
+
+The source library is available at [firmngin/Firmngin-Arduino](https://github.com/firmngin/Firmngin-Arduino).

@@ -43,8 +43,17 @@
           {
             "group": "Libraries",
             "pages": [
-              "libraries/arduino",
-              "libraries/javascript"
+              {
+                "group": "Arduino",
+                "root": "libraries/arduino",
+                "pages": [
+                  "libraries/arduino/installation",
+                  "libraries/arduino/entities",
+                  "libraries/arduino/monetization",
+                  "libraries/arduino/ota-media-location",
+                  "libraries/arduino/examples"
+                ]
+              }
             ]
           }
         ]

@@ -1,0 +1,51 @@
+---
+title: "Examples"
+description: "Available Firmngin Arduino examples and when to use each one"
+---
+
+The Firmngin Arduino repository includes example sketches for common device patterns. Start with the smallest example that matches your device, then add features only when needed.
+
+[image:Arduino examples folder with basic, MQTT, OTA, GPS, camera, and monetization examples]
+
+## Setup pattern
+
+Most examples follow this setup:
+
+- Include `firmngin.h` from the installed library.
+- Put `keys.h` next to the sketch.
+- Configure Wi-Fi or another supported network client.
+- Upload the sketch with Arduino IDE or PlatformIO.
+- Watch Serial output during first connection.
+
+## Example list
+
+| Example | Use it for |
+| --- | --- |
+| `BasicExample` | First Firmngin connection and basic device state handling. |
+| `PushStateExample` | Sending entity values from firmware. |
+| `ReceiveStateExample` | Receiving entity commands from Firmngin. |
+| `BatchStateExample` | Sending multiple entity values in one update. |
+| `SensorExample` | Sensor-style telemetry. |
+| `BasicMonetizeExample` | Basic paid device flow. |
+| `DisplayPINExample` | Showing a verification PIN on device display or Serial. |
+| `ActiveSessionEndExample` | Ending an active paid session from firmware logic. |
+| `OTAUpdateExample` | Firmware update checks and OTA install flow. |
+| `GPSTrackerExample` | GPS tracking with location updates. |
+| `CameraUploadExample` | Uploading camera images to Firmngin. |
+| `GenericCameraExample` | Generic camera integration pattern. |
+| `MqttOnlyExample` | Using bundled PubSubClient without Firmngin device credentials. |
+| `MqttClientExample` | Firmngin platform MQTT plus a second broker client. |
+| `EthernetExample` | Using an external network client instead of Wi-Fi. |
+| `PersistentQueueExample` | Queueing state when the device cannot send immediately. |
+
+## MQTT-only mode
+
+Use `MqttOnlyExample` only when the firmware needs MQTT to another broker without Firmngin device credentials, entities, payments, or `Firmngin.begin()`.
+
+<Note>
+  For Firmngin-connected devices, use the Firmngin client lifecycle with `begin()` and `loop()`.
+</Note>
+
+## Repository
+
+Open the source examples in [firmngin/Firmngin-Arduino](https://github.com/firmngin/Firmngin-Arduino/tree/main/examples).

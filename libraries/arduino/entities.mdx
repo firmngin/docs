@@ -1,0 +1,58 @@
+---
+title: "Entities and State"
+description: "Send device state and receive entity commands from Firmngin"
+---
+
+Entities are the user-facing values and controls exposed by a device. Use them for sensor readings, relay state, status values, counters, and dashboard commands.
+
+[image:device entity list with temperature, relay, status, and command controls]
+
+## Define entities
+
+Use an `Entity` object when you want a typed reference to an entity key.
+
+[code:define Entity objects for relay and temperature keys]
+
+You can also use string keys directly when the sketch is small.
+
+## Push state
+
+Use `pushEntity()` for a single value update. This is useful for sensors, relay feedback, or any state that changes over time.
+
+[code:push temperature and relay entity values from Arduino loop]
+
+For multiple values at once, use the batch builder.
+
+[code:pushBatchEntities with temperature, humidity, pressure, light, and status]
+
+## Receive commands
+
+Use entity callbacks to receive commands sent from Firmngin to the device. The command includes an entity key and value, so the firmware can route it to the correct GPIO or component.
+
+[code:onEntity callback that turns a relay pin on or off from command value]
+
+For multiple entity commands, register one global entity command callback and switch by key.
+
+[code:global ENTITIES callback routing gpio_1 and relay_2 commands]
+
+## Request init
+
+Call `requestInit()` when the firmware needs the latest device configuration after connection or reconnect.
+
+[code:requestInit after Firmngin begin or after reconnect]
+
+## Typed callbacks
+
+The Arduino library supports typed callback objects for common flows.
+
+| Callback type | Use it for |
+| --- | --- |
+| `EntityCommand` | Entity commands from the dashboard or automation. |
+| `DeviceStates` | Device lifecycle and monetization state changes. |
+| `Inits` | Initial entity, merchant, and verification configuration. |
+| `Payments` | Pending and successful payment events. |
+| `Verifications` | PIN display and verification result events. |
+| `Usages` | Usage limit state. |
+| `ActiveSession` | Device-side checks for an active paid session. |
+
+Use the typed objects instead of parsing raw payloads unless you specifically need raw metadata.

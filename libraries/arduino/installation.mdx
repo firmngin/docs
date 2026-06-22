@@ -1,0 +1,54 @@
+---
+title: "Installation"
+description: "Install the Firmngin Arduino library and prepare device credentials"
+---
+
+Install the Firmngin Arduino library on firmware projects that target ESP32 or ESP8266.
+
+[image:Arduino IDE and PlatformIO setup screen for Firmngin library]
+
+## PlatformIO
+
+Add the library to `platformio.ini`.
+
+[code:PlatformIO lib_deps entry for firmngin/firmngin and Wi-Fi enabled ESP32 or ESP8266 environment]
+
+The library uses PubSubClient for MQTT. The Firmngin Arduino repository vendors PubSubClient under the library source, so a separate install is normally not needed.
+
+## Arduino IDE
+
+Use one of these install paths:
+
+- Install `firmngin` from Arduino Library Manager when available.
+- Download the latest release ZIP from the GitHub repository and install it with Sketch -> Include Library -> Add .ZIP Library.
+
+## Device credentials
+
+Each Firmngin device needs a `keys.h` file next to the sketch. Download it from the Firmngin dashboard by opening the device in Device Registry, then using the device secrets download action.
+
+`keys.h` contains the device ID, device key, certificates, and validation mode used for secure connection.
+
+<Warning>
+  Do not commit `keys.h` to version control. It contains device credentials and private key material.
+</Warning>
+
+## Validation mode
+
+The public template supports two validation modes:
+
+| Mode | Recommended use | Notes |
+| --- | --- | --- |
+| CA certificate | ESP32 and production firmware | Stronger validation and safer certificate renewal behavior. |
+| Fingerprint | ESP8266 or prototypes | Lighter, but must be updated when the server certificate changes. |
+
+## First connection checklist
+
+- Install the library.
+- Add `keys.h` next to the sketch.
+- Configure Wi-Fi credentials.
+- Include `firmngin.h` and `keys.h`.
+- Construct `Firmngin` with `DEVICE_ID` and `DEVICE_KEY`.
+- Call `begin()` in `setup()`.
+- Call `loop()` continuously in `loop()`.
+
+[code:first Firmngin Arduino connection checklist sketch]
