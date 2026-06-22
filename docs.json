@@ -27,6 +27,7 @@
             "group": "Core concepts",
             "pages": [
               "devices",
+              "plans",
               "firmware",
               "ota-updates",
               "monetization"
