@@ -1,0 +1,88 @@
+---
+title: "Automations"
+description: "Create device workflows that react to events, schedules, conditions, and AI decisions"
+---
+
+Automations let you connect device events, conditions, schedules, and actions into a workflow. Use them when a device should react automatically without an operator watching the dashboard all day.
+
+[image:automation editor with device trigger, condition, action, schedule, and execution trace]
+
+## What automations are for
+
+Use automations for workflows such as:
+
+- Turn on a relay when a sensor value reaches a threshold.
+- Send a command to a device on a schedule.
+- Check multiple conditions before running an action.
+- Run different actions depending on device state.
+- Use AI to classify, decide, or process information before continuing.
+- Stop or continue a device workflow based on an execution result.
+
+## Main views
+
+The Automations page has two main views:
+
+| View | Use it for |
+| --- | --- |
+| Table | Search, enable, disable, duplicate, delete, and open automations. |
+| Calendar | Review scheduled automations in a time-based view. |
+
+An automation can be active or inactive. Inactive automations stay saved but should not run until they are enabled again.
+
+## Automation editor
+
+The editor is a canvas where you connect nodes. Each node has a role in the workflow.
+
+| Node type | What it means |
+| --- | --- |
+| Device trigger | Starts the automation when a device value or state changes. |
+| Device action | Sends an action or state change to a connected device. |
+| Condition or compare | Checks a value and chooses the next path. |
+| Schedule | Starts the automation at a configured time. |
+| Time window | Allows a workflow only within a selected time range. |
+| Flow nodes | Split, merge, or route the workflow. |
+| AI nodes | Use AI for classification, decision, image processing, or agent-style tasks. |
+| Sticky note | Adds a note on the canvas for documentation only; it is not executed. |
+
+[image:automation node picker grouped by device, logic, schedule, flow, and AI]
+
+## Schedules
+
+Schedules can run an automation without waiting for a device event. The current editor supports common repeat choices such as daily, weekly, monthly, yearly, once, and custom date selections.
+
+For scheduled automations, choose the time and timezone carefully. If a schedule depends on a specific date, day of week, or day of month, review it in the calendar view before relying on it.
+
+## Testing and traces
+
+Use **Test Automation** before relying on a workflow in production. The editor can listen for live execution events and show which steps ran, which path was taken, and whether the result succeeded or failed.
+
+The **Execution trace** tab shows past runs for an automation. It helps answer:
+
+- Did the automation run?
+- Which node ran first?
+- Which condition path was selected?
+- Did any step return an error?
+- What was the final result?
+
+[image:execution trace timeline showing successful and failed automation steps]
+
+## AI and knowledge bases
+
+Some automation nodes can use AI. AI nodes can classify information, make decisions, process images, or run an agent-style task. When knowledge bases are selected, the AI node can use uploaded knowledge as context.
+
+Use AI nodes when rule-based logic is not enough. For deterministic device safety rules, prefer clear conditions and device actions.
+
+## Safe usage checklist
+
+Before enabling an automation:
+
+- Confirm every device and entity is selected correctly.
+- Make sure the first trigger is intentional.
+- Check schedule timezone if the automation runs by time.
+- Test the automation and review the trace.
+- Keep the automation inactive until the result is expected.
+- Use clear names and descriptions so other workspace members understand the workflow.
+
+<Note>
+  Automations are workspace-scoped. A user should only see and manage automations available to their authenticated workspace context.
+</Note>

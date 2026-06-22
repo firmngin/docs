@@ -27,6 +27,7 @@
             "group": "Core concepts",
             "pages": [
               "devices",
+              "automations",
               "plans",
               "firmware",
               "ota-updates"
