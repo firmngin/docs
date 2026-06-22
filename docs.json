@@ -33,21 +33,16 @@
             ]
           },
           {
+            "group": "Monetization",
+            "pages": [
+              "monetization"
+            ]
+          },
+          {
             "group": "Libraries",
             "pages": [
               "libraries/arduino",
               "libraries/javascript"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Monetization",
-        "groups": [
-          {
-            "group": "Overview",
-            "pages": [
-              "monetization"
             ]
           }
         ]
