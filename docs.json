@@ -36,7 +36,8 @@
             "group": "Monetization",
             "pages": [
               "monetization",
-              "payment-channels"
+              "payment-channels",
+              "live-merchant-verification"
             ]
           },
           {
