@@ -29,8 +29,7 @@
               "devices",
               "plans",
               "firmware",
-              "ota-updates",
-              "monetization"
+              "ota-updates"
             ]
           },
           {
@@ -38,6 +37,17 @@
             "pages": [
               "libraries/arduino",
               "libraries/javascript"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Monetization",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "monetization"
             ]
           }
         ]

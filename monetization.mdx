@@ -27,6 +27,24 @@ Payment state must come from backend/payment manager truth. The frontend should 
 
 [code:payment status priority example showing paid higher than processing and pending]
 
+## Payment channels and fees
+
+Merchants can choose which payment channels appear at checkout. The channel list shown to customers follows the merchant's selected channels, live merchant status, and payment provider availability.
+
+QRIS is the default channel and stays enabled. The current frontend settings show these available channels:
+
+| Channel type | Channels currently available | Fee shown in frontend |
+| --- | --- | --- |
+| QR | QRIS | 0.70% including VAT, deducted after successful settlement. |
+| E-wallet | DANA, OVO, LinkAja, AstraPay | About 1.50% - 4.00%. DANA and AstraPay are shown as 1.50%; OVO and LinkAja may vary by merchant category. |
+| Virtual Account | BJB, BNI, BRI, BSI, BSS, CIMB, Mandiri, Permata | Rp 4,000 per successful transaction. |
+
+Some other channel names may appear in the settings screen as unavailable options. Those channels should not be promised to customers until they are enabled for the merchant.
+
+<Note>
+  Channel fees are deducted after the transaction is successfully settled. Settlement time varies by bank or e-wallet provider and is commonly shown as around 7-14 business days.
+</Note>
+
 ## Live merchant verification
 
 Merchants can start in test/debug mode for setup and validation. To accept real customer payments, a merchant must submit a Go Live request and pass live verification first.
