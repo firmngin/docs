@@ -3,9 +3,25 @@ title: "Device Templates"
 description: "Reusable device contracts for hardware, entities, protocols, and rollout rules"
 ---
 
-Device templates help you standardize how a group of devices should be configured. Use a template when multiple devices share the same hardware type, entity structure, connection options, or firmware rollout rules.
+Device templates are reusable blueprints for a type of device. A template explains what a device is expected to look like in Firmngin: its board type, connection options, data points, controls, and optional firmware rollout rules.
+
+Instead of setting up the same structure one device at a time, create one template and assign it to devices that follow the same pattern.
 
 [image:device template list with search, assignment filter, version badge, and device count]
+
+## What templates are for
+
+Device templates are useful when you want many devices to behave consistently. They help your team keep setup, firmware, dashboard widgets, automations, and monitoring aligned around the same device definition.
+
+| Use case | How templates help |
+| --- | --- |
+| Standardize device setup | Keep board, model, connection options, and basic structure consistent across many devices. |
+| Define device data | Describe which values a device can report, such as temperature, battery, relay state, usage count, or signal level. |
+| Define device controls | Describe which actions a device can receive, such as turning a relay on or off, changing a mode, or resetting a counter. |
+| Prepare dashboards | Make it easier to build dashboards because devices using the same template expose the same expected data points. |
+| Prepare automations | Make automation setup clearer because matching devices have predictable data and control names. |
+| Manage firmware rollout | Attach rollout rules so firmware updates for the same device type can be handled in a controlled way. |
+| Review device groups | See which templates are already assigned to devices and how many devices use each template. |
 
 ## When to use templates
 
@@ -18,6 +34,16 @@ Use device templates when:
 - You want device setup to be more consistent across a workspace.
 
 Do not use a template just to rename one device. Templates are more useful when they describe a reusable device type.
+
+## Example uses
+
+You can use device templates for:
+
+- Temperature or cold-chain sensors that always report temperature, humidity, battery, and signal quality.
+- Smart relays that expose relay state, active mode, and power usage.
+- Vending or paid-service devices that share the same control and usage data.
+- Environmental monitoring devices with the same sensor layout across many locations.
+- Field devices that should receive firmware updates only during a selected maintenance window.
 
 ## Template list
 
