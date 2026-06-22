@@ -11,7 +11,11 @@ Entities are the user-facing values and controls exposed by a device. Use them f
 
 Use an `Entity` object when you want a typed reference to an entity key.
 
-[code:define Entity objects for relay and temperature keys]
+```cpp
+Entity relay1("gpio_1");
+Entity relay2("relay_2");
+Entity temperature("temperature");
+```
 
 You can also use string keys directly when the sketch is small.
 
@@ -19,27 +23,72 @@ You can also use string keys directly when the sketch is small.
 
 Use `pushEntity()` for a single value update. This is useful for sensors, relay feedback, or any state that changes over time.
 
-[code:push temperature and relay entity values from Arduino loop]
+```cpp
+void loop() {
+  fngin.loop();
+
+  static unsigned long lastPush = 0;
+  if (millis() - lastPush >= 10000) {
+    lastPush = millis();
+    fngin.pushEntity("temperature", "25.5");
+    fngin.pushEntity(relay1, "1");
+  }
+}
+```
 
 For multiple values at once, use the batch builder.
 
-[code:pushBatchEntities with temperature, humidity, pressure, light, and status]
+```cpp
+bool sent = fngin.pushBatchEntities()
+  .add("temperature", "25.5")
+  .add("humidity", "80")
+  .add("pressure", "1013")
+  .add("light", String(analogRead(A0)))
+  .add("status", "ONLINE")
+  .send();
+
+if (sent) {
+  Serial.println("Batch state sent");
+}
+```
 
 ## Receive commands
 
 Use entity callbacks to receive commands sent from Firmngin to the device. The command includes an entity key and value, so the firmware can route it to the correct GPIO or component.
 
-[code:onEntity callback that turns a relay pin on or off from command value]
+```cpp
+Entity relay1("gpio_1");
+
+ON_ENTITY(relay1, [](EntityCommand &cmd) {
+  digitalWrite(2, cmd.value() == "1" ? HIGH : LOW);
+});
+```
 
 For multiple entity commands, register one global entity command callback and switch by key.
 
-[code:global ENTITIES callback routing gpio_1 and relay_2 commands]
+```cpp
+fngin.on(ENTITIES, [](EntityCommand &cmd) {
+  if (cmd.key() == "gpio_1") {
+    digitalWrite(2, cmd.value() == "1" ? HIGH : LOW);
+  }
+
+  if (cmd.key() == "relay_2") {
+    digitalWrite(4, cmd.value() == "1" ? HIGH : LOW);
+  }
+});
+```
 
 ## Request init
 
 Call `requestInit()` when the firmware needs the latest device configuration after connection or reconnect.
 
-[code:requestInit after Firmngin begin or after reconnect]
+```cpp
+void setup() {
+  // Connect Wi-Fi first.
+  fngin.begin();
+  fngin.requestInit();
+}
+```
 
 ## Typed callbacks
 

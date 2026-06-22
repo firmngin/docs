@@ -11,7 +11,15 @@ Install the Firmngin Arduino library on firmware projects that target ESP32 or E
 
 Add the library to `platformio.ini`.
 
-[code:PlatformIO lib_deps entry for firmngin/firmngin and Wi-Fi enabled ESP32 or ESP8266 environment]
+```ini
+[env:esp32dev]
+platform = espressif32
+board = esp32dev
+framework = arduino
+monitor_speed = 115200
+lib_deps =
+  firmngin/firmngin
+```
 
 The library uses PubSubClient for MQTT. The Firmngin Arduino repository vendors PubSubClient under the library source, so a separate install is normally not needed.
 
@@ -51,4 +59,35 @@ The public template supports two validation modes:
 - Call `begin()` in `setup()`.
 - Call `loop()` continuously in `loop()`.
 
-[code:first Firmngin Arduino connection checklist sketch]
+```cpp
+#include "keys.h"
+#include <firmngin.h>
+
+#if defined(ESP8266)
+#include <ESP8266WiFi.h>
+#elif defined(ESP32)
+#include <WiFi.h>
+#endif
+
+const char *ssid = "YOUR_SSID";
+const char *password = "YOUR_PASSWORD";
+
+Firmngin fngin(DEVICE_ID, DEVICE_KEY);
+
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  fngin.setDebug(true);
+  fngin.begin();
+}
+
+void loop() {
+  fngin.loop();
+}
+```

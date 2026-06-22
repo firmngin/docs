@@ -15,7 +15,25 @@ Use monetization callbacks when the device needs to react to paid orders, PIN ve
 
 The `Payments` object handles both pending and successful payment events. Use it to update a display, unlock a device after payment, or log order information locally.
 
-[code:Payments callback that handles pending payment and successful payment states]
+```cpp
+fngin.on(PAYMENTS, [](Payments &p) {
+  if (p.isPending()) {
+    Serial.println("Payment pending...");
+  }
+
+  if (p.isSuccess()) {
+    Serial.println("Payment success!");
+    unlockDevice();
+  }
+
+  Serial.print("Item: ");
+  Serial.println(p.itemTitle());
+  Serial.print("Price: ");
+  Serial.println(p.price());
+  Serial.print("Order: ");
+  Serial.println(p.orderId());
+});
+```
 
 Common values include item title, price, order ID, quantity, and metadata.
 
@@ -23,24 +41,83 @@ Common values include item title, price, order ID, quantity, and metadata.
 
 The `Verifications` object handles PIN display and verification result events. Use it when a customer must enter a PIN or pass a precondition before using the device.
 
-[code:Verifications callback that displays PIN and checks verification result]
+```cpp
+fngin.on(VERIFICATIONS, [](Verifications &v) {
+  if (v.hasPinNumber()) {
+    Serial.print("PIN: ");
+    Serial.println(v.pin());
+    Serial.print("Valid for seconds: ");
+    Serial.println(v.ttl());
+  }
+
+  if (v.hasResult()) {
+    if (v.pinMet() && v.preconditionMet()) {
+      Serial.println("Verification passed");
+    } else {
+      Serial.println("Verification failed");
+    }
+  }
+});
+```
 
 ## Device state
 
 The `DeviceStates` object helps firmware react to state changes such as idle, pending payment, expired payment, successful payment, maintenance, or active service.
 
-[code:DeviceStates callback that checks idle, pending payment, success payment, maintenance, and active service]
+```cpp
+fngin.on(DEVICE_STATUS, [](DeviceStates &ds) {
+  if (ds.isIdle()) {
+    Serial.println("Device is idle");
+  }
+  if (ds.isPendingPayment()) {
+    Serial.println("Waiting for payment");
+  }
+  if (ds.isSuccessPayment()) {
+    Serial.println("Payment success");
+  }
+  if (ds.isMaintenance()) {
+    Serial.println("Maintenance mode");
+  }
+  if (ds.isOnActiveService()) {
+    Serial.println("Active service running");
+  }
+});
+```
 
 ## Init flow
 
 The `Inits` object provides the initial device configuration after connection. It can include entity configuration, merchant status, active order ID, and verification flags.
 
-[code:Init callback reading entities, merchant status, active order ID, and verification mode]
+```cpp
+fngin.on(INIT, [](Inits &i) {
+  Serial.print("Entities: ");
+  Serial.println(i.entities());
+
+  Serial.print("Merchant status: ");
+  Serial.println(i.merchantStatus());
+
+  Serial.print("Active order: ");
+  Serial.println(i.activeOrderId());
+
+  if (i.isVerificationRequired()) {
+    Serial.println("Verification is required");
+  }
+});
+```
 
 ## Active session end
 
 The `ActiveSession` callback lets firmware end an active paid session from the device when local rules are met. This is useful for usage limits, sensor thresholds, or device-side safety rules.
 
-[code:ON_ACTIVE_SESSION callback that ends a paid session when energy usage reaches a configured limit]
+```cpp
+Entity energyKwh("energy_kwh");
+
+fngin.on(ON_ACTIVE_SESSION, [](ActiveSession &s) {
+  if (s.entity(energyKwh).toFloat() >= 10.0) {
+    stopMachine();
+    s.endSession();
+  }
+});
+```
 
 Use this for device-side business rules only. Customer payment status and session ownership should still come from Firmngin.

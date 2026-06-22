@@ -42,7 +42,44 @@ The firmware should connect to Wi-Fi or another supported network client, authen
 
 Most sketches follow this shape:
 
-[code:minimal Arduino sketch with firmngin.h, keys.h, Wi-Fi connection, Firmngin constructor, begin in setup, loop in loop, and pushEntity on interval]
+```cpp
+#include "keys.h"
+#include <firmngin.h>
+
+#if defined(ESP8266)
+#include <ESP8266WiFi.h>
+#elif defined(ESP32)
+#include <WiFi.h>
+#endif
+
+const char *ssid = "YOUR_SSID";
+const char *password = "YOUR_PASSWORD";
+
+Firmngin fngin(DEVICE_ID, DEVICE_KEY);
+Entity temperature("temperature");
+
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  fngin.begin();
+}
+
+void loop() {
+  fngin.loop();
+
+  static unsigned long lastPush = 0;
+  if (millis() - lastPush > 10000) {
+    lastPush = millis();
+    fngin.pushEntity(temperature, "25.5");
+  }
+}
+```
 
 ## Source repository
 

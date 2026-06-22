@@ -13,21 +13,73 @@ OTA lets the device check for remote firmware updates, download firmware, verify
 
 Before using OTA, set firmware metadata such as the firmware version and optional target model.
 
-[code:set firmware version, register OTA status callback, and start Firmngin connection]
+```cpp
+#if defined(ESP8266)
+fngin.setFirmwareInfo("1.0.0", "ESP8266", "esp8266:esp8266:generic");
+#elif defined(ESP32)
+fngin.setFirmwareInfo("1.0.0", "ESP32", "esp32:esp32:esp32");
+#endif
+
+fngin.onOTAStatus([](const char *status, const char *message) {
+  Serial.print("[OTA] ");
+  Serial.print(status);
+  Serial.print(": ");
+  Serial.println(message);
+});
+
+fngin.begin();
+```
 
 The device can check and perform OTA from firmware logic.
 
-[code:checkOTA and performOTA flow with status logging]
+```cpp
+void loop() {
+  fngin.loop();
+
+  static unsigned long lastCheck = 0;
+  if (millis() - lastCheck > 300000) {
+    lastCheck = millis();
+
+    if (fngin.checkOTA()) {
+      Serial.println("Update available");
+      fngin.performOTA();
+    }
+  }
+}
+```
 
 OTA can also be disabled in firmware if a device model should not accept remote updates.
 
-[code:disable OTA from Arduino firmware]
+```cpp
+fngin.setEnableOTA(false);
+```
 
 ## Image upload
 
 Use image upload for camera devices or image-producing sensors. The upload attaches the image to an entity key.
 
-[code:uploadImage with entity key, image bytes, JPEG content type, success callback, and error callback]
+```cpp
+void onUploadSuccess(const char *response) {
+  Serial.print("Upload success: ");
+  Serial.println(response);
+}
+
+void onUploadError(int code, const char *message) {
+  Serial.print("Upload failed: ");
+  Serial.print(code);
+  Serial.print(" ");
+  Serial.println(message);
+}
+
+fngin.uploadImage(
+  "camera_image",
+  imageData,
+  imageLen,
+  "image/jpeg",
+  onUploadSuccess,
+  onUploadError
+);
+```
 
 Typical inputs are:
 
@@ -43,6 +95,13 @@ Typical inputs are:
 
 Use `pushLocation()` for GPS tracking devices. The method uses a builder-style API.
 
-[code:pushLocation with latitude, longitude, accuracy, altitude, and speed]
+```cpp
+fngin.pushLocation()
+  .lat(-6.208763)
+  .lon(106.845599)
+  .accuracy(5.0f)
+  .alt(10.0f)
+  .speed(1.2f);
+```
 
 Latitude and longitude are the required fields. Accuracy, altitude, and speed are optional.
