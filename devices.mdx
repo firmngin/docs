@@ -1,6 +1,6 @@
 ---
 title: "Devices"
-description: "Device identity, availability, entities, logs, and public visibility"
+description: "Device identity, availability, entities, logs, and dashboard monitoring"
 ---
 
 Devices are the primary runtime unit in firmngin. A device has credentials, protocol metadata, entity values, availability, logs, dashboards, map metadata, firmware state, and optional monetization settings.
@@ -47,7 +47,3 @@ Availability shows the latest reliable connection status for a device.
 <Warning>
   Do not mark a device online just because it exists in the database or has old telemetry.
 </Warning>
-
-## Public visibility
-
-Public pages may hide device names depending on workspace or merchant settings. If a public API returns an empty device name, the frontend should hide the name instead of inventing a replacement label.
