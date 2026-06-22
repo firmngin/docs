@@ -1,0 +1,32 @@
+---
+title: "Payment Channels"
+description: "Available checkout payment channels and user-facing fee notes"
+---
+
+Payment channels define how customers can pay during checkout. Merchants can choose which channels appear on the public checkout page, as long as the merchant is eligible and the provider channel is available.
+
+[image:merchant payment channel settings with QRIS, e-wallet, and virtual account options]
+
+<Note>
+  Real customer payments require an approved live merchant. Test/debug merchants can be used for setup, but should not be used to collect real payments.
+</Note>
+
+## Available channels
+
+QRIS is the default channel and stays enabled. Based on the current frontend merchant settings, these channels are available:
+
+| Channel type | Channels currently available | Fee shown in frontend |
+| --- | --- | --- |
+| QR | QRIS | 0.70% including VAT, deducted after successful settlement. |
+| E-wallet | DANA, OVO, LinkAja, AstraPay | About 1.50% - 4.00%. DANA and AstraPay are shown as 1.50%; OVO and LinkAja may vary by merchant category. |
+| Virtual Account | BJB, BNI, BRI, BSI, BSS, CIMB, Mandiri, Permata | Rp 4,000 per successful transaction. |
+
+## Fee timing
+
+Channel fees are deducted after the transaction is successfully settled. Settlement time varies by bank or e-wallet provider and is commonly shown as around 7-14 business days.
+
+The customer checkout only shows channels selected by the merchant. If a channel is not selected, unavailable, or not enabled for the merchant, it should not be presented as an available checkout option.
+
+## Unavailable options
+
+Some channel names may appear in the merchant settings screen as unavailable options. Those channels should not be promised to customers until they are enabled for the merchant.
