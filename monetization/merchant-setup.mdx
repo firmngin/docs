@@ -7,7 +7,20 @@ Merchant setup connects a merchant profile to the devices that can be sold, rent
 
 [image:merchant detail page showing sidebar with Linked Devices, Catalog, Orders, Transactions, and Settings]
 
-## Test and live merchants
+## Setup sequence
+
+Set up a merchant in this order:
+
+1. Start in test/debug mode.
+2. Link devices to the merchant.
+3. Configure Map Entity for customer-facing device display.
+4. Configure Flow for verification and stop behavior.
+5. Prepare catalog items and public page content.
+6. Test the public checkout experience.
+7. Review payment channels.
+8. Submit live merchant verification before accepting real customer payments.
+
+## Start in test/debug mode
 
 Merchants can be prepared in test/debug mode before going live. Test mode is useful for setup and validation:
 
@@ -17,10 +30,8 @@ Merchants can be prepared in test/debug mode before going live. Test mode is use
 - Test verification and stop flow behavior.
 - Review the public checkout experience without treating it as a real customer payment flow.
 
-Live merchants are approved merchants that can accept real customer payments. A merchant should only be used for real transactions after live verification is approved.
-
 <Note>
-  Use test/debug mode while configuring devices and flow rules. Use live mode only after the merchant is approved and ready to accept real payments.
+  Keep the merchant in test/debug mode while configuring devices and flow rules.
 </Note>
 
 ## Linked devices
@@ -40,16 +51,15 @@ You can:
 
 [image:merchant linked devices table with Link Devices dialog and linked device action menu]
 
-## Device setup order
+## Linked device setup order
 
-For most merchants, configure linked devices in this order:
+After a device is linked, configure the device-specific monetization setup in this order:
 
-1. Link the device to the merchant.
-2. Open the linked device setup drawer.
-3. Review the device overview and current service status.
-4. Configure **Map Entity** for customer-facing display.
-5. Configure **Flow** for verification and stop mode.
-6. Test the public page and checkout flow before going live.
+1. Open the linked device setup drawer.
+2. Review the device overview and current service status.
+3. Configure **Map Entity** for customer-facing display.
+4. Configure **Flow** for verification and stop mode.
+5. Test the public page and checkout flow before going live.
 
 ## Map Entity
 
@@ -105,14 +115,25 @@ Stop mode controls who or what is allowed to end an active device session.
 
 Enable **Device Local End** only when the firmware is designed to end sessions from the device itself. If the firmware does not support that behavior, leave it off and rely on manual end or dashboard controls.
 
+## Before going live
+
+After linked devices, Map Entity, Flow, catalog items, and public page content are ready, review payment channels and submit live merchant verification.
+
+Live merchants are approved merchants that can accept real customer payments. A merchant should only be used for real transactions after live verification is approved.
+
+<Warning>
+  Do not use a test/debug merchant to collect real customer payments.
+</Warning>
+
 ## Quick checklist
 
 Before using a linked device with real customers:
 
-- The merchant is approved for live payments if real transactions are needed.
+- The merchant has been configured and tested in test/debug mode.
 - The correct devices are linked to the merchant.
 - Customer-facing entities are reviewed in Map Entity.
 - Internal-only entities are hidden.
 - Verification rules are tested.
 - Stop mode matches the expected physical device behavior.
 - The public page and checkout flow are reviewed end to end.
+- The merchant is approved for live payments if real transactions are needed.
