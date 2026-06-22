@@ -26,7 +26,13 @@
           {
             "group": "Core concepts",
             "pages": [
-              "devices",
+              {
+                "group": "Devices",
+                "root": "devices",
+                "pages": [
+                  "devices/security"
+                ]
+              },
               "device-templates",
               "automations",
               "plans",

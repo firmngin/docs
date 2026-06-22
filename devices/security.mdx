@@ -1,0 +1,54 @@
+---
+title: "Security"
+description: "How device keys are used and how to download keys.h safely"
+---
+
+Firmngin devices use a `keys.h` file so firmware can connect as the correct device. This file is generated for a specific device and should be treated as private device credentials.
+
+[image:device detail page showing the Keys (keys.h) card and Download File button]
+
+## What keys.h is for
+
+`keys.h` helps your firmware identify itself to Firmngin and open a secure connection. In normal Arduino firmware, the file is placed next to your sketch and included before the Firmngin library starts.
+
+You do not need to edit the file manually. Download it from the dashboard, place it in the firmware project, then use it when uploading firmware to the matching device.
+
+## How to download keys.h
+
+1. Open the Firmngin dashboard.
+2. Go to **Devices**.
+3. Select the device you want to connect.
+4. Find the **Keys (keys.h)** section.
+5. Click **Download File**.
+6. Place the downloaded `keys.h` file next to your Arduino sketch.
+
+[code:include keys.h in the Arduino sketch without showing real credential values]
+
+## Important rules
+
+- Use the `keys.h` file only for the device it was downloaded from.
+- Do not reuse one device key across multiple physical devices.
+- Do not paste the file content into support chats, screenshots, documentation, or public examples.
+- Do not commit `keys.h` to GitHub or any public repository.
+- Store production keys only with the people or systems that need to upload firmware.
+
+<Warning>
+  If a production `keys.h` file is exposed, treat that device credential as compromised before using the device again in production.
+</Warning>
+
+## When you need it
+
+You usually need `keys.h` when:
+
+- Uploading firmware for the first time.
+- Moving the firmware project to another computer.
+- Rebuilding firmware after changing the sketch.
+- Preparing a production device before installation.
+
+You do not need to share `keys.h` with dashboard users who only monitor devices, view logs, manage automations, or review monetization activity.
+
+## Good practice
+
+Keep example firmware safe by using placeholders in public code. Show where `keys.h` is included, but never show real device credentials.
+
+For teams, keep each device's file organized by device name or serial number outside the public source code folder. This makes it easier to avoid mixing credentials between devices.
