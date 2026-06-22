@@ -49,6 +49,7 @@
             "group": "Monetization",
             "pages": [
               "monetization",
+              "monetization/merchant-setup",
               "payment-channels",
               "live-merchant-verification"
             ]
