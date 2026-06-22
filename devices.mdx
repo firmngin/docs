@@ -36,13 +36,13 @@ Use stable entity keys. Renaming entity keys can break dashboards, automations, 
 
 ## Availability
 
-Availability is real-time operational state from the MQTT lifecycle path.
+Availability shows the latest reliable connection status for a device.
 
 | State | Meaning |
 | --- | --- |
-| `unknown` | No reliable MQTT lifecycle event has been seen yet. |
-| `online` | Broker/backend received the online lifecycle state. |
-| `offline` | Broker/backend received the offline lifecycle state. |
+| `unknown` | Firmngin has not received a reliable connection signal for this device yet. |
+| `online` | The device is currently connected. |
+| `offline` | The device is currently disconnected. |
 
 <Warning>
   Do not mark a device online just because it exists in the database or has old telemetry.
