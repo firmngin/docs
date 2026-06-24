@@ -13,7 +13,6 @@ Two entry points, one protocol — choose what fits your code:
 | | `AsyncClient` | `Client` |
 | --- | --- | --- |
 | Style | `async` / `await` | Regular blocking calls |
-| Best for | Asyncio apps, long-running services | Simple scripts, cron jobs, CLI tools |
 | Handlers | `client.on(...)`, `client.on_entity(...)` | Same |
 | Push state | `await client.push_entity(...)` | `client.push_entity(...)` |
 | Event loop | `await client.run()` | `client.run()` |
