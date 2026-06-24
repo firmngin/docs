@@ -5,19 +5,22 @@ description: "Send device state and receive entity commands from Firmngin"
 
 Entities are the user-facing values and controls exposed by a device. Use them for sensor readings, relay state, status values, counters, and dashboard commands.
 
-[image:device entity list with temperature, relay, status, and command controls]
+\[image:device entity list with temperature, relay, status, and command controls\]
 
 ## Define entities
 
 Use an `Entity` object when you want a typed reference to an entity key.
 
 ```cpp
-Entity relay1("gpio_1");
-Entity relay2("relay_2");
+// By entity key — matches the "key" field in dashboard
 Entity temperature("temperature");
+
+// By GPIO pin — matches the "gpio_pin" field in dashboard
+Entity relay1(1);
+Entity relay2(2);
 ```
 
-You can also use string keys directly when the sketch is small.
+You can also use string or int keys directly when the sketch is small.
 
 ## Push state
 
@@ -41,9 +44,9 @@ For multiple values at once, use the batch builder.
 ```cpp
 bool sent = fngin.pushBatchEntities()
   .add("temperature", "25.5")
+  .add(relay1, "1")
+  .add(relay2, "0")
   .add("humidity", "80")
-  .add("pressure", "1013")
-  .add("light", String(analogRead(A0)))
   .add("status", "ONLINE")
   .send();
 
@@ -57,7 +60,7 @@ if (sent) {
 Use entity callbacks to receive commands sent from Firmngin to the device. The command includes an entity key and value, so the firmware can route it to the correct GPIO or component.
 
 ```cpp
-Entity relay1("gpio_1");
+Entity relay1(1);
 
 ON_ENTITY(relay1, [](EntityCommand &cmd) {
   digitalWrite(2, cmd.value() == "1" ? HIGH : LOW);
@@ -68,12 +71,17 @@ For multiple entity commands, register one global entity command callback and sw
 
 ```cpp
 fngin.on(ENTITIES, [](EntityCommand &cmd) {
-  if (cmd.key() == "gpio_1") {
+  if (cmd.key() == "1") {
     digitalWrite(2, cmd.value() == "1" ? HIGH : LOW);
   }
 
-  if (cmd.key() == "relay_2") {
+  if (cmd.key() == "2") {
     digitalWrite(4, cmd.value() == "1" ? HIGH : LOW);
+  }
+
+  if (cmd.key() == "temperature") {
+    Serial.print("Temperature: ");
+    Serial.println(cmd.value());
   }
 });
 ```
