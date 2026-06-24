@@ -5,16 +5,16 @@ description: "Send device state and receive entity commands from Firmngin"
 
 Entities are the user-facing values and controls exposed by a device. Use them for sensor readings, relay state, status values, counters, and dashboard commands.
 
-[image:device entity list with temperature, relay, status, and command controls]
+\[image:device entity list with temperature, relay, status, and command controls\]
 
 ## Define entities
 
 Use an `Entity` object when you want a typed reference to an entity key.
 
 ```cpp
-Entity relay1("gpio_1");
-Entity relay2("relay_2");
-Entity temperature("temperature");
+Entity relay1("1");
+Entity relay2("2");
+Entity temperature("3");
 ```
 
 You can also use string keys directly when the sketch is small.
@@ -57,7 +57,7 @@ if (sent) {
 Use entity callbacks to receive commands sent from Firmngin to the device. The command includes an entity key and value, so the firmware can route it to the correct GPIO or component.
 
 ```cpp
-Entity relay1("gpio_1");
+Entity relay1("1");
 
 ON_ENTITY(relay1, [](EntityCommand &cmd) {
   digitalWrite(2, cmd.value() == "1" ? HIGH : LOW);
