@@ -31,13 +31,15 @@ pip install firmngin[http]
 
 ## Device credentials
 
+Download `keys.json` from the device dashboard and place it next to your script.
+
 ```python
 from firmngin import ClientConfig
 
 config = ClientConfig.from_file("keys.json")
 ```
 
-Jangan commit `keys.json` yang berisi kredensial nyata.
+Do not commit real device keys to version control.
 
 ## See also
 

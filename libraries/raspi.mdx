@@ -1,49 +1,49 @@
 ---
 title: "Raspberry Pi"
 sidebarTitle: "Raspberry Pi"
-description: "Python SDK untuk Raspberry Pi, Linux devices, dan server-side tooling"
+description: "Python SDK for Raspberry Pi, Linux devices, and server-side tooling"
 ---
 
-Gunakan Firmngin Python SDK untuk Raspberry Pi, Linux-based devices, integration tests, dan server-side tooling.
+Use the Firmngin Python SDK on Raspberry Pi, Linux-based devices, integration tests, and server-side tooling.
 
 ## Client vs AsyncClient
 
-Dua entry point, satu protokol — pilih sesuai gaya kode Anda:
+Two entry points, one protocol — choose what fits your code:
 
 | | `AsyncClient` | `Client` |
 | --- | --- | --- |
-| Gaya pemrograman | `async` / `await` | Pemanggilan biasa |
-| Cocok untuk | App asyncio, service berjalan terus | Skrip sederhana, cron, CLI |
-| Daftar handler | `client.on(...)`, `client.on_entity(...)` | Sama |
-| Kirim state | `await client.push_entity(...)` | `client.push_entity(...)` |
-| Terima event | `await client.run()` | `client.run()` |
+| Style | `async` / `await` | Regular blocking calls |
+| Best for | Asyncio apps, long-running services | Simple scripts, cron jobs, CLI tools |
+| Handlers | `client.on(...)`, `client.on_entity(...)` | Same |
+| Push state | `await client.push_entity(...)` | `client.push_entity(...)` |
+| Event loop | `await client.run()` | `client.run()` |
 
-Keduanya memakai `ClientConfig.from_file("keys.json")` dan mendukung event yang sama.
+Both use `ClientConfig.from_file("keys.json")` and support the same events.
 
 ## Features
 
-- TLS, mTLS, dan certificate fingerprint validation
-- E2EE (AES-GCM) aktif secara default
-- Typed payloads, entity publishing, batch, location, offline queue
-- Image upload opsional via `firmngin[http]`
+- TLS, mTLS, and certificate fingerprint validation
+- E2EE (AES-GCM) enabled by default
+- Typed payloads, entity publishing, batch updates, location, offline queue
+- Optional image upload via `firmngin[http]`
 
 ## Requirements
 
 - Python 3.9+
-- File `keys.json` dari dashboard Firmngin
+- A `keys.json` file from the Firmngin dashboard
 
 ## Dependencies
 
-| Package | Fungsi |
+| Package | Purpose |
 | --- | --- |
-| `aiomqtt` | Transport MQTT |
-| `cryptography` | TLS + enkripsi E2EE |
+| `aiomqtt` | MQTT transport |
+| `cryptography` | TLS + E2EE encryption |
 
-Upload gambar: `pip install firmngin[http]`
+Image upload: `pip install firmngin[http]`
 
 ## Quickstart
 
-**Async** — untuk app berbasis `asyncio`:
+**Async** — for asyncio-based apps:
 
 ```python
 import asyncio
@@ -59,7 +59,7 @@ async def main():
 asyncio.run(main())
 ```
 
-**Sync** — untuk skrip tanpa `asyncio`:
+**Sync** — for scripts without asyncio:
 
 ```python
 from firmngin import Client, ClientConfig, Entity

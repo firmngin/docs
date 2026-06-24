@@ -3,23 +3,23 @@ title: "Events and Callbacks"
 description: "Handle payments, verification, device state, and active sessions from Python"
 ---
 
-Daftarkan handler pada `AsyncClient` dengan `client.on(Event.X, handler)`.
+Register handlers with `client.on(Event.X, handler)` on `AsyncClient` or `Client`.
 
 ## Event types
 
-| Event | Payload |
-| --- | --- |
-| `Event.PAYMENT` | `Payment` |
-| `Event.PAYMENT_PENDING` | `Payment` |
-| `Event.PAYMENT_SUCCESS` | `Payment` |
-| `Event.INIT` | `Init` |
-| `Event.MERCHANT_STATUS` | `str` |
-| `Event.VERIFICATION` | `Verification` |
-| `Event.PIN` | `Verification` |
-| `Event.DEVICE_STATUS` | `DeviceStatus` |
-| `Event.ENTITY_COMMAND` | `EntityCommand` |
-| `Event.ACTIVE_SESSION` | `ActiveSession` |
-| `Event.ERROR` | `Exception` |
+| Event | Payload | Description |
+| --- | --- | --- |
+| `Event.PAYMENT` | `Payment` | Pending and successful payments |
+| `Event.PAYMENT_PENDING` | `Payment` | Payment is pending |
+| `Event.PAYMENT_SUCCESS` | `Payment` | Payment succeeded |
+| `Event.INIT` | `Init` | Initial device configuration |
+| `Event.MERCHANT_STATUS` | `str` | Merchant status changed |
+| `Event.VERIFICATION` | `Verification` | Verification result |
+| `Event.PIN` | `Verification` | PIN displayed on device |
+| `Event.DEVICE_STATUS` | `DeviceStatus` | Device lifecycle change |
+| `Event.ENTITY_COMMAND` | `EntityCommand` | Entity command (all entities) |
+| `Event.ACTIVE_SESSION` | `ActiveSession` | Active paid session |
+| `Event.ERROR` | `Exception` | Runtime error |
 
 ## Register handlers
 
@@ -35,7 +35,7 @@ async with AsyncClient(config) as client:
             print("paid:", payment.order_id)
 ```
 
-Hapus handler:
+Remove a handler:
 
 ```python
 client.off(Event.PAYMENT, handle_payment)

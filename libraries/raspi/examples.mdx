@@ -3,11 +3,11 @@ title: "Examples"
 description: "Raspberry Pi Python SDK usage examples"
 ---
 
-Contoh lengkap: [github.com/firmngin/firmngin-sdk-python/tree/main/examples](https://github.com/firmngin/firmngin-sdk-python/tree/main/examples)
+Full examples: [github.com/firmngin/firmngin-sdk-python/tree/main/examples](https://github.com/firmngin/firmngin-sdk-python/tree/main/examples)
 
 ## AsyncClient
 
-Untuk kode yang sudah memakai `asyncio`:
+For code that already uses `asyncio`:
 
 ```python
 import asyncio
@@ -30,7 +30,7 @@ asyncio.run(main())
 
 ## Client (sync)
 
-Untuk skrip sederhana — relay + suhu, tanpa `async`/`await`:
+For simple scripts — relay commands and temperature, no `async`/`await`:
 
 ```python
 from firmngin import Client, ClientConfig, Entity, EntityCommand
@@ -50,7 +50,7 @@ with Client(ClientConfig.from_file("keys.json")) as client:
     client.run()
 ```
 
-Semua event (`Event.PAYMENT`, `Event.INIT`, dll.) didaftarkan dengan `client.on(...)` — sama di `AsyncClient` maupun `Client`.
+All events (`Event.PAYMENT`, `Event.INIT`, etc.) are registered with `client.on(...)` on both clients.
 
 ## Entity command
 

@@ -11,7 +11,7 @@ from firmngin import ClientConfig
 config = ClientConfig.from_file("keys.json")
 ```
 
-Gunakan config ini dengan `AsyncClient` (async) atau `Client` (sync). Keduanya menerima `ClientConfig` yang sama.
+Use this config with `AsyncClient` (async) or `Client` (sync).
 
 ## KeysConfig
 
@@ -27,15 +27,15 @@ keys = KeysConfig.from_file("keys.json")
 | --- | --- | --- |
 | `device_id` | `str` | Device identifier |
 | `device_key` | `str` | Authentication key |
-| `decryptor` | `str` | Hex-encoded AES key untuk E2EE |
-| `validation_mode` | `str` | `"ca"`, `"pin"`, atau `"both"` |
+| `decryptor` | `str` | Hex-encoded AES key for E2EE |
+| `validation_mode` | `str` | `"ca"`, `"pin"`, or `"both"` |
 | `ca_cert` | `str \| None` | CA certificate PEM |
 | `service_ca_cert` | `str` | Service CA PEM |
-| `client_cert` | `str \| None` | Client cert untuk mTLS |
-| `private_key` | `str \| None` | Private key untuk mTLS |
+| `client_cert` | `str \| None` | Client cert for mTLS |
+| `private_key` | `str \| None` | Private key for mTLS |
 | `fingerprint_sha256` | `str \| None` | SHA-256 fingerprint |
 
-Property `decryptor_key` menyimpan byte key yang sudah di-parse.
+The `decryptor_key` property holds the parsed key bytes.
 
 ### Load from environment
 
@@ -47,22 +47,22 @@ keys = KeysConfig.from_env(prefix="FIRMNGIN_")
 
 | Field | Default | Description |
 | --- | --- | --- |
-| `keys` | (required) | `KeysConfig` |
-| `queue_path` | `None` | Offline queue path |
-| `queue_max_size` | `500` | Batas jumlah pesan queue |
-| `queue_max_bytes` | `5242880` | Batas ukuran queue (bytes) |
-| `connect_timeout_seconds` | `10.0` | MQTT timeout |
+| `keys` | (required) | `KeysConfig` instance |
+| `queue_path` | `None` | Offline queue directory |
+| `queue_max_size` | `500` | Max queued messages |
+| `queue_max_bytes` | `5242880` | Max queue size in bytes |
+| `connect_timeout_seconds` | `10.0` | MQTT connection timeout |
 | `keepalive_seconds` | `60` | MQTT keepalive |
-| `reconnect_max_attempts` | `None` | Batas reconnect (`None` = unlimited) |
+| `reconnect_max_attempts` | `None` | Max reconnect attempts (`None` = unlimited) |
 | `mtls` | `True` | Mutual TLS |
 
-Broker MQTT dikelola platform (`asia-jkt1.firmngin.dev:58884`).
+The MQTT broker (`asia-jkt1.firmngin.dev:58884`) is managed by the platform.
 
 ## TLS modes
 
 | Mode | Use case |
 | --- | --- |
-| `"ca"` | Production — validasi CA |
+| `"ca"` | Production — CA validation |
 | `"pin"` | Fingerprint pinning |
 | `"both"` | Default |
 
