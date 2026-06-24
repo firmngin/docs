@@ -1,6 +1,6 @@
 ---
 title: "Configuration"
-description: "Configure ClientConfig, KeysConfig, TLS modes, and connection settings"
+description: "Configure ClientConfig, KeysConfig, and connection settings"
 ---
 
 ## Quick setup
@@ -37,12 +37,6 @@ keys = KeysConfig.from_file("keys.json")
 
 The `decryptor_key` property holds the parsed key bytes.
 
-### Load from environment
-
-```python
-keys = KeysConfig.from_env(prefix="FIRMNGIN_")
-```
-
 ## ClientConfig
 
 | Field | Default | Description |
@@ -55,16 +49,6 @@ keys = KeysConfig.from_env(prefix="FIRMNGIN_")
 | `keepalive_seconds` | `60` | MQTT keepalive |
 | `reconnect_max_attempts` | `None` | Max reconnect attempts (`None` = unlimited) |
 | `mtls` | `True` | Mutual TLS |
-
-The MQTT broker (`asia-jkt1.firmngin.dev:58884`) is managed by the platform.
-
-## TLS modes
-
-| Mode | Use case |
-| --- | --- |
-| `"ca"` | Production — CA validation |
-| `"pin"` | Fingerprint pinning |
-| `"both"` | Default |
 
 ## Debug logging
 
