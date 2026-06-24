@@ -5,31 +5,22 @@ description: "Python SDK untuk Raspberry Pi, Linux devices, dan server-side tool
 icon: "raspberry-pi"
 ---
 
-# Raspberry Pi (Python SDK)
-
 Gunakan Firmngin Python SDK untuk Raspberry Pi, Linux-based devices, integration tests, dan server-side tooling.
 
-## Installation
+## Features
 
-```bash
-pip install git+https://github.com/firmngin/firmngin-sdk-python.git
-```
+- Event-driven async device client API
+- TLS, mTLS, and certificate fingerprint validation
+- E2EE enabled by default
+- Typed payload models for payment, init, verification, device status, and entity commands
+- Entity state publishing, batch updates, location updates, active-session helpers, and image upload
 
-## Entity patterns
+## Requirements
 
-Entity key wrapper works with both patterns:
+- Python 3.9 or newer
+- A platform-issued `keys.json` file for the device
 
-```python
-from firmngin import Entity
-
-# By GPIO pin — matches the "gpio_pin" field in dashboard
-relay = Entity(1)
-
-# By entity key — matches the "key" field in dashboard
-temperature = Entity("temperature")
-```
-
-## Push state
+## Minimal lifecycle
 
 ```python
 import asyncio
@@ -49,77 +40,9 @@ async def main():
 asyncio.run(main())
 ```
 
-## Batch entities
-
-```python
-batch = client.push_batch_entities()
-batch.add(relay, "on")
-batch.add(temperature, 27.5)
-await batch.send()
-```
-
-## Entity commands
-
-Register per-entity command handlers:
-
-```python
-from firmngin import EntityCommand
-
-@client.on_entity(relay)
-async def handle_relay(command: EntityCommand) -> None:
-    print("relay:", command.value)
-```
-
-Or use global event listener:
-
-```python
-from firmngin import Event
-
-client.on(Event.ENTITY_COMMAND, lambda cmd: print(cmd.key, cmd.value))
-```
-
-## Events
-
-Supported event types:
-
-| Event | Trigger |
-| --- | --- |
-| `Event.PAYMENT` | Payment pending or success |
-| `Event.INIT` | Initial device config |
-| `Event.PIN` | PIN verification |
-| `Event.DEVICE_STATUS` | Device lifecycle changes |
-| `Event.ENTITY_COMMAND` | Entity command from dashboard |
-| `Event.ACTIVE_SESSION` | Active paid session |
-
-## Location
-
-```python
-await client.push_location_values(
-    lat=-6.208763,
-    lon=106.845599,
-    accuracy=5.0,
-)
-```
-
-## Image upload
-
-```python
-camera = Entity("camera_image")
-await client.upload_image(camera, "snapshot.jpg")
-```
-
-## Sync adapter
-
-For blocking scripts:
-
-```python
-from firmngin import SyncFirmnginClient
-
-client = SyncFirmnginClient(config)
-client.connect()
-client.push_entity(relay, "off")
-```
-
 ## See also
 
+- [Installation](/libraries/raspi/installation)
+- [Entities and State](/libraries/raspi/entities)
+- [Examples](/libraries/raspi/examples)
 - [Arduino Library](/libraries/arduino) — for ESP32/ESP8266 firmware
