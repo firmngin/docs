@@ -5,16 +5,11 @@ description: "Send device state and receive entity commands from Python"
 
 ## Entity patterns
 
-Use the `Entity` class to wrap an entity reference:
-
 ```python
 from firmngin import Entity
 
-# By GPIO pin — matches the "gpio_pin" field in dashboard
-relay = Entity(1)
-
-# By entity key — matches the "key" field in dashboard
-temperature = Entity("temperature")
+relay = Entity(1)              # GPIO pin / numeric key
+temperature = Entity("temperature")  # string key dari dashboard
 ```
 
 ## Push state
@@ -35,7 +30,7 @@ await batch.send()
 
 ## Entity commands
 
-Register per-entity command handlers:
+Per entity:
 
 ```python
 from firmngin import EntityCommand
@@ -43,41 +38,16 @@ from firmngin import EntityCommand
 @client.on_entity(relay)
 async def handle_relay(command: EntityCommand) -> None:
     print("relay:", command.value)
-
-@client.on_entity(temperature)
-async def handle_temperature(command: EntityCommand) -> None:
-    print("temperature:", command.value)
 ```
 
-Or use global event listener:
+Global:
 
 ```python
 from firmngin import Event
 
-client.on(Event.ENTITY_COMMAND, lambda cmd: print(cmd.key, cmd.value))
-```
-
-## Events
-
-Supported event types:
-
-| Event | Trigger |
-| --- | --- |
-| `Event.PAYMENT` | Payment pending or success |
-| `Event.INIT` | Initial device config |
-| `Event.PIN` | PIN verification |
-| `Event.DEVICE_STATUS` | Device lifecycle changes |
-| `Event.ENTITY_COMMAND` | Entity command from dashboard |
-| `Event.ACTIVE_SESSION` | Active paid session |
-
-Register event handlers:
-
-```python
-async def handle_payment(payment):
-    if payment.is_success:
-        print("paid:", payment.order_id)
-
-client.on(Event.PAYMENT, handle_payment)
+@client.on(Event.ENTITY_COMMAND)
+async def handle_command(command: EntityCommand) -> None:
+    print(command.key, command.value)
 ```
 
 ## Location
@@ -92,8 +62,10 @@ await client.push_location_values(
 
 ## Image upload
 
+Butuh `pip install firmngin[http]`:
+
 ```python
-camera = Entity("camera_image")
+camera = Entity("camera")
 await client.upload_image(camera, "snapshot.jpg")
 ```
 
@@ -106,5 +78,5 @@ await client.request_init()
 ## See also
 
 - [Overview](/libraries/raspi)
-- [Installation](/libraries/raspi/installation)
+- [Events and Callbacks](/libraries/raspi/events)
 - [Examples](/libraries/raspi/examples)

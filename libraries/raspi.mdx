@@ -8,29 +8,41 @@ Gunakan Firmngin Python SDK untuk Raspberry Pi, Linux-based devices, integration
 
 ## Features
 
-- Event-driven async device client API
-- TLS, mTLS, and certificate fingerprint validation
-- E2EE enabled by default
-- Typed payload models for payment, init, verification, device status, and entity commands
-- Entity state publishing, batch updates, location updates, active-session helpers, and image upload
+- Event-driven async API dengan `Client`
+- TLS, mTLS, dan certificate fingerprint validation
+- E2EE (AES-GCM) aktif secara default
+- Typed payloads: payment, init, verification, device status, entity commands
+- Entity publishing, batch updates, location, active sessions, offline queue
+- Image upload opsional via `firmngin[http]`
 
 ## Requirements
 
-- Python 3.9 or newer
-- A platform-issued `keys.json` file for the device
+- Python 3.9+
+- File `keys.json` dari dashboard Firmngin
+
+## Dependencies
+
+Instalasi inti hanya menarik **dua** library pihak ketiga:
+
+| Package | Fungsi |
+| --- | --- |
+| `aiomqtt` | Transport MQTT |
+| `cryptography` | TLS + enkripsi E2EE |
+
+Upload gambar membutuhkan extra: `pip install firmngin[http]`
 
 ## Minimal lifecycle
 
 ```python
 import asyncio
-from firmngin import ClientConfig, Entity, FirmnginClient, KeysConfig
+from firmngin import Client, ClientConfig, Entity
 
 relay = Entity(1)
 temperature = Entity("temperature")
 
 async def main():
-    config = ClientConfig(keys=KeysConfig.from_file("keys.json"))
-    async with FirmnginClient(config) as client:
+    config = ClientConfig.from_file("keys.json")
+    async with Client(config) as client:
         await client.connect()
         await client.push_entity(relay, "on")
         await client.push_entity(temperature, 27.5)
@@ -42,6 +54,8 @@ asyncio.run(main())
 ## See also
 
 - [Installation](/libraries/raspi/installation)
+- [Configuration](/libraries/raspi/configuration)
 - [Entities and State](/libraries/raspi/entities)
+- [Events and Callbacks](/libraries/raspi/events)
 - [Examples](/libraries/raspi/examples)
-- [Arduino](/libraries/arduino) — for ESP32/ESP8266 firmware
+- [Arduino](/libraries/arduino) — untuk firmware ESP32/ESP8266

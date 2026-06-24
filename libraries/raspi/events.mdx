@@ -1,162 +1,127 @@
 ---
 title: "Events and Callbacks"
-description: "Handle payments, verification, device state, and active sessions from Python firmware"
+description: "Handle payments, verification, device state, and active sessions from Python"
 ---
 
-Use event callbacks when the device needs to react to paid orders, PIN verification, device state changes, or active service sessions.
+Daftarkan handler dengan `client.on(Event.X, handler)` saat perangkat perlu bereaksi terhadap pembayaran, verifikasi PIN, perubahan status, atau sesi aktif.
 
 ## Event types
 
-| Event | Callback payload | Description |
+| Event | Payload | Description |
 | --- | --- | --- |
-| `Event.PAYMENT` | `Payment` | Fires for both pending and successful payments. |
-| `Event.PAYMENT_PENDING` | `Payment` | Fires when a payment is pending. |
-| `Event.PAYMENT_SUCCESS` | `Payment` | Fires when a payment succeeds. |
-| `Event.INIT` | `Init` | Fires when the device receives initial configuration. |
-| `Event.MERCHANT_STATUS` | `str` | Fires when merchant status changes. |
-| `Event.VERIFICATION` | `Verification` | Fires for verification results. |
-| `Event.PIN` | `Verification` | Fires when a PIN is displayed. |
-| `Event.DEVICE_STATUS` | `DeviceStatus` | Fires when device state changes. |
-| `Event.ENTITY_COMMAND` | `EntityCommand` | Fires for any entity command. |
-| `Event.ACTIVE_SESSION` | `ActiveSession` | Fires when an active paid session starts. |
-| `Event.ERROR` | `Exception` | Fires on runtime errors. |
+| `Event.PAYMENT` | `Payment` | Pending dan success |
+| `Event.PAYMENT_PENDING` | `Payment` | Pembayaran menunggu |
+| `Event.PAYMENT_SUCCESS` | `Payment` | Pembayaran berhasil |
+| `Event.INIT` | `Init` | Konfigurasi awal perangkat |
+| `Event.MERCHANT_STATUS` | `str` | Perubahan status merchant |
+| `Event.VERIFICATION` | `Verification` | Hasil verifikasi |
+| `Event.PIN` | `Verification` | PIN ditampilkan ke perangkat |
+| `Event.DEVICE_STATUS` | `DeviceStatus` | Perubahan lifecycle perangkat |
+| `Event.ENTITY_COMMAND` | `EntityCommand` | Perintah entity (global) |
+| `Event.ACTIVE_SESSION` | `ActiveSession` | Sesi berbayar aktif |
+| `Event.ERROR` | `Exception` | Error runtime SDK |
 
 ## Register handlers
 
-Use the `on()` method with an `Event` enum:
+Decorator:
 
 ```python
-from firmngin import Event, Payment
+from firmngin import Client, ClientConfig, Event, Payment
 
-@client.on(Event.PAYMENT)
-async def handle_payment(payment: Payment) -> None:
-    if payment.is_pending:
-        print("waiting for payment:", payment.order_id)
-    elif payment.is_success:
-        print("paid:", payment.order_id, payment.item_title)
+config = ClientConfig.from_file("keys.json")
+
+async with Client(config) as client:
+    @client.on(Event.PAYMENT)
+    async def handle_payment(payment: Payment) -> None:
+        if payment.is_success:
+            print("paid:", payment.order_id)
 ```
 
-Or pass the callback directly:
+Atau langsung:
 
 ```python
-async def handle_payment(payment: Payment) -> None:
-    print("payment:", payment.order_id)
-
 client.on(Event.PAYMENT, handle_payment)
 ```
 
-## Payment events
+Hapus handler:
 
-The `Payment` object provides payment details:
+```python
+client.off(Event.PAYMENT, handle_payment)
+client.clear_handlers()  # semua event
+```
+
+## Payment
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `item_title` | `str` | Name of the purchased item. |
-| `price` | `str` | Payment amount. |
-| `order_id` | `str` | Unique order identifier. |
-| `quantity` | `int` | Number of items. |
-| `is_pending` | `bool` | Whether the payment is pending. |
-| `is_success` | `bool` | Whether the payment succeeded. |
+| `item_title` | `str` | Nama item |
+| `price` | `str` | Jumlah pembayaran |
+| `order_id` | `str` | ID order |
+| `quantity` | `int` | Jumlah item |
+| `is_pending` | `bool` | Menunggu pembayaran |
+| `is_success` | `bool` | Pembayaran sukses |
 
 ```python
 @client.on(Event.PAYMENT_SUCCESS)
 async def on_success(payment: Payment) -> None:
-    print(f"Paid: {payment.item_title} - {payment.price}")
+    print(f"Paid: {payment.item_title} — {payment.price}")
 ```
 
-## Verification events
-
-The `Verification` object handles PIN display and verification results:
+## Verification
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `pin` | `str` | The PIN number to display. |
-| `session_id` | `str` | Verification session ID. |
-| `ttl` | `int` | Time-to-live in seconds. |
-| `pin_met` | `bool` | Whether PIN was entered correctly. |
-| `precondition_met` | `bool` | Whether precondition was met. |
+| `pin` | `str` | PIN untuk ditampilkan |
+| `session_id` | `str` | ID sesi verifikasi |
+| `ttl` | `int` | TTL (detik) |
+| `pin_met` | `bool` | PIN benar |
+| `precondition_met` | `bool` | Precondition terpenuhi |
 
 ```python
 @client.on(Event.PIN)
 async def handle_pin(verification: Verification) -> None:
     print("PIN:", verification.pin)
-    print("Valid for seconds:", verification.ttl)
 
 @client.on(Event.VERIFICATION)
 async def handle_verification(verification: Verification) -> None:
     if verification.pin_met and verification.precondition_met:
         print("Verification passed")
-    else:
-        print("Verification failed")
 ```
 
-## Device state
-
-The `DeviceStatus` object helps react to state changes:
+## Device status
 
 | State | Meaning |
 | --- | --- |
-| `idle` | Device is idle and available. |
-| `pending_payment` | Waiting for payment. |
-| `expired_payment` | Payment expired. |
-| `success_payment` | Payment confirmed. |
-| `maintenance` | Device is in maintenance mode. |
-| `on_active_service` | Active paid service is running. |
+| `idle` | Siap |
+| `pending_payment` | Menunggu pembayaran |
+| `expired_payment` | Pembayaran kedaluwarsa |
+| `success_payment` | Pembayaran dikonfirmasi |
+| `maintenance` | Mode maintenance |
+| `on_active_service` | Layanan berbayar aktif |
 
-```python
-@client.on(Event.DEVICE_STATUS)
-async def handle_status(status: DeviceStatus) -> None:
-    if status.is_idle:
-        print("Device is idle")
-    elif status.is_on_active_service:
-        print("Active service running")
-```
-
-## Init flow
-
-The `Init` object provides the initial device configuration:
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `merchant_status` | `str` | Current merchant status. |
-| `active_order_id` | `str` | Active order ID if on service. |
-| `verification_flag` | `int` | Verification mode flags. |
-| `entities` | `Any` | Entity configuration from the platform. |
+## Init
 
 ```python
 @client.on(Event.INIT)
 async def handle_init(init: Init) -> None:
     print("merchant status:", init.merchant_status)
-    if init.is_pin_enabled:
-        print("PIN verification required")
     if init.is_on_active_service:
         print("active order:", init.active_order_id)
 ```
 
 ## Active session
 
-The `ActiveSession` callback provides device-side session control:
-
 ```python
 @client.on(Event.ACTIVE_SESSION)
 async def handle_session(session: ActiveSession) -> None:
     if session.can_run:
         print("active order:", session.order_id)
-```
-
-End an active session from the device when local rules are met:
-
-```python
-@client.on(Event.ACTIVE_SESSION)
-async def handle_session(session: ActiveSession) -> None:
-    temperature_value = session.entity("temperature")
-    if temperature_value.to_float() >= 100.0:
-        await session.end_session()
+        temp = session.entity("temperature")
+        if temp.to_float() >= 100.0:
+            await session.end_session()
 ```
 
 ## Error handling
-
-Register an error callback to handle runtime errors:
 
 ```python
 @client.on(Event.ERROR)
@@ -164,12 +129,4 @@ async def handle_error(error: Exception) -> None:
     print("error:", error)
 ```
 
-If no error callback is registered and debug mode is enabled, errors are logged to the SDK logger.
-
-## Debug logging
-
-Enable debug logging to see all runtime events:
-
-```python
-client.set_debug(True)
-```
+Tanpa handler `ERROR`, error dicatat ke logger saat `set_debug(True)`.

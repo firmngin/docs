@@ -5,42 +5,58 @@ description: "Install the Firmngin Python SDK and prepare device credentials"
 
 ## Install the package
 
+From PyPI:
+
+```bash
+pip install firmngin
+```
+
 From Git:
 
 ```bash
 pip install git+https://github.com/firmngin/firmngin-sdk-python.git
 ```
 
-From PyPI after release:
+### Optional: image upload
 
 ```bash
-pip install firmngin
+pip install firmngin[http]
 ```
+
+## Dependencies
+
+| Package | Required | Purpose |
+| --- | --- | --- |
+| `aiomqtt` | Yes | MQTT client |
+| `cryptography` | Yes | TLS + AES-GCM E2EE |
+| `httpx` | No (`[http]` extra) | Multipart image upload |
+
+Sisanya memakai Python stdlib — tanpa Pydantic atau framework config eksternal.
 
 ## Device credentials
 
-Device identity and cryptographic material are loaded from `keys.json`. Download the keys file from the device dashboard and place it next to your script.
+Unduh `keys.json` dari device dashboard Firmngin. Letakkan di direktori kerja script Anda.
 
 ```python
-from firmngin import ClientConfig, KeysConfig
+from firmngin import ClientConfig
 
-config = ClientConfig(keys=KeysConfig.from_file("keys.json"))
+config = ClientConfig.from_file("keys.json")
 ```
 
-Do not commit real device keys to version control.
+Jangan commit `keys.json` yang berisi kredensial nyata.
 
 ## Development requirements
 
-The following tools are used for development:
+Tools yang dipakai saat pengembangan SDK:
 
-- `ruff` — linting and formatting
+- `ruff` — lint dan format
 - `mypy --strict` — type checking
-- `pytest` — unit and integration tests
-- `pip-audit` — dependency vulnerability scanning
+- `pytest` — unit dan integration tests
+- `pip-audit` — vulnerability scan
 - `bandit` — security analysis
 
 ## See also
 
 - [Overview](/libraries/raspi)
-- [Entities and State](/libraries/raspi/entities)
+- [Configuration](/libraries/raspi/configuration)
 - [Examples](/libraries/raspi/examples)

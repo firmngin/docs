@@ -3,11 +3,19 @@ title: "Configuration"
 description: "Configure ClientConfig, KeysConfig, TLS modes, and connection settings"
 ---
 
-The Firmngin Python SDK uses two configuration models: `KeysConfig` for device identity and cryptographic material, and `ClientConfig` for runtime behavior.
+SDK memakai dua model konfigurasi: `KeysConfig` untuk identitas perangkat, dan `ClientConfig` untuk perilaku runtime.
+
+## Quick setup
+
+```python
+from firmngin import ClientConfig
+
+config = ClientConfig.from_file("keys.json")
+```
 
 ## KeysConfig
 
-Load device credentials from a `keys.json` file downloaded from the Firmngin dashboard.
+Muat kredensial dari `keys.json`:
 
 ```python
 from firmngin import KeysConfig
@@ -19,33 +27,34 @@ keys = KeysConfig.from_file("keys.json")
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `device_id` | `str` | Unique device identifier from Firmngin. |
-| `device_key` | `str` | Device authentication key. |
-| `decryptor` | `str` | Hex-encoded AES key for E2EE message encryption. |
-| `validation_mode` | `str` | `"ca"`, `"pin"`, or `"both"`. |
-| `ca_cert` | `str \| None` | CA certificate PEM for TLS validation. |
-| `service_ca_cert` | `str` | Service CA certificate PEM. |
-| `client_cert` | `str \| None` | Client certificate PEM for mTLS. |
-| `private_key` | `str \| None` | Private key PEM for mTLS. |
-| `fingerprint_sha256` | `str \| None` | SHA-256 fingerprint for pin validation. |
+| `device_id` | `str` | Device identifier dari Firmngin |
+| `device_key` | `str` | Authentication key |
+| `decryptor` | `str` | Hex-encoded AES key untuk E2EE |
+| `validation_mode` | `str` | `"ca"`, `"pin"`, atau `"both"` |
+| `ca_cert` | `str \| None` | CA certificate PEM |
+| `service_ca_cert` | `str` | Service CA certificate PEM |
+| `client_cert` | `str \| None` | Client certificate untuk mTLS |
+| `private_key` | `str \| None` | Private key untuk mTLS |
+| `fingerprint_sha256` | `str \| None` | SHA-256 fingerprint untuk pin mode |
 
-### Load from environment variables
+Property `decryptor_key` menyimpan byte key yang sudah di-parse (cache internal).
+
+### Load from environment
 
 ```python
 keys = KeysConfig.from_env(prefix="FIRMNGIN_")
 ```
 
-This reads `FIRMNGIN_DEVICE_ID`, `FIRMNGIN_DEVICE_KEY`, and so on.
+Membaca `FIRMNGIN_DEVICE_ID`, `FIRMNGIN_DEVICE_KEY`, dan seterusnya.
 
 ## ClientConfig
-
-Runtime configuration for `FirmnginClient`.
 
 ```python
 from firmngin import ClientConfig, KeysConfig
 
 config = ClientConfig(
     keys=KeysConfig.from_file("keys.json"),
+    queue_path="/var/lib/firmngin/queue",
 )
 ```
 
@@ -53,49 +62,51 @@ config = ClientConfig(
 
 | Field | Default | Description |
 | --- | --- | --- |
-| `keys` | (required) | `KeysConfig` instance. |
-| `queue_path` | `None` | Path for offline queue persistence. Set to enable offline queuing. |
-| `ntp_server` | `"pool.ntp.org"` | NTP server for time synchronization. |
-| `connect_timeout_seconds` | `10.0` | MQTT connection timeout. |
-| `keepalive_seconds` | `60` | MQTT keepalive interval. |
-| `reconnect_initial_delay_seconds` | `1.0` | Initial delay before reconnect attempt. |
-| `reconnect_max_delay_seconds` | `30.0` | Maximum delay between reconnect attempts. |
-| `reconnect_max_attempts` | `None` | Maximum reconnect attempts. `None` means unlimited. |
-| `insecure` | `False` | Skip TLS certificate validation. Not recommended for production. |
-| `mtls` | `True` | Enable mutual TLS. Requires `client_cert` and `private_key`. |
+| `keys` | (required) | Instance `KeysConfig` |
+| `api_base_url` | `https://api.firmngin.dev/api/v1` | Base URL HTTP API |
+| `queue_path` | `None` | Path offline queue (aktifkan untuk persist saat offline) |
+| `queue_max_size` | `500` | Batas jumlah pesan dalam queue |
+| `queue_max_bytes` | `5242880` | Batas ukuran total payload queue (bytes) |
+| `queue_drain_batch_size` | `50` | Pesan yang di-drain per siklus connect |
+| `max_local_entity_values` | `256` | Batas cache nilai entity lokal |
+| `connect_timeout_seconds` | `10.0` | Timeout koneksi MQTT |
+| `keepalive_seconds` | `60` | MQTT keepalive |
+| `reconnect_initial_delay_seconds` | `1.0` | Delay awal reconnect |
+| `reconnect_max_delay_seconds` | `30.0` | Delay maksimum reconnect |
+| `reconnect_max_attempts` | `None` | Batas percobaan reconnect (`None` = unlimited) |
+| `insecure` | `False` | Lewati validasi TLS (tidak untuk production) |
+| `mtls` | `True` | Mutual TLS — butuh `client_cert` + `private_key` |
+
+Broker MQTT (`asia-jkt1.firmngin.dev:58884`) dikelola platform dan tidak dikonfigurasi oleh aplikasi.
 
 ## TLS modes
 
 | Mode | Use case |
 | --- | --- |
-| CA certificate (`"ca"`) | Recommended for production. Strongest validation. |
-| Fingerprint (`"pin"`) | Lighter, but must be updated when server certificate changes. |
-| Both (`"both"`) | Default. Uses both CA and fingerprint validation. |
+| `"ca"` | Validasi CA — direkomendasikan production |
+| `"pin"` | Fingerprint pinning — ringan, perlu update saat cert berubah |
+| `"both"` | Default — CA + fingerprint |
 
 ## Offline queue
 
-Enable the offline queue to persist MQTT messages when the connection is temporarily unavailable. Messages are drained when the connection is re-established.
-
 ```python
-config = ClientConfig(
-    keys=KeysConfig.from_file("keys.json"),
+config = ClientConfig.from_file(
+    "keys.json",
     queue_path="/var/lib/firmngin/queue",
 )
 ```
 
+Pesan di-queue saat MQTT offline dan di-drain bertahap saat reconnect.
+
 ## Debug logging
 
-Enable debug logging to diagnose runtime behavior:
-
 ```python
-async with FirmnginClient(config) as client:
+async with Client(config) as client:
     client.set_debug(True)
     await client.connect()
 ```
 
 ## Firmware metadata
-
-Set firmware version and target board information for device identification:
 
 ```python
 client.set_firmware_info(
