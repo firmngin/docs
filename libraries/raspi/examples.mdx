@@ -1,51 +1,54 @@
 ---
 title: "Examples"
-description: "Available Firmngin Python SDK examples and when to use each one"
+description: "Raspberry Pi Python SDK usage examples"
 ---
 
-The Firmngin Python SDK repository includes example scripts for common device patterns. Start with the smallest example that matches your device, then add features only when needed.
-
-## Setup pattern
-
-Most examples follow this setup:
-
-- Import `firmngin` components.
-- Place `keys.json` next to the script.
-- Configure network connectivity.
-- Run the script with `python example.py`.
-
-## Example list
-
-| Example | Use it for |
-| --- | --- |
-| `async_basic.py` | First Firmngin connection with async client, payment and init handlers. |
-| `sync_basic.py` | Synchronous-style connection for scripts without event loop management. |
-| `entity_publish.py` | Sending single entity values from device. |
-| `entity_command.py` | Receiving entity commands from Firmngin and routing by entity key. |
-| `batch_and_location.py` | Sending batch entity values and GPS location updates. |
-| `payment_events.py` | Handling pending and successful payment events separately. |
-| `device_status_events.py` | Reacting to device state changes (idle, maintenance, active service). |
-| `pin_verification_events.py` | Handling PIN display and verification result events. |
-| `active_session_events.py` | Managing active paid sessions from device logic. |
-| `async_with_image_upload.py` | Uploading camera images to Firmngin. |
-| `flask_device_dashboard/` | Flask-based device dashboard web application. |
-
-## Async vs sync
-
-Most examples use the async client (`FirmnginClient`) for production use. The sync adapter (`SyncFirmnginClient`) is available for quick scripts and testing:
+## Basic async client
 
 ```python
-# Async (recommended)
-async with FirmnginClient(config) as client:
-    await client.connect()
-    await client.run()
+import asyncio
+from firmngin import ClientConfig, Entity, FirmnginClient, KeysConfig
 
-# Sync (simple scripts)
-client = SyncFirmnginClient(config)
-client.connect()
-client.push_entity(relay, "on")
+relay = Entity(1)
+temperature = Entity("temperature")
+
+async def main():
+    config = ClientConfig(keys=KeysConfig.from_file("keys.json"))
+    async with FirmnginClient(config) as client:
+        await client.connect()
+        await client.push_entity(relay, "on")
+        await client.push_entity(temperature, 27.5)
+        await client.run()
+
+asyncio.run(main())
 ```
 
-## Repository
+## Command handlers
 
-Open the source examples in [firmngin/firmngin-sdk-python](https://github.com/firmngin/firmngin-sdk-python/tree/main/examples).
+```python
+from firmngin import EntityCommand
+
+@client.on_entity(relay)
+async def handle_relay(command: EntityCommand) -> None:
+    if command.value == "on":
+        GPIO.output(RELAY_PIN, GPIO.HIGH)
+    elif command.value == "off":
+        GPIO.output(RELAY_PIN, GPIO.LOW)
+```
+
+## Sync adapter for blocking scripts
+
+```python
+from firmngin import SyncFirmnginClient
+
+client = SyncFirmnginClient(config)
+client.connect()
+client.push_entity(relay, "off")
+client.disconnect()
+```
+
+## See also
+
+- [Overview](/libraries/raspi)
+- [Installation](/libraries/raspi/installation)
+- [Entities and State](/libraries/raspi/entities)

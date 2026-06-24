@@ -3,83 +3,44 @@ title: "Installation"
 description: "Install the Firmngin Python SDK and prepare device credentials"
 ---
 
-Install the Firmngin Python SDK on Raspberry Pi or any Linux-based device running Python 3.9 or newer.
+## Install the package
 
-## Requirements
-
-- Python 3.9 or newer.
-- A platform-issued `keys.json` file for the device.
-- Device credentials and TLS material issued by Firmngin.
-
-## Install from Git
+From Git:
 
 ```bash
 pip install git+https://github.com/firmngin/firmngin-sdk-python.git
 ```
 
-## Install from PyPI
-
-After release:
+From PyPI after release:
 
 ```bash
 pip install firmngin
 ```
 
-## Dependencies
-
-The SDK installs these dependencies automatically:
-
-| Package | Purpose |
-| --- | --- |
-| `aiomqtt` | MQTT transport for device messaging. |
-| `httpx` | HTTP client for image upload and API calls. |
-| `cryptography` | AES-GCM encryption for E2EE device messages. |
-| `ntplib` | NTP time synchronization for device clocks. |
-| `pydantic` | Typed configuration and payload models. |
-
 ## Device credentials
 
-Each Firmngin device needs a `keys.json` file. Download it from the Firmngin dashboard by opening the device in Device Registry, then using the device secrets download action.
-
-`keys.json` contains the device ID, device key, decryptor, certificates, and validation mode used for secure connection.
-
-<Warning>
-  Do not commit `keys.json` to version control. It contains device credentials and private key material. Add `keys.json` to `.gitignore`.
-</Warning>
-
-## First connection checklist
-
-- Install the SDK with `pip`.
-- Place `keys.json` next to your script.
-- Configure network connectivity (Wi-Fi, Ethernet, or cellular).
-- Import `firmngin` and create a `ClientConfig`.
-- Construct `FirmnginClient` with the config.
-- Call `connect()` then `run()`.
+Device identity and cryptographic material are loaded from `keys.json`. Download the keys file from the device dashboard and place it next to your script.
 
 ```python
-import asyncio
+from firmngin import ClientConfig, KeysConfig
 
-from firmngin import ClientConfig, FirmnginClient, KeysConfig
-
-
-async def main() -> None:
-    config = ClientConfig(keys=KeysConfig.from_file("keys.json"))
-
-    async with FirmnginClient(config) as client:
-        await client.connect()
-        print("connected to Firmngin")
-        await client.run()
-
-
-asyncio.run(main())
+config = ClientConfig(keys=KeysConfig.from_file("keys.json"))
 ```
 
-## Virtual environment
+Do not commit real device keys to version control.
 
-It is recommended to install the SDK inside a virtual environment:
+## Development requirements
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install git+https://github.com/firmngin/firmngin-sdk-python.git
-```
+The following tools are used for development:
+
+- `ruff` — linting and formatting
+- `mypy --strict` — type checking
+- `pytest` — unit and integration tests
+- `pip-audit` — dependency vulnerability scanning
+- `bandit` — security analysis
+
+## See also
+
+- [Overview](/libraries/raspi)
+- [Entities and State](/libraries/raspi/entities)
+- [Examples](/libraries/raspi/examples)
