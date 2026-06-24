@@ -69,7 +69,7 @@
                 ]
               },
               {
-                "group": "Raspberry Pi",
+                "group": "Python SDK",
                 "root": "libraries/raspi",
                 "pages": [
                   "libraries/raspi/installation",
