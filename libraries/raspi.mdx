@@ -1,89 +1,125 @@
 ---
-title: "Python SDK"
-description: "Firmware integration for Raspberry Pi and Linux-based devices using Python"
+title: "Raspberry Pi (Python)"
+sidebarTitle: "Raspberry Pi SDK"
+description: "Python SDK untuk Raspberry Pi, Linux devices, dan server-side tooling"
+icon: "raspberry-pi"
 ---
 
-Use the Firmngin Python SDK to connect Raspberry Pi and other Linux-based devices to Firmngin. The SDK covers secure device connection, entity state updates, command handling, image upload, GPS location updates, and monetization flows.
+# Raspberry Pi (Python SDK)
 
-## When to use it
+Gunakan Firmngin Python SDK untuk Raspberry Pi, Linux-based devices, integration tests, dan server-side tooling.
 
-Use this SDK for:
+## Installation
 
-- Raspberry Pi devices running Linux.
-- Python-based device integrations and server-side tooling.
-- Devices that publish structured entity values such as temperature, relay state, energy, or GPS position.
-- Devices that receive entity commands from the dashboard.
-- Devices that need secure mTLS connection using downloaded device credentials.
-- Firmware that participates in paid session, payment, or verification flows.
-- Integration tests and prototyping before moving to Arduino firmware.
+```bash
+pip install git+https://github.com/firmngin/firmngin-sdk-python.git
+```
 
-## Core responsibilities
+## Entity patterns
 
-The application should connect to the network, authenticate with device credentials, keep the Firmngin connection alive, send entity state updates, receive entity commands, and handle optional flows such as location, image upload, and monetization events.
+Entity key wrapper works with both patterns:
 
-## Main capabilities
+```python
+from firmngin import Entity
 
-| Capability | What it does |
-| --- | --- |
-| Secure connection | Uses device credentials and mTLS for platform connection. |
-| Entity state | Sends single or batch entity values from device to Firmngin. |
-| Entity commands | Receives dashboard commands and routes them to the correct handler. |
-| Typed callbacks | Provides typed objects for payments, verifications, device state, init, and active sessions. |
-| Location | Sends GPS coordinates through a builder-style API. |
-| Image upload | Uploads camera/image data and links it to an entity key. |
-| Offline queue | Queues updates when the connection is temporarily unavailable. |
+# By GPIO pin — matches the "gpio_pin" field in dashboard
+relay = Entity(1)
 
-## Minimal lifecycle
+# By entity key — matches the "key" field in dashboard
+temperature = Entity("temperature")
+```
 
-Most applications follow this shape:
+## Push state
 
 ```python
 import asyncio
+from firmngin import ClientConfig, Entity, FirmnginClient, KeysConfig
 
-from firmngin import ClientConfig, Entity, Event, FirmnginClient, Init, KeysConfig, Payment
+relay = Entity(1)
+temperature = Entity("temperature")
 
-
-async def handle_payment(payment: Payment) -> None:
-    if payment.is_success:
-        print("paid:", payment.order_id)
-
-
-async def handle_init(init: Init) -> None:
-    print("merchant status:", init.merchant_status)
-
-
-async def main() -> None:
+async def main():
     config = ClientConfig(keys=KeysConfig.from_file("keys.json"))
-    relay = Entity("relay")
-
     async with FirmnginClient(config) as client:
-        client.on(Event.PAYMENT, handle_payment)
-        client.on(Event.INIT, handle_init)
-
         await client.connect()
-        await client.request_init()
         await client.push_entity(relay, "on")
+        await client.push_entity(temperature, 27.5)
         await client.run()
-
 
 asyncio.run(main())
 ```
 
-## Sync adapter
-
-For scripts that cannot manage an event loop, use `SyncFirmnginClient`:
+## Batch entities
 
 ```python
-from firmngin import ClientConfig, Entity, KeysConfig, SyncFirmnginClient
+batch = client.push_batch_entities()
+batch.add(relay, "on")
+batch.add(temperature, 27.5)
+await batch.send()
+```
 
-config = ClientConfig(keys=KeysConfig.from_file("keys.json"))
-relay = Entity("relay")
+## Entity commands
+
+Register per-entity command handlers:
+
+```python
+from firmngin import EntityCommand
+
+@client.on_entity(relay)
+async def handle_relay(command: EntityCommand) -> None:
+    print("relay:", command.value)
+```
+
+Or use global event listener:
+
+```python
+from firmngin import Event
+
+client.on(Event.ENTITY_COMMAND, lambda cmd: print(cmd.key, cmd.value))
+```
+
+## Events
+
+Supported event types:
+
+| Event | Trigger |
+| --- | --- |
+| `Event.PAYMENT` | Payment pending or success |
+| `Event.INIT` | Initial device config |
+| `Event.PIN` | PIN verification |
+| `Event.DEVICE_STATUS` | Device lifecycle changes |
+| `Event.ENTITY_COMMAND` | Entity command from dashboard |
+| `Event.ACTIVE_SESSION` | Active paid session |
+
+## Location
+
+```python
+await client.push_location_values(
+    lat=-6.208763,
+    lon=106.845599,
+    accuracy=5.0,
+)
+```
+
+## Image upload
+
+```python
+camera = Entity("camera_image")
+await client.upload_image(camera, "snapshot.jpg")
+```
+
+## Sync adapter
+
+For blocking scripts:
+
+```python
+from firmngin import SyncFirmnginClient
+
 client = SyncFirmnginClient(config)
-
 client.connect()
 client.push_entity(relay, "off")
 ```
 
-## Source repository
+## See also
 
-The source SDK is available at [firmngin/firmngin-sdk-python](https://github.com/firmngin/firmngin-sdk-python).
+- [Arduino Library](/libraries/arduino) — for ESP32/ESP8266 firmware
