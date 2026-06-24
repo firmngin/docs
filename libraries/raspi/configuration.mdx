@@ -1,6 +1,6 @@
 ---
 title: "Configuration"
-description: "Configure ClientConfig, KeysConfig, and connection settings"
+description: "Configure ClientConfig and KeysConfig"
 ---
 
 ## Quick setup
@@ -39,16 +39,9 @@ The `decryptor_key` property holds the parsed key bytes.
 
 ## ClientConfig
 
-| Field | Default | Description |
+| Field | Type | Description |
 | --- | --- | --- |
-| `keys` | (required) | `KeysConfig` instance |
-| `queue_path` | `None` | Offline queue directory |
-| `queue_max_size` | `500` | Max queued messages |
-| `queue_max_bytes` | `5242880` | Max queue size in bytes |
-| `connect_timeout_seconds` | `10.0` | MQTT connection timeout |
-| `keepalive_seconds` | `60` | MQTT keepalive |
-| `reconnect_max_attempts` | `None` | Max reconnect attempts (`None` = unlimited) |
-| `mtls` | `True` | Mutual TLS |
+| `keys` | `KeysConfig` | Device credentials (required) |
 
 ## Debug logging
 
