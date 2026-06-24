@@ -5,8 +5,6 @@ description: "Install the Firmngin Python SDK and prepare device credentials"
 
 ## Install the package
 
-From PyPI:
-
 ```bash
 pip install firmngin
 ```
@@ -29,13 +27,9 @@ pip install firmngin[http]
 | --- | --- | --- |
 | `aiomqtt` | Yes | MQTT client |
 | `cryptography` | Yes | TLS + AES-GCM E2EE |
-| `httpx` | No (`[http]` extra) | Multipart image upload |
-
-Sisanya memakai Python stdlib — tanpa Pydantic atau framework config eksternal.
+| `httpx` | No (`[http]` extra) | Image upload |
 
 ## Device credentials
-
-Unduh `keys.json` dari device dashboard Firmngin. Letakkan di direktori kerja script Anda.
 
 ```python
 from firmngin import ClientConfig
@@ -44,16 +38,6 @@ config = ClientConfig.from_file("keys.json")
 ```
 
 Jangan commit `keys.json` yang berisi kredensial nyata.
-
-## Development requirements
-
-Tools yang dipakai saat pengembangan SDK:
-
-- `ruff` — lint dan format
-- `mypy --strict` — type checking
-- `pytest` — unit dan integration tests
-- `pip-audit` — vulnerability scan
-- `bandit` — security analysis
 
 ## See also
 

@@ -8,8 +8,8 @@ description: "Send device state and receive entity commands from Python"
 ```python
 from firmngin import Entity
 
-relay = Entity(1)              # GPIO pin / numeric key
-temperature = Entity("temperature")  # string key dari dashboard
+relay = Entity(1)
+temperature = Entity("temperature")
 ```
 
 ## Push state
@@ -30,8 +30,6 @@ await batch.send()
 
 ## Entity commands
 
-Per entity:
-
 ```python
 from firmngin import EntityCommand
 
@@ -40,43 +38,18 @@ async def handle_relay(command: EntityCommand) -> None:
     print("relay:", command.value)
 ```
 
-Global:
-
-```python
-from firmngin import Event
-
-@client.on(Event.ENTITY_COMMAND)
-async def handle_command(command: EntityCommand) -> None:
-    print(command.key, command.value)
-```
-
-## Location
-
-```python
-await client.push_location_values(
-    lat=-6.208763,
-    lon=106.845599,
-    accuracy=5.0,
-)
-```
-
 ## Image upload
 
-Butuh `pip install firmngin[http]`:
+```bash
+pip install firmngin[http]
+```
 
 ```python
 camera = Entity("camera")
 await client.upload_image(camera, "snapshot.jpg")
 ```
 
-## Request init
-
-```python
-await client.request_init()
-```
-
 ## See also
 
-- [Overview](/libraries/raspi)
 - [Events and Callbacks](/libraries/raspi/events)
 - [Examples](/libraries/raspi/examples)

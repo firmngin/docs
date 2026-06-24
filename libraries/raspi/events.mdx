@@ -3,110 +3,43 @@ title: "Events and Callbacks"
 description: "Handle payments, verification, device state, and active sessions from Python"
 ---
 
-Daftarkan handler dengan `client.on(Event.X, handler)` saat perangkat perlu bereaksi terhadap pembayaran, verifikasi PIN, perubahan status, atau sesi aktif.
+Daftarkan handler pada `AsyncClient` dengan `client.on(Event.X, handler)`.
 
 ## Event types
 
-| Event | Payload | Description |
-| --- | --- | --- |
-| `Event.PAYMENT` | `Payment` | Pending dan success |
-| `Event.PAYMENT_PENDING` | `Payment` | Pembayaran menunggu |
-| `Event.PAYMENT_SUCCESS` | `Payment` | Pembayaran berhasil |
-| `Event.INIT` | `Init` | Konfigurasi awal perangkat |
-| `Event.MERCHANT_STATUS` | `str` | Perubahan status merchant |
-| `Event.VERIFICATION` | `Verification` | Hasil verifikasi |
-| `Event.PIN` | `Verification` | PIN ditampilkan ke perangkat |
-| `Event.DEVICE_STATUS` | `DeviceStatus` | Perubahan lifecycle perangkat |
-| `Event.ENTITY_COMMAND` | `EntityCommand` | Perintah entity (global) |
-| `Event.ACTIVE_SESSION` | `ActiveSession` | Sesi berbayar aktif |
-| `Event.ERROR` | `Exception` | Error runtime SDK |
+| Event | Payload |
+| --- | --- |
+| `Event.PAYMENT` | `Payment` |
+| `Event.PAYMENT_PENDING` | `Payment` |
+| `Event.PAYMENT_SUCCESS` | `Payment` |
+| `Event.INIT` | `Init` |
+| `Event.MERCHANT_STATUS` | `str` |
+| `Event.VERIFICATION` | `Verification` |
+| `Event.PIN` | `Verification` |
+| `Event.DEVICE_STATUS` | `DeviceStatus` |
+| `Event.ENTITY_COMMAND` | `EntityCommand` |
+| `Event.ACTIVE_SESSION` | `ActiveSession` |
+| `Event.ERROR` | `Exception` |
 
 ## Register handlers
 
-Decorator:
-
 ```python
-from firmngin import Client, ClientConfig, Event, Payment
+from firmngin import AsyncClient, ClientConfig, Event, Payment
 
 config = ClientConfig.from_file("keys.json")
 
-async with Client(config) as client:
+async with AsyncClient(config) as client:
     @client.on(Event.PAYMENT)
     async def handle_payment(payment: Payment) -> None:
         if payment.is_success:
             print("paid:", payment.order_id)
 ```
 
-Atau langsung:
-
-```python
-client.on(Event.PAYMENT, handle_payment)
-```
-
 Hapus handler:
 
 ```python
 client.off(Event.PAYMENT, handle_payment)
-client.clear_handlers()  # semua event
-```
-
-## Payment
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `item_title` | `str` | Nama item |
-| `price` | `str` | Jumlah pembayaran |
-| `order_id` | `str` | ID order |
-| `quantity` | `int` | Jumlah item |
-| `is_pending` | `bool` | Menunggu pembayaran |
-| `is_success` | `bool` | Pembayaran sukses |
-
-```python
-@client.on(Event.PAYMENT_SUCCESS)
-async def on_success(payment: Payment) -> None:
-    print(f"Paid: {payment.item_title} — {payment.price}")
-```
-
-## Verification
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `pin` | `str` | PIN untuk ditampilkan |
-| `session_id` | `str` | ID sesi verifikasi |
-| `ttl` | `int` | TTL (detik) |
-| `pin_met` | `bool` | PIN benar |
-| `precondition_met` | `bool` | Precondition terpenuhi |
-
-```python
-@client.on(Event.PIN)
-async def handle_pin(verification: Verification) -> None:
-    print("PIN:", verification.pin)
-
-@client.on(Event.VERIFICATION)
-async def handle_verification(verification: Verification) -> None:
-    if verification.pin_met and verification.precondition_met:
-        print("Verification passed")
-```
-
-## Device status
-
-| State | Meaning |
-| --- | --- |
-| `idle` | Siap |
-| `pending_payment` | Menunggu pembayaran |
-| `expired_payment` | Pembayaran kedaluwarsa |
-| `success_payment` | Pembayaran dikonfirmasi |
-| `maintenance` | Mode maintenance |
-| `on_active_service` | Layanan berbayar aktif |
-
-## Init
-
-```python
-@client.on(Event.INIT)
-async def handle_init(init: Init) -> None:
-    print("merchant status:", init.merchant_status)
-    if init.is_on_active_service:
-        print("active order:", init.active_order_id)
+client.clear_handlers()
 ```
 
 ## Active session
@@ -115,10 +48,7 @@ async def handle_init(init: Init) -> None:
 @client.on(Event.ACTIVE_SESSION)
 async def handle_session(session: ActiveSession) -> None:
     if session.can_run:
-        print("active order:", session.order_id)
-        temp = session.entity("temperature")
-        if temp.to_float() >= 100.0:
-            await session.end_session()
+        await session.end_session()
 ```
 
 ## Error handling
@@ -128,5 +58,3 @@ async def handle_session(session: ActiveSession) -> None:
 async def handle_error(error: Exception) -> None:
     print("error:", error)
 ```
-
-Tanpa handler `ERROR`, error dicatat ke logger saat `set_debug(True)`.

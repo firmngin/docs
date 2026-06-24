@@ -3,13 +3,13 @@ title: "Examples"
 description: "Raspberry Pi Python SDK usage examples"
 ---
 
-Contoh lengkap ada di [repositori SDK](https://github.com/firmngin/firmngin-sdk-python/tree/main/examples).
+Contoh lengkap: [github.com/firmngin/firmngin-sdk-python/tree/main/examples](https://github.com/firmngin/firmngin-sdk-python/tree/main/examples)
 
-## Basic async client
+## Async client
 
 ```python
 import asyncio
-from firmngin import Client, ClientConfig, Entity, Event, Payment
+from firmngin import AsyncClient, ClientConfig, Entity, Event, Payment
 
 async def on_payment(payment: Payment) -> None:
     if payment.is_success:
@@ -17,7 +17,7 @@ async def on_payment(payment: Payment) -> None:
 
 async def main():
     config = ClientConfig.from_file("keys.json")
-    async with Client(config) as client:
+    async with AsyncClient(config) as client:
         client.on(Event.PAYMENT, on_payment)
         await client.connect()
         await client.push_entity(Entity("relay"), "on")
@@ -26,63 +26,29 @@ async def main():
 asyncio.run(main())
 ```
 
-## Entity command handler
+## Sync client
+
+```python
+from firmngin import Client, ClientConfig, Entity
+
+with Client(ClientConfig.from_file("keys.json")) as client:
+    client.connect()
+    client.push_entity(Entity("relay"), "off")
+```
+
+Handler async pada sync client: `client.async_client.on(...)`
+
+## Entity command
 
 ```python
 from firmngin import Entity, EntityCommand
 
-relay = Entity(1)
-
-@client.on_entity(relay)
+@client.on_entity(Entity(1))
 async def handle_relay(command: EntityCommand) -> None:
-    if command.value == "on":
-        print("relay on")
-    elif command.value == "off":
-        print("relay off")
+    print(command.value)
 ```
-
-## Sync client
-
-Untuk skrip blocking tanpa `asyncio`:
-
-```python
-from firmngin import ClientConfig, Entity, SyncClient
-
-with SyncClient(ClientConfig.from_file("keys.json")) as sync:
-    sync.connect()
-    sync.push_entity(Entity("relay"), "off")
-```
-
-Akses async client di dalam wrapper: `sync.client.on(...)`
-
-## Batch and location
-
-```python
-batch = client.push_batch_entities()
-batch.add(Entity(1), "on")
-batch.add(Entity("2"), 27.5)
-await batch.send()
-
-await client.push_location_values(lat=-6.2, lon=106.816666, accuracy=8.5)
-```
-
-## Flask dashboard
-
-Contoh `flask_device_dashboard/` menjalankan `Client` di background thread dan mengekspos endpoint HTTP untuk relay state dan image upload.
-
-## Example index
-
-| Script | Topic |
-| --- | --- |
-| `async_basic.py` | Connect, handlers, entity publish |
-| `sync_basic.py` | `SyncClient` |
-| `payment_events.py` | Payment pending/success |
-| `entity_command.py` | Per-entity commands |
-| `batch_and_location.py` | Batch + GPS |
-| `async_with_image_upload.py` | Image upload |
 
 ## See also
 
 - [Installation](/libraries/raspi/installation)
 - [Entities and State](/libraries/raspi/entities)
-- [Events and Callbacks](/libraries/raspi/events)

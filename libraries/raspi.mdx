@@ -8,11 +8,11 @@ Gunakan Firmngin Python SDK untuk Raspberry Pi, Linux-based devices, integration
 
 ## Features
 
-- Event-driven async API dengan `Client`
+- `AsyncClient` — event-driven async API
+- `Client` — synchronous blocking wrapper
 - TLS, mTLS, dan certificate fingerprint validation
 - E2EE (AES-GCM) aktif secara default
-- Typed payloads: payment, init, verification, device status, entity commands
-- Entity publishing, batch updates, location, active sessions
+- Typed payloads, entity publishing, batch, location, offline queue
 - Image upload opsional via `firmngin[http]`
 
 ## Requirements
@@ -22,27 +22,25 @@ Gunakan Firmngin Python SDK untuk Raspberry Pi, Linux-based devices, integration
 
 ## Dependencies
 
-Instalasi inti hanya menarik **dua** library pihak ketiga:
-
 | Package | Fungsi |
 | --- | --- |
 | `aiomqtt` | Transport MQTT |
 | `cryptography` | TLS + enkripsi E2EE |
 
-Upload gambar membutuhkan extra: `pip install firmngin[http]`
+Upload gambar: `pip install firmngin[http]`
 
-## Minimal lifecycle
+## Minimal lifecycle (async)
 
 ```python
 import asyncio
-from firmngin import Client, ClientConfig, Entity
+from firmngin import AsyncClient, ClientConfig, Entity
 
 relay = Entity(1)
 temperature = Entity("temperature")
 
 async def main():
     config = ClientConfig.from_file("keys.json")
-    async with Client(config) as client:
+    async with AsyncClient(config) as client:
         await client.connect()
         await client.push_entity(relay, "on")
         await client.push_entity(temperature, 27.5)
@@ -58,4 +56,4 @@ asyncio.run(main())
 - [Entities and State](/libraries/raspi/entities)
 - [Events and Callbacks](/libraries/raspi/events)
 - [Examples](/libraries/raspi/examples)
-- [Arduino](/libraries/arduino) — untuk firmware ESP32/ESP8266
+- [Arduino](/libraries/arduino)
