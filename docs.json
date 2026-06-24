@@ -65,7 +65,8 @@
                   "libraries/arduino/entities",
                   "libraries/arduino/monetization",
                   "libraries/arduino/ota-media-location",
-                  "libraries/arduino/examples"
+                  "libraries/arduino/examples",
+                  "libraries/raspi"
                 ]
               }
             ]
