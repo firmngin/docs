@@ -21,6 +21,8 @@ from firmngin import KeysConfig
 keys = KeysConfig.from_file("keys.json")
 ```
 
+Download `keys.json` from the Firmngin dashboard. The SDK accepts dashboard fields such as `server_fingerprint_bytes` and sets TLS validation automatically.
+
 ### Fields
 
 | Field | Type | Description |
@@ -28,12 +30,13 @@ keys = KeysConfig.from_file("keys.json")
 | `device_id` | `str` | Device identifier |
 | `device_key` | `str` | Authentication key |
 | `decryptor` | `str` | Hex-encoded AES key for E2EE |
-| `validation_mode` | `str` | `"ca"`, `"pin"`, or `"both"` |
+| `validation_mode` | `str` | `"ca"`, `"pin"`, or `"both"` (optional) |
 | `ca_cert` | `str \| None` | CA certificate PEM |
 | `service_ca_cert` | `str` | Service CA PEM |
 | `client_cert` | `str \| None` | Client cert for mTLS |
 | `private_key` | `str \| None` | Private key for mTLS |
 | `fingerprint_sha256` | `str \| None` | SHA-256 fingerprint |
+| `server_fingerprint_bytes` | `list` | Dashboard fingerprint bytes (optional) |
 
 The `decryptor_key` property holds the parsed key bytes.
 
@@ -43,10 +46,19 @@ The `decryptor_key` property holds the parsed key bytes.
 | --- | --- | --- |
 | `keys` | `KeysConfig` | Device credentials (required) |
 
-## Debug logging
+## Debug mode
+
+Debug is **off** by default. No banner or console output is printed unless you enable it:
 
 ```python
-async with AsyncClient(config) as client:
-    client.set_debug(True)
-    await client.connect()
+client.set_debug(True)
+client.connect()
 ```
+
+When enabled, `connect()` prints the Firmngin banner, device connection details, and connect/disconnect messages.
+
+## On connect
+
+`connect()` subscribes to platform topics, publishes LWT online, syncs firmware info, calls `request_init()`, and drains the offline queue when configured.
+
+`disconnect()` and `stop()` publish LWT offline before closing MQTT.

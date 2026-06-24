@@ -21,10 +21,15 @@ Both use `ClientConfig.from_file("keys.json")` and support the same events.
 
 ## Features
 
-- TLS, mTLS, and certificate fingerprint validation
+- TLS, mTLS, and certificate validation (including dashboard `keys.json`)
 - E2EE (AES-GCM) enabled by default
-- Typed payloads, entity publishing, batch updates, location, offline queue
+- LWT online/offline on connect and disconnect
+- Auto `request_init()` on connect
+- Typed events, entity publishing, batch updates, location, offline queue
+- Payment metadata callbacks (`mop` / `moe` / `mos`) as raw JSON strings
 - Optional image upload via `firmngin[http]`
+
+OTA firmware updates are not available in the Python SDK.
 
 ## Requirements
 
@@ -67,6 +72,15 @@ with Client(ClientConfig.from_file("keys.json")) as client:
     client.connect()
     client.push_entity(Entity("relay"), "on")
     client.run()
+```
+
+## Debug mode
+
+Debug is off by default. Enable it before `connect()` to print the startup banner and connection logs:
+
+```python
+client.set_debug(True)
+client.connect()
 ```
 
 ## See also

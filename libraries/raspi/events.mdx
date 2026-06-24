@@ -1,6 +1,6 @@
 ---
 title: "Events and Callbacks"
-description: "Handle payments, verification, device state, and active sessions from Python"
+description: "Handle payments, verification, device state, usage, metadata, and active sessions from Python"
 ---
 
 Register handlers with `client.on(Event.X, handler)` on `AsyncClient` or `Client`.
@@ -9,7 +9,7 @@ Register handlers with `client.on(Event.X, handler)` on `AsyncClient` or `Client
 
 | Event | Payload | Description |
 | --- | --- | --- |
-| `Event.PAYMENT` | `Payment` | Pending and successful payments |
+| `Event.PAYMENT` | `Payment` | Payment updates |
 | `Event.PAYMENT_PENDING` | `Payment` | Payment is pending |
 | `Event.PAYMENT_SUCCESS` | `Payment` | Payment succeeded |
 | `Event.INIT` | `Init` | Initial device configuration |
@@ -19,6 +19,10 @@ Register handlers with `client.on(Event.X, handler)` on `AsyncClient` or `Client
 | `Event.DEVICE_STATUS` | `DeviceStatus` | Device lifecycle change |
 | `Event.ENTITY_COMMAND` | `EntityCommand` | Entity command (all entities) |
 | `Event.ACTIVE_SESSION` | `ActiveSession` | Active paid session |
+| `Event.USAGE` | `Usage` | Usage / limit topics (`ur`, `le`, `nl`) |
+| `Event.METADATA_PENDING` | `str` | Raw JSON from `mop` |
+| `Event.METADATA_EXPIRED` | `str` | Raw JSON from `moe` |
+| `Event.METADATA_SUCCESS` | `str` | Raw JSON from `mos` |
 | `Event.ERROR` | `Exception` | Runtime error |
 
 ## Register handlers
@@ -42,6 +46,38 @@ client.off(Event.PAYMENT, handle_payment)
 client.clear_handlers()
 ```
 
+## Payment metadata (raw JSON)
+
+Topics `mop`, `moe`, and `mos` deliver decrypted JSON as a plain string. Parse it yourself for custom fields:
+
+```python
+import json
+
+@client.on(Event.METADATA_PENDING)
+def on_pending(raw_json: str) -> None:
+    data = json.loads(raw_json)
+```
+
+## Usage limits
+
+```python
+from firmngin import Event, Usage
+
+@client.on(Event.USAGE)
+def on_usage(usage: Usage) -> None:
+    print(usage.used, usage.limit, usage.near_limit, usage.limit_exceeded)
+```
+
+## Per-entity commands
+
+```python
+from firmngin import Entity, EntityCommand
+
+@client.on_entity(Entity("relay"))
+def handle_relay(command: EntityCommand) -> None:
+    print(command.value)
+```
+
 ## Active session
 
 ```python
@@ -58,3 +94,11 @@ async def handle_session(session: ActiveSession) -> None:
 async def handle_error(error: Exception) -> None:
     print("error:", error)
 ```
+
+## Connection lifecycle
+
+On `connect()` the SDK subscribes to platform topics, publishes LWT online (`"1"`), syncs firmware info, and calls `request_init()` automatically.
+
+On `disconnect()` or `stop()`, the SDK publishes LWT offline (`"0"`).
+
+The Python SDK does **not** implement OTA firmware updates.

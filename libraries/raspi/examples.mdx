@@ -50,7 +50,18 @@ with Client(ClientConfig.from_file("keys.json")) as client:
     client.run()
 ```
 
-All events (`Event.PAYMENT`, `Event.INIT`, etc.) are registered with `client.on(...)` on both clients.
+All events are registered with `client.on(...)` on both clients.
+
+## Payment metadata
+
+```python
+import json
+from firmngin import Event
+
+@client.on(Event.METADATA_PENDING)
+def on_pending(raw_json: str) -> None:
+    data = json.loads(raw_json)
+```
 
 ## Entity command
 
