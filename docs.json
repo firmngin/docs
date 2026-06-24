@@ -61,12 +61,25 @@
                 "group": "Arduino",
                 "root": "libraries/arduino",
                 "pages": [
-                  "libraries/arduino/installation",
-                  "libraries/arduino/entities",
-                  "libraries/arduino/monetization",
-                  "libraries/arduino/ota-media-location",
-                  "libraries/arduino/examples",
-                  "libraries/raspi"
+                  {
+                    "group": "Arduino",
+                    "icon": "microchip",
+                    "pages": [
+                      "libraries/arduino",
+                      "libraries/arduino/installation",
+                      "libraries/arduino/entities",
+                      "libraries/arduino/monetization",
+                      "libraries/arduino/ota-media-location",
+                      "libraries/arduino/examples"
+                    ]
+                  },
+                  {
+                    "group": "Raspberry Pi",
+                    "icon": "raspberry-pi",
+                    "pages": [
+                      "libraries/raspi"
+                    ]
+                  }
                 ]
               }
             ]
