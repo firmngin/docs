@@ -54,7 +54,6 @@ from firmngin import ClientConfig, KeysConfig
 
 config = ClientConfig(
     keys=KeysConfig.from_file("keys.json"),
-    queue_path="/var/lib/firmngin/queue",
 )
 ```
 
@@ -63,11 +62,6 @@ config = ClientConfig(
 | Field | Default | Description |
 | --- | --- | --- |
 | `keys` | (required) | Instance `KeysConfig` |
-| `api_base_url` | `https://api.firmngin.dev/api/v1` | Base URL HTTP API |
-| `queue_path` | `None` | Path offline queue (aktifkan untuk persist saat offline) |
-| `queue_max_size` | `500` | Batas jumlah pesan dalam queue |
-| `queue_max_bytes` | `5242880` | Batas ukuran total payload queue (bytes) |
-| `queue_drain_batch_size` | `50` | Pesan yang di-drain per siklus connect |
 | `max_local_entity_values` | `256` | Batas cache nilai entity lokal |
 | `connect_timeout_seconds` | `10.0` | Timeout koneksi MQTT |
 | `keepalive_seconds` | `60` | MQTT keepalive |
@@ -86,17 +80,6 @@ Broker MQTT (`asia-jkt1.firmngin.dev:58884`) dikelola platform dan tidak dikonfi
 | `"ca"` | Validasi CA — direkomendasikan production |
 | `"pin"` | Fingerprint pinning — ringan, perlu update saat cert berubah |
 | `"both"` | Default — CA + fingerprint |
-
-## Offline queue
-
-```python
-config = ClientConfig.from_file(
-    "keys.json",
-    queue_path="/var/lib/firmngin/queue",
-)
-```
-
-Pesan di-queue saat MQTT offline dan di-drain bertahap saat reconnect.
 
 ## Debug logging
 
