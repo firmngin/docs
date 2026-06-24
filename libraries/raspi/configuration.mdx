@@ -55,10 +55,4 @@ client.set_debug(True)
 client.connect()
 ```
 
-When enabled, `connect()` prints the Firmngin banner, device connection details, and connect/disconnect messages.
-
-## On connect
-
-`connect()` subscribes to platform topics, publishes LWT online, syncs firmware info, calls `request_init()`, and drains the offline queue when configured.
-
-`disconnect()` and `stop()` publish LWT offline before closing MQTT.
+When enabled, `connect()` prints lifecycle messages (`starting`, `connected to server`) and `disconnect()` / `stop()` print `stopping` and `stopped`.

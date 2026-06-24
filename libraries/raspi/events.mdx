@@ -94,11 +94,3 @@ async def handle_session(session: ActiveSession) -> None:
 async def handle_error(error: Exception) -> None:
     print("error:", error)
 ```
-
-## Connection lifecycle
-
-On `connect()` the SDK subscribes to platform topics, publishes LWT online (`"1"`), syncs firmware info, and calls `request_init()` automatically.
-
-On `disconnect()` or `stop()`, the SDK publishes LWT offline (`"0"`).
-
-The Python SDK does **not** implement OTA firmware updates.
