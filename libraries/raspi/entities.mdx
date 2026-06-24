@@ -1,141 +1,110 @@
 ---
 title: "Entities and State"
-description: "Send device state and receive entity commands from Firmngin"
+description: "Send device state and receive entity commands from Python"
 ---
 
-Entities are the user-facing values and controls exposed by a device. Use them for sensor readings, relay state, status values, counters, and dashboard commands.
+## Entity patterns
 
-## Define entities
-
-Use an `Entity` object when you want a typed reference to an entity key.
+Use the `Entity` class to wrap an entity reference:
 
 ```python
 from firmngin import Entity
 
-relay = Entity("relay")
+# By GPIO pin — matches the "gpio_pin" field in dashboard
+relay = Entity(1)
+
+# By entity key — matches the "key" field in dashboard
 temperature = Entity("temperature")
-status = Entity(1)
 ```
 
 ## Push state
 
-Use `push_entity()` for a single value update. This is useful for sensors, relay feedback, or any state that changes over time.
-
 ```python
-await client.push_entity(temperature, 25.5)
 await client.push_entity(relay, "on")
-await client.push_entity(status, 1)
+await client.push_entity(temperature, 27.5)
 ```
 
-Boolean values are automatically serialized: `True` becomes `"1"`, `False` becomes `"0"`.
-
-## Batch updates
-
-For multiple values at once, use the batch builder:
+## Batch entities
 
 ```python
 batch = client.push_batch_entities()
 batch.add(relay, "on")
 batch.add(temperature, 27.5)
-batch.add("humidity", 80)
 await batch.send()
 ```
 
-You can also use `update_entities()` directly:
+## Entity commands
 
-```python
-await client.update_entities({
-    "relay": "on",
-    "temperature": 27.5,
-    "humidity": 80,
-})
-```
-
-## Receive commands
-
-Use `on_entity()` to receive commands sent from Firmngin to the device. The command includes an entity key and value, so the application can route it to the correct handler.
+Register per-entity command handlers:
 
 ```python
 from firmngin import EntityCommand
 
-relay = Entity("relay")
-
 @client.on_entity(relay)
 async def handle_relay(command: EntityCommand) -> None:
-    print("relay command:", command.value)
+    print("relay:", command.value)
+
+@client.on_entity(temperature)
+async def handle_temperature(command: EntityCommand) -> None:
+    print("temperature:", command.value)
 ```
 
-You can also use the `on_entity()` method directly without the decorator:
+Or use global event listener:
 
 ```python
-async def handle_relay(command: EntityCommand) -> None:
-    print("relay command:", command.value)
+from firmngin import Event
 
-client.on_entity(relay, handle_relay)
+client.on(Event.ENTITY_COMMAND, lambda cmd: print(cmd.key, cmd.value))
 ```
 
-For multiple entity commands, register one global handler and switch by key:
+## Events
+
+Supported event types:
+
+| Event | Trigger |
+| --- | --- |
+| `Event.PAYMENT` | Payment pending or success |
+| `Event.INIT` | Initial device config |
+| `Event.PIN` | PIN verification |
+| `Event.DEVICE_STATUS` | Device lifecycle changes |
+| `Event.ENTITY_COMMAND` | Entity command from dashboard |
+| `Event.ACTIVE_SESSION` | Active paid session |
+
+Register event handlers:
 
 ```python
-@client.on(Event.ENTITY_COMMAND)
-async def handle_command(command: EntityCommand) -> None:
-    if command.key == "relay":
-        print("relay:", command.value)
-    elif command.key == "temperature":
-        print("temperature:", command.value)
+async def handle_payment(payment):
+    if payment.is_success:
+        print("paid:", payment.order_id)
+
+client.on(Event.PAYMENT, handle_payment)
 ```
 
-## Read local entity values
-
-Read the last known value of an entity from local state:
-
-```python
-value = client.entity(temperature)
-print(value.to_string())
-print(value.to_float())
-print(value.to_int())
-print(value.is_on())
-```
-
-## Request init
-
-Call `request_init()` when the application needs the latest device configuration after connection or reconnect.
-
-```python
-await client.connect()
-await client.request_init()
-await client.run()
-```
-
-## Location updates
-
-Use the location builder for GPS tracking:
+## Location
 
 ```python
 await client.push_location_values(
     lat=-6.208763,
     lon=106.845599,
     accuracy=5.0,
-    alt=10.0,
-    speed=1.2,
 )
-```
-
-Or use the builder step by step:
-
-```python
-location = client.push_location()
-location.lat(-6.208763)
-location.lon(106.845599)
-location.accuracy(5.0)
-await location.send()
 ```
 
 ## Image upload
 
-Upload an image and link it to an entity:
-
 ```python
-camera = Entity("camera")
+camera = Entity("camera_image")
 await client.upload_image(camera, "snapshot.jpg")
 ```
+
+## Request init
+
+```python
+await client.request_init()
+```
+
+## See also
+
+- [Overview](/libraries/raspi)
+- [Installation](/libraries/raspi/installation)
+- [Examples](/libraries/raspi/examples)
