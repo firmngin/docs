@@ -5,7 +5,9 @@ description: "Raspberry Pi Python SDK usage examples"
 
 Contoh lengkap: [github.com/firmngin/firmngin-sdk-python/tree/main/examples](https://github.com/firmngin/firmngin-sdk-python/tree/main/examples)
 
-## Async client
+## AsyncClient
+
+Untuk kode yang sudah memakai `asyncio`:
 
 ```python
 import asyncio
@@ -26,29 +28,42 @@ async def main():
 asyncio.run(main())
 ```
 
-## Sync client
+## Client (sync)
+
+Untuk skrip sederhana — relay + suhu, tanpa `async`/`await`:
 
 ```python
-from firmngin import Client, ClientConfig, Entity
+from firmngin import Client, ClientConfig, Entity, EntityCommand
+
+relay = Entity("relay")
+temperature = Entity("temperature")
 
 with Client(ClientConfig.from_file("keys.json")) as client:
+
+    @client.on_entity(relay)
+    def handle_relay(command: EntityCommand) -> None:
+        print("relay:", command.value)
+
     client.connect()
-    client.push_entity(Entity("relay"), "off")
+    client.push_entity(relay, "off")
+    client.push_entity(temperature, 27.5)
+    client.run()
 ```
 
-Handler async pada sync client: `client.async_client.on(...)`
+Semua event (`Event.PAYMENT`, `Event.INIT`, dll.) didaftarkan dengan `client.on(...)` — sama di `AsyncClient` maupun `Client`.
 
 ## Entity command
 
 ```python
 from firmngin import Entity, EntityCommand
 
-@client.on_entity(Entity(1))
-async def handle_relay(command: EntityCommand) -> None:
+@client.on_entity(Entity("relay"))
+def handle_relay(command: EntityCommand) -> None:
     print(command.value)
 ```
 
 ## See also
 
+- [Overview](/libraries/raspi)
 - [Installation](/libraries/raspi/installation)
 - [Entities and State](/libraries/raspi/entities)

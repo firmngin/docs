@@ -6,10 +6,22 @@ description: "Python SDK untuk Raspberry Pi, Linux devices, dan server-side tool
 
 Gunakan Firmngin Python SDK untuk Raspberry Pi, Linux-based devices, integration tests, dan server-side tooling.
 
+## Client vs AsyncClient
+
+Dua entry point, satu protokol — pilih sesuai gaya kode Anda:
+
+| | `AsyncClient` | `Client` |
+| --- | --- | --- |
+| Gaya pemrograman | `async` / `await` | Pemanggilan biasa |
+| Cocok untuk | App asyncio, service berjalan terus | Skrip sederhana, cron, CLI |
+| Daftar handler | `client.on(...)`, `client.on_entity(...)` | Sama |
+| Kirim state | `await client.push_entity(...)` | `client.push_entity(...)` |
+| Terima event | `await client.run()` | `client.run()` |
+
+Keduanya memakai `ClientConfig.from_file("keys.json")` dan mendukung event yang sama.
+
 ## Features
 
-- `AsyncClient` — event-driven async API
-- `Client` — synchronous blocking wrapper
 - TLS, mTLS, dan certificate fingerprint validation
 - E2EE (AES-GCM) aktif secara default
 - Typed payloads, entity publishing, batch, location, offline queue
@@ -29,24 +41,33 @@ Gunakan Firmngin Python SDK untuk Raspberry Pi, Linux-based devices, integration
 
 Upload gambar: `pip install firmngin[http]`
 
-## Minimal lifecycle (async)
+## Quickstart
+
+**Async** — untuk app berbasis `asyncio`:
 
 ```python
 import asyncio
 from firmngin import AsyncClient, ClientConfig, Entity
 
-relay = Entity(1)
-temperature = Entity("temperature")
-
 async def main():
     config = ClientConfig.from_file("keys.json")
     async with AsyncClient(config) as client:
         await client.connect()
-        await client.push_entity(relay, "on")
-        await client.push_entity(temperature, 27.5)
+        await client.push_entity(Entity("relay"), "on")
         await client.run()
 
 asyncio.run(main())
+```
+
+**Sync** — untuk skrip tanpa `asyncio`:
+
+```python
+from firmngin import Client, ClientConfig, Entity
+
+with Client(ClientConfig.from_file("keys.json")) as client:
+    client.connect()
+    client.push_entity(Entity("relay"), "on")
+    client.run()
 ```
 
 ## See also
