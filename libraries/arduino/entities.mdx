@@ -68,11 +68,11 @@ For multiple entity commands, register one global entity command callback and sw
 
 ```cpp
 fngin.on(ENTITIES, [](EntityCommand &cmd) {
-  if (cmd.key() == "gpio_1") {
+  if (cmd.key() == "1") {
     digitalWrite(2, cmd.value() == "1" ? HIGH : LOW);
   }
 
-  if (cmd.key() == "relay_2") {
+  if (cmd.key() == "2") {
     digitalWrite(4, cmd.value() == "1" ? HIGH : LOW);
   }
 });
