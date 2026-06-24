@@ -61,26 +61,22 @@
                 "group": "Arduino",
                 "root": "libraries/arduino",
                 "pages": [
-                  {
-                    "group": "Arduino",
-                    "pages": [
-                      "libraries/arduino",
-                      "libraries/arduino/installation",
-                      "libraries/arduino/entities",
-                      "libraries/arduino/monetization",
-                      "libraries/arduino/ota-media-location",
-                      "libraries/arduino/examples"
-                    ]
-                  },
-                  {
-                    "group": "Raspberry Pi",
-                    "pages": [
-                      "libraries/raspi",
-                      "libraries/raspi/installation",
-                      "libraries/raspi/entities",
-                      "libraries/raspi/examples"
-                    ]
-                  }
+                  "libraries/arduino/installation",
+                  "libraries/arduino/entities",
+                  "libraries/arduino/monetization",
+                  "libraries/arduino/ota-media-location",
+                  "libraries/arduino/examples"
+                ]
+              },
+              {
+                "group": "Raspberry Pi",
+                "root": "libraries/raspi",
+                "pages": [
+                  "libraries/raspi/installation",
+                  "libraries/raspi/configuration",
+                  "libraries/raspi/entities",
+                  "libraries/raspi/events",
+                  "libraries/raspi/examples"
                 ]
               }
             ]
