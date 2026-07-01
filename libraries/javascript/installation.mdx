@@ -1,0 +1,68 @@
+---
+title: "Installation"
+description: "Install the Firmngin JavaScript SDK and prepare device credentials"
+---
+
+## Install the package
+
+```bash
+npm install firmngin
+```
+
+From Git:
+
+```bash
+npm install git+https://github.com/firmngin/firmngin-sdk-js.git
+```
+
+Local development:
+
+```bash
+git clone https://github.com/firmngin/firmngin-sdk-js.git
+cd firmngin-sdk-js
+npm install
+npm run build
+```
+
+## Dependencies
+
+| Package | Required | Purpose |
+| --- | --- | --- |
+| `mqtt` | Yes | MQTT client |
+| `@noble/ciphers` | Yes | AES-GCM E2EE |
+
+Image upload is included in the main package (Node.js only).
+
+## Device credentials
+
+Download `keys.json` from the device dashboard and place it next to your script.
+
+```typescript
+import { ClientConfig } from 'firmngin'
+
+const config = await ClientConfig.fromFile('keys.json')
+```
+
+You can also load keys from a plain object:
+
+```typescript
+import { KeysConfig, ClientConfig } from 'firmngin'
+
+const keys = KeysConfig.fromDict({
+  device_id: '...',
+  device_key: '...',
+  decryptor: '...',
+  service_ca_cert: '...',
+  // ...
+})
+
+const config = new ClientConfig({ keys })
+```
+
+Do not commit real device keys to version control.
+
+## See also
+
+- [Overview](/libraries/javascript)
+- [Configuration](/libraries/javascript/configuration)
+- [Examples](/libraries/javascript/examples)
