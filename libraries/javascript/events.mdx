@@ -1,0 +1,98 @@
+---
+title: "Events and Callbacks"
+description: "Handle payments, verification, device state, usage, metadata, and active sessions from JavaScript"
+---
+
+Register handlers with `client.on(Event.X, handler)` on `AsyncClient` or `Client`.
+
+## Event types
+
+| Event | Payload | Description |
+| --- | --- | --- |
+| `Event.PAYMENT` | `Payment` | Payment updates |
+| `Event.PAYMENT_PENDING` | `Payment` | Payment is pending |
+| `Event.PAYMENT_SUCCESS` | `Payment` | Payment succeeded |
+| `Event.INIT` | `Init` | Initial device configuration |
+| `Event.MERCHANT_STATUS` | `string` | Merchant status changed |
+| `Event.VERIFICATION` | `Verification` | Verification result |
+| `Event.PIN` | `Verification` | PIN displayed on device |
+| `Event.DEVICE_STATUS` | `DeviceStatus` | Device lifecycle change |
+| `Event.ENTITY_COMMAND` | `EntityCommand` | Entity command (all entities) |
+| `Event.ACTIVE_SESSION` | `ActiveSession` | Active paid session |
+| `Event.USAGE` | `Usage` | Usage / limit topics (`ur`, `le`, `nl`) |
+| `Event.METADATA_PENDING` | `string` | Raw JSON from `mop` |
+| `Event.METADATA_EXPIRED` | `string` | Raw JSON from `moe` |
+| `Event.METADATA_SUCCESS` | `string` | Raw JSON from `mos` |
+| `Event.ERROR` | `Error` | Runtime error |
+
+## Register handlers
+
+```typescript
+import { AsyncClient, ClientConfig, Event, Payment } from 'firmngin'
+
+const config = await ClientConfig.fromFile('keys.json')
+const client = new AsyncClient(config)
+
+client.on(Event.PAYMENT, (payment: Payment) => {
+  if (payment.isSuccess) {
+    console.log('paid:', payment.orderId)
+  }
+})
+```
+
+Remove a handler:
+
+```typescript
+client.off(Event.PAYMENT, handlePayment)
+client.clearHandlers()
+```
+
+## Payment metadata (raw JSON)
+
+Topics `mop`, `moe`, and `mos` deliver decrypted JSON as a plain string. Parse it yourself for custom fields:
+
+```typescript
+client.on(Event.METADATA_PENDING, (rawJson: string) => {
+  const data = JSON.parse(rawJson)
+})
+```
+
+## Usage limits
+
+```typescript
+import { Event, Usage } from 'firmngin'
+
+client.on(Event.USAGE, (usage: Usage) => {
+  console.log(usage.used, usage.limit, usage.nearLimit, usage.limitExceeded)
+})
+```
+
+## Per-entity commands
+
+```typescript
+import { Entity, EntityCommand } from 'firmngin'
+
+client.onEntity(new Entity('relay'), (command: EntityCommand) => {
+  console.log(command.value)
+})
+```
+
+## Active session
+
+```typescript
+import { Event, ActiveSession } from 'firmngin'
+
+client.on(Event.ACTIVE_SESSION, async (session: ActiveSession) => {
+  if (session.canRun) {
+    await session.endSession()
+  }
+})
+```
+
+## Error handling
+
+```typescript
+client.on(Event.ERROR, (error: Error) => {
+  console.error('error:', error)
+})
+```
