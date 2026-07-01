@@ -1,27 +1,97 @@
 ---
-title: "JavaScript Library"
-description: "Node.js integration notes for tools, gateways, and simulators"
+title: "JavaScript SDK"
+sidebarTitle: "Introduction"
+description: "Introduction to the Firmngin JavaScript/TypeScript SDK for Node.js device clients and integrations"
 ---
 
-Use the JavaScript library for Node.js tools, simulators, gateways, and service integrations that need to interact with firmngin device or platform APIs.
+Use the Firmngin JavaScript SDK on Node.js gateways, simulators, integration tests, and server-side tooling.
 
-## Use this library for
+## Client vs AsyncClient
 
-- Device simulators.
-- Gateway processes that bridge non-MQTT devices.
-- Internal tools that read device state.
-- Automation helpers that need API access.
+Two entry points, one protocol — choose what fits your code:
 
-## Security note
+| | `AsyncClient` | `Client` |
+| --- | --- | --- |
+| Style | `async` / `await` | Same Promise-based API |
+| Handlers | `client.on(...)`, `client.onEntity(...)` | Same |
+| Push state | `await client.pushEntity(...)` | `await client.pushEntity(...)` |
+| Event loop | `await client.run()` | `await client.run()` |
 
-Do not ship backend API tokens to browser code. Browser UI should call the firmngin backend through authenticated user sessions, not through service tokens embedded in JavaScript bundles.
+Both use `ClientConfig.fromFile("keys.json")` and support the same events.
 
-## Basic client setup
+## Features
 
-[code:create JavaScript client with base URL and token, then list devices]
+- TLS, mTLS, and certificate validation (including dashboard `keys.json`)
+- E2EE (AES-GCM) enabled by default
+- LWT online/offline on connect and disconnect
+- Auto `requestInit()` on connect
+- Typed events, entity publishing, batch updates, and location helpers
+- Payment metadata callbacks (`mop` / `moe` / `mos`) as raw JSON strings
+- Image upload included in the main package
 
-## Standard errors
+OTA firmware updates are not available in the JavaScript SDK.
 
-[code:handle standard API error fields error and message]
+## Requirements
 
-Always prefer the standard `error` and `message` fields when displaying API errors.
+- Node.js 18+
+- A `keys.json` file from the Firmngin dashboard
+
+## Dependencies
+
+| Package | Purpose |
+| --- | --- |
+| `mqtt` | MQTT transport |
+| `@noble/ciphers` | AES-GCM E2EE |
+
+## Quickstart
+
+**AsyncClient** — recommended for most apps:
+
+```typescript
+import { AsyncClient, ClientConfig, Entity } from 'firmngin'
+
+const config = await ClientConfig.fromFile('keys.json')
+const client = new AsyncClient(config)
+
+await client.connect()
+await client.pushEntity(new Entity('relay'), 'on')
+await client.run()
+```
+
+**Client** — alternative entry point with the same API:
+
+```typescript
+import { Client, ClientConfig, Entity } from 'firmngin'
+
+const client = new Client(await ClientConfig.fromFile('keys.json'))
+
+await client.connect()
+await client.pushEntity(new Entity('relay'), 'on')
+await client.run()
+```
+
+## Debug mode
+
+Debug is off by default. Enable it before `connect()` to print the startup banner and connection logs:
+
+```typescript
+client.setDebug(true)
+await client.connect()
+```
+
+## Browser entry
+
+The package also exports `firmngin/browser` for bundlers that target the browser. Device connectivity in the browser requires WSS and platform-specific constraints — use the Node entry for full device client features today.
+
+```typescript
+import { AsyncClient } from 'firmngin/browser'
+```
+
+## See also
+
+- [Installation](/libraries/javascript/installation)
+- [Configuration](/libraries/javascript/configuration)
+- [Entities and State](/libraries/javascript/entities)
+- [Events and Callbacks](/libraries/javascript/events)
+- [Examples](/libraries/javascript/examples)
+- [Python SDK](/libraries/raspi)
