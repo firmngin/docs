@@ -18,10 +18,7 @@
         "groups": [
           {
             "group": "Getting started",
-            "pages": [
-              "index",
-              "quickstart"
-            ]
+            "pages": ["index", "quickstart"]
           },
           {
             "group": "Core concepts",
@@ -29,17 +26,12 @@
               {
                 "group": "Devices",
                 "root": "devices",
-                "pages": [
-                  "devices/security",
-                  "device-templates"
-                ]
+                "pages": ["devices/security", "device-templates"]
               },
               {
                 "group": "Firmware",
                 "root": "firmware",
-                "pages": [
-                  "ota-updates"
-                ]
+                "pages": ["ota-updates"]
               },
               "automations",
               "plans"
@@ -69,6 +61,17 @@
                 ]
               },
               {
+                "group": "JavaScript SDK",
+                "root": "libraries/javascript",
+                "pages": [
+                  "libraries/javascript/installation",
+                  "libraries/javascript/configuration",
+                  "libraries/javascript/entities",
+                  "libraries/javascript/events",
+                  "libraries/javascript/examples"
+                ]
+              },
+              {
                 "group": "Python SDK",
                 "root": "libraries/raspi",
                 "pages": [
@@ -88,9 +91,7 @@
         "groups": [
           {
             "group": "API documentation",
-            "pages": [
-              "api-reference/introduction"
-            ]
+            "pages": ["api-reference/introduction"]
           }
         ]
       }
@@ -110,16 +111,7 @@
     }
   },
   "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+    "options": ["copy", "view", "chatgpt", "claude", "perplexity", "mcp", "cursor", "vscode"]
   },
   "footer": {
     "socials": {

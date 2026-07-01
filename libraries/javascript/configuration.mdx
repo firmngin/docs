@@ -1,0 +1,67 @@
+---
+title: "Configuration"
+description: "Configure ClientConfig and KeysConfig"
+---
+
+## Quick setup
+
+```typescript
+import { ClientConfig } from 'firmngin'
+
+const config = await ClientConfig.fromFile('keys.json')
+```
+
+Use this config with `AsyncClient` or `Client`.
+
+## KeysConfig
+
+```typescript
+import { KeysConfig } from 'firmngin'
+
+const keys = await KeysConfig.fromFile('keys.json')
+```
+
+Download `keys.json` from the Firmngin dashboard. The SDK accepts dashboard fields such as `server_fingerprint_bytes` and sets TLS validation automatically.
+
+### Fields
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `deviceId` | `string` | Device identifier (JSON: `device_id`) |
+| `deviceKey` | `string` | Authentication key (JSON: `device_key`) |
+| `decryptor` | `string` | Hex-encoded AES key for E2EE |
+| `validationMode` | `string` | `"ca"`, `"pin"`, or `"both"` (optional) |
+| `caCert` | `string \| null` | CA certificate PEM |
+| `serviceCaCert` | `string` | Service CA PEM |
+| `clientCert` | `string \| null` | Client cert for mTLS |
+| `privateKey` | `string \| null` | Private key for mTLS |
+| `fingerprintSha256` | `string \| null` | SHA-256 fingerprint |
+| `server_fingerprint_bytes` | `list` | Dashboard fingerprint bytes (optional) |
+
+The `decryptorKey` property holds the parsed key bytes.
+
+Load from environment variables:
+
+```typescript
+const keys = KeysConfig.fromEnv('FIRMNGIN_')
+```
+
+## ClientConfig
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `keys` | `KeysConfig` | Device credentials (required) |
+| `apiBaseUrl` | `string` | REST API base URL |
+| `mqttServer` | getter | Platform MQTT host |
+| `mqttPort` | getter | Platform MQTT port |
+
+## Debug mode
+
+Debug is **off** by default. No banner or console output is printed unless you enable it:
+
+```typescript
+client.setDebug(true)
+await client.connect()
+```
+
+When enabled, `connect()` prints lifecycle messages (`starting`, `connected to server`) and `disconnect()` prints `stopping` and `stopped`.
