@@ -50,6 +50,8 @@
             "pages": [
               "monetization",
               "monetization/merchant-setup",
+              "monetization/prepaid",
+              "monetization/postpaid",
               "payment-channels",
               "live-merchant-verification"
             ]

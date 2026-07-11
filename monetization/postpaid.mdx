@@ -1,0 +1,213 @@
+---
+title: "Postpaid"
+description: "Calculate a customer's final bill from usage or duration and collect payment after the session"
+---
+
+Postpaid items calculate the final amount from what happens during a service session. Choose postpaid when the amount is not known until the customer finishes using the device or service.
+
+Common postpaid use cases include:
+
+- EV charging billed by energy consumed.
+- Water dispensing billed by liters used.
+- Equipment rental billed by time.
+- A service billed from the latest sensor value.
+- A machine billed by completed cycles or events.
+
+## How postpaid works
+
+<Steps>
+  <Step title="Customer starts the service">
+    The customer selects a postpaid item and completes any verification or readiness steps required by your device flow.
+  </Step>
+  <Step title="Usage is measured">
+    During the session, the order page shows the running usage and estimated amount based on the selected price rule.
+  </Step>
+  <Step title="Session ends">
+    The customer, device, or dashboard operator ends the session using an allowed stop method. A configured maximum amount can also end the session automatically.
+  </Step>
+  <Step title="Final bill is created">
+    Firmngin calculates the final amount from the session usage and the price rule that was active when the session started.
+  </Step>
+  <Step title="Customer pays">
+    The customer completes payment using an available payment channel.
+  </Step>
+</Steps>
+
+## Create a postpaid catalog item
+
+1. Open your merchant in the dashboard.
+2. Open **Price Rules** and create a rule for the service.
+3. Go to **Catalog**.
+4. Create a new item or edit an existing item.
+5. Set **Payment Type** to **Postpaid**.
+6. Select the required **Price Rule**.
+7. Complete the item details and device assignment.
+8. Save the item and test a complete session on the public page.
+
+Postpaid items use one quantity per order. Multiple quantity is disabled because each order represents one measured service session.
+
+## Configure a price rule
+
+A price rule defines the base charge, billable quantity, unit price, and optional spending limit.
+
+### Start amount
+
+**Start Amount** is a base charge added to the usage charge.
+
+For example:
+
+- Start amount: IDR 10,000
+- Usage charge: IDR 15,500
+- Final total: IDR 25,500
+
+Set the start amount to 0 when the customer should pay only for measured usage.
+
+### Maximum amount
+
+**Max Amount** limits the combined total. When the running amount reaches the limit, the session ends automatically.
+
+Leave it empty when the service does not need an automatic spending limit.
+
+### Pricing component
+
+Choose the component that matches how you sell the service:
+
+| Component | Use it for | Example |
+| --- | --- | --- |
+| Per Unit | A price multiplied by measured usage | IDR 2,500 per kWh |
+| Per Time | A price multiplied by session duration | IDR 300 per minute |
+| Tiered | Different unit prices across usage ranges | 0–10 kWh at one rate, then a different rate above 10 kWh |
+
+Choose a unit that customers understand and that matches the values produced by the device, such as kWh, liter, minute, hour, kilometer, or cycle.
+
+## Usage calculation
+
+For per-unit and tiered pricing, **Usage calculation** controls how incoming readings become the billable quantity.
+
+### Cumulative delta
+
+Use **Cumulative delta** for a total meter that normally only increases, such as an energy meter, water meter, odometer, or total production counter.
+
+- The first reading sets the session baseline and adds no usage.
+- Each later reading adds the difference between the current and previous reading.
+- Lower readings are rejected.
+
+Example:
+
+| Reading | Result |
+| --- | --- |
+| 68 | Baseline; usage remains 0 |
+| 99 | Adds 31 units |
+| 105 | Adds 6 units; total session usage is 37 |
+
+This prevents usage recorded before the customer started the session from being included in their bill.
+
+### Latest value
+
+Use **Latest value** when the newest reading itself is the billable quantity. Values may increase or decrease.
+
+This works well for adjustable levels, a potentiometer, a final measured quantity, or another value where the customer should be charged from the current reading.
+
+Example: a latest value of 68 at IDR 500 per unit produces a usage charge of IDR 34,000.
+
+### Time integral
+
+Use **Time integral** when a changing value must be accumulated over elapsed time.
+
+Examples include:
+
+- Speed over time to estimate distance.
+- Power over time to calculate energy.
+- Flow rate over time to calculate volume.
+
+Select the rate period represented by the incoming value: per second, per minute, or per hour. Set **Maximum gap** to prevent a long period without readings from being included as continuous usage.
+
+### Event count
+
+Use **Event count** when each unique accepted reading represents one billable event, cycle, pulse, or completed action.
+
+Each accepted event adds one to the session quantity.
+
+## Price examples
+
+### Cumulative energy meter
+
+- Start amount: IDR 10,000
+- Price: IDR 500 per kWh
+- First reading: 68 kWh
+- Latest reading: 99 kWh
+- Session usage: 31 kWh
+- Usage charge: IDR 15,500
+- Final total: IDR 25,500
+
+### Latest measured value
+
+- Start amount: IDR 10,000
+- Price: IDR 500 per unit
+- Latest reading: 68
+- Usage charge: IDR 34,000
+- Final total: IDR 44,000
+
+### Time-based rental
+
+- Price: IDR 300 per minute
+- Session duration: 25 minutes
+- Final total: IDR 7,500
+
+## Changes to an active rule
+
+An active session continues using the price rule configuration that applied when the session started. Editing the rule affects new sessions, not a session already in progress.
+
+This keeps the price shown during a customer session consistent until the final bill is created.
+
+## Ending a session
+
+A postpaid session can end through the stop methods enabled for the linked device:
+
+- The customer selects **End Session** on the public order page.
+- Device-side logic ends the session when **Device Local End** is enabled.
+- A dashboard user force-ends the service.
+- The configured maximum amount is reached.
+
+Review [Merchant Setup](/monetization/merchant-setup) for verification and stop-mode configuration.
+
+## Troubleshooting
+
+### Usage remains zero
+
+Check the selected usage calculation and the readings sent after the session started.
+
+- With cumulative delta, the first reading is only a baseline.
+- A later reading must be higher before usage increases.
+- With latest value, the newest reading should appear as the quantity.
+- With time integral, at least two readings and elapsed time are needed.
+
+### A lower cumulative reading is ignored
+
+This is expected for cumulative delta. Use latest value or time integral for sensors that naturally move up and down.
+
+### The public page still shows the previous calculation method
+
+End the existing test session and start a new one. Price-rule changes apply to new sessions.
+
+### The item is unavailable
+
+Confirm that:
+
+- The selected price rule is active.
+- The item is linked to the correct device.
+- The device is online and ready.
+- The start amount meets the minimum requirement of the enabled payment channels.
+- The merchant is available and approved for the intended payment mode.
+
+## Pre-launch checklist
+
+- The item uses **Postpaid** payment type.
+- An active price rule is selected.
+- The pricing component and unit match the service.
+- The usage calculation matches the device readings.
+- Start and maximum amounts have been reviewed.
+- The device sends readings during an active session.
+- Customer and device stop methods have been tested.
+- The public page shows running usage and the expected estimate.
+- A complete test session produces the expected final bill.

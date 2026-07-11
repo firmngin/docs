@@ -103,6 +103,72 @@ Order prerequisites can be checked before payment or after payment:
 
 [image:linked device Flow tab showing PIN Verification and Order Prerequisites]
 
+### PIN verification flow
+
+Use PIN verification when the customer must prove that they are physically near the merchant's device before the service continues.
+
+```mermaid actions={false}
+sequenceDiagram
+    participant Client as Client (Payer)
+    participant Firmngin
+    participant Merchant
+    Client->>Firmngin: Start the order
+    Firmngin->>Merchant: Request PIN verification
+    Merchant->>Client: Display the PIN
+    Client->>Firmngin: Enter the PIN
+    Firmngin->>Merchant: Confirm successful verification
+    Merchant->>Client: Make the service available
+```
+
+If the PIN is incorrect or expires, the client must use the current PIN shown by the merchant before continuing.
+
+### Prerequisite before payment flow
+
+Choose **Before Payment** when the client should only pay after the merchant confirms that the service is ready.
+
+```mermaid actions={false}
+sequenceDiagram
+    participant Client as Client (Payer)
+    participant Firmngin
+    participant Merchant
+    Client->>Firmngin: Continue the order
+    Firmngin->>Merchant: Check service readiness
+    Merchant->>Firmngin: Return readiness result
+    alt Service is ready
+        Firmngin->>Client: Show payment step
+        Client->>Firmngin: Complete payment
+        Firmngin->>Merchant: Confirm paid order
+        Merchant->>Client: Provide the service
+    else Service is not ready
+        Firmngin->>Client: Explain that the order cannot continue
+    end
+```
+
+This option reduces the chance that a customer pays while the service is unavailable.
+
+### Prerequisite after payment flow
+
+Choose **After Payment** when payment should be completed before the final readiness check.
+
+```mermaid actions={false}
+sequenceDiagram
+    participant Client as Client (Payer)
+    participant Firmngin
+    participant Merchant
+    Client->>Firmngin: Complete payment
+    Firmngin->>Merchant: Confirm paid order
+    Firmngin->>Merchant: Check service readiness
+    Merchant->>Firmngin: Return readiness result
+    alt Service is ready
+        Firmngin->>Client: Confirm service access
+        Merchant->>Client: Provide the service
+    else Service is not ready
+        Firmngin->>Client: Show the required next step
+    end
+```
+
+Use this option only when your operating process is prepared to assist a paid customer if the service is not ready.
+
 ### Stop mode
 
 Stop mode controls who or what is allowed to end an active device session.

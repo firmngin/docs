@@ -8,12 +8,65 @@ Monetization turns connected devices into paid services. A merchant can publish 
 [image:monetization dashboard with revenue, orders, sessions, and merchant public page status]
 
 <Note>
-  Monetization is currently available for Indonesia-focused payment flows. Do not assume every country or payment method is enabled until the payment manager configuration confirms it.
+  Monetization is currently available for Indonesia-focused payment flows. Available payment methods depend on the channels enabled for your merchant.
 </Note>
+
+## Prepaid and postpaid
+
+The main difference is when the final amount becomes known and when the customer pays.
+
+| | Prepaid | Postpaid |
+| --- | --- | --- |
+| When the price is known | Before the service starts | After usage or duration is measured |
+| When the customer pays | Before using the service | After the session ends |
+| How the amount is calculated | Fixed item price × quantity | Start amount + measured usage or duration |
+| Quantity | Can allow multiple quantities | One measured session per order |
+| Best for | Fixed packages, access fees, and known-price services | Energy, water, rental time, sensor values, and event-based services |
+| Configuration | Set a fixed catalog price | Attach an active price rule |
+
+Choose **Prepaid** when every customer should see and pay the final amount before the service begins. Choose **Postpaid** when the final bill depends on what happens during the session.
+
+<CardGroup cols={2}>
+  <Card title="Prepaid" icon="credit-card" href="/monetization/prepaid">
+    Charge a fixed amount before the customer starts using the service.
+  </Card>
+  <Card title="Postpaid" icon="gauge" href="/monetization/postpaid">
+    Calculate the final amount from usage or duration and collect payment after the session.
+  </Card>
+</CardGroup>
+
+## Prepaid flow
+
+```mermaid actions={false}
+sequenceDiagram
+    participant Client as Client (Payer)
+    participant Firmngin
+    participant Merchant
+    Client->>Firmngin: Select item and review fixed price
+    Client->>Firmngin: Complete payment
+    Firmngin->>Merchant: Confirm paid order
+    Merchant->>Client: Provide the purchased service
+```
+
+## Postpaid flow
+
+```mermaid actions={false}
+sequenceDiagram
+    participant Client as Client (Payer)
+    participant Firmngin
+    participant Merchant
+    Client->>Firmngin: Start a postpaid session
+    Firmngin->>Merchant: Confirm the service session
+    Merchant->>Client: Provide the metered service
+    Client->>Firmngin: End the session
+    Firmngin->>Client: Show the final bill
+    Client->>Firmngin: Complete payment
+    Firmngin->>Merchant: Confirm payment
+```
 
 ## Plan limits
 
-When your workspace exhausts the message quota on its active plan, firmngin automatically disables the merchant. While the merchant is disabled, it cannot receive new orders.
+When your workspace exhausts the message quota on its active plan, Firmngin automatically disables the merchant. While the merchant is disabled, it cannot receive new orders.
 
 Upgrade your plan to restore merchant availability and continue accepting orders.
 
@@ -29,21 +82,24 @@ Upgrade your plan to restore merchant availability and continue accepting orders
 
 ## Payment state
 
-Payment state must come from backend/payment manager truth. The frontend should avoid overwriting a newer state with stale local or WebSocket data.
+An order page shows the latest payment state so customers know what to do next.
 
-[code:payment status priority example showing paid higher than processing and pending]
+| State | Meaning |
+| --- | --- |
+| Pending | The customer still needs to complete payment. |
+| Processing | The payment is being confirmed. |
+| Paid | Payment is complete and the order can continue. |
+| Expired or cancelled | The payment can no longer be completed from that order. |
 
 ## Session detail
 
-Session detail should distinguish start time, end time, device, item, payment source, who ended the session, and whether the session is still active.
-
-Raw backend identifiers should not be shown as user-facing labels unless they are intended to be visible.
+Session detail shows the start time, end time, device, item, payment method, who ended the session, and whether the service is still active.
 
 ## Public pages
 
 Public pages should:
 
 - Show only device names allowed by workspace settings.
-- Keep availability real-time.
-- Preserve guest/payer session state during offline to online refreshes.
-- Avoid exposing internal device secrets or backend errors.
+- Show whether a device is currently available.
+- Keep the customer's active order visible while the service is running.
+- Present clear payment, verification, and session actions.
