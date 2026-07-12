@@ -46,9 +46,34 @@ Common postpaid use cases include:
 
 Postpaid items use one quantity per order. Multiple quantity is disabled because each order represents one measured service session.
 
+## Send catalog metadata to a device
+
+Open **Advanced Settings** in the catalog item editor when the device needs custom JSON alongside the service lifecycle.
+
+| Field | MQTT topic | When it is sent |
+| --- | --- | --- |
+| **On Postpaid Ready** | `/c/{device_secret_id}/mpp` | After the postpaid-ready parent `/pr`, before the device enters active service |
+| **On Active Service** | `/c/{device_secret_id}/moa` | After `/ds` reports `on_active_service` |
+
+Both fields accept a JSON object or an array of JSON objects. Metadata is optional; Firmngin does not publish the metadata topic when its field is empty.
+
+`/pr` carries the selected postpaid item as `{it, pc, oid, q}`. The quantity is always `1`. Firmngin creates the order and billing session, publishes `/pr`, publishes `/mpp` when configured, and then changes the device state to `on_active_service`.
+
+The Arduino `Payments` object exposes `isPostPaid()` and `isPrePaid()` as mutually exclusive booleans. For `/pr`, `isPostPaid()` is `true` and `isPrePaid()` is `false`. The Python `Payment` object exposes the equivalent `is_post_paid=True` and `is_pre_paid=False`. For prepaid `/pp` and `/pm` messages, these values are reversed. Payment type is independent from the pending and success flags.
+
+`/moa` is separate from `/mpp` and `/mos`. It can be configured for prepaid or postpaid items because both payment modes can enter active service. Firmngin publishes the parent `/ds` status first, then publishes `/moa` only when **On Active Service** metadata exists.
+
+<Warning>
+  Treat `/ds` as the authoritative service state. Metadata delivery does not replace the `on_active_service` state, and a metadata failure does not roll back a service that is already active.
+</Warning>
+
 ## Configure a price rule
 
-A price rule defines the base charge, billable quantity, unit price, and optional spending limit.
+A price rule defines the base charge, billable quantity, unit price, and optional spending limit. A rule can contain any number of pricing components; Firmngin calculates every active component and adds their charges together.
+
+Physical meter entities follow the components. Different measured units such as `kwh` and `count` generate separate device entities. Components that reference the same unit share one generated entity and one Usage calculation policy. Per Time and Tiered Per Duration use the internal session timer and generate no physical meter entity.
+
+The Price Rule form shows **Will be generated** before creation. When editing an existing rule, it loads the persisted generated-entity status and displays the actual key and linked-device coverage. Partial generation and missing linked devices are shown explicitly; the browser does not predict the key.
 
 ### Start amount
 
@@ -76,9 +101,14 @@ Choose the component that matches how you sell the service:
 | --- | --- | --- |
 | Per Unit | A price multiplied by measured usage | IDR 2,500 per kWh |
 | Per Time | A price multiplied by session duration | IDR 300 per minute |
-| Tiered | Different unit prices across usage ranges | 0–10 kWh at one rate, then a different rate above 10 kWh |
+| Tiered | Fixed totals by measured-unit bracket, or progressive rates by duration bracket | Unit: usage below 10 kWh costs IDR 25,000. Duration: first hour at IDR 500/hour plus second hour at IDR 1,000/hour totals IDR 1,500 |
 
 Choose a unit that customers understand and that matches the values produced by the device, such as kWh, liter, minute, hour, kilometer, or cycle.
+
+Tiered components provide a **Per Unit** or **Per Duration** basis and use contiguous `[From, Until)` brackets: **From** is included and **Until** is excluded. Both fields display the component unit. The first bracket starts at 0, and the final bracket has no upper limit.
+
+- **Per Unit** selects one fixed total from the measured-usage bracket. The charge is not multiplied by usage.
+- **Per Duration** is progressive. Each duration slice is multiplied by that bracket's rate, and partial duration is prorated. It supports second, minute, and hour.
 
 ## Usage calculation
 
