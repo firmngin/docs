@@ -47,6 +47,10 @@ The current price field accepts amounts from IDR 10,000 to IDR 5,000,000. Your a
   If an item is below the minimum supported by the selected payment channels, it can appear unavailable on the public page.
 </Note>
 
+## SDK payment type flags
+
+For prepaid `/pp` and `/pm` messages, the Arduino `Payments` object returns `isPrePaid() == true` and `isPostPaid() == false`. The Python `Payment` object returns `is_pre_paid=True` and `is_post_paid=False`. These payment-type booleans are separate from the pending and success flags.
+
 ## Active-service metadata
 
 Use **On Active Service** under **Advanced Settings** when the device needs optional custom JSON after a prepaid service becomes active.

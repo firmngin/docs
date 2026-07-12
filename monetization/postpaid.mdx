@@ -59,6 +59,8 @@ Both fields accept a JSON object or an array of JSON objects. Metadata is option
 
 `/pr` carries the selected postpaid item as `{it, pc, oid, q}`. The quantity is always `1`. Firmngin creates the order and billing session, publishes `/pr`, publishes `/mpp` when configured, and then changes the device state to `on_active_service`.
 
+The Arduino `Payments` object exposes `isPostPaid()` and `isPrePaid()` as mutually exclusive booleans. For `/pr`, `isPostPaid()` is `true` and `isPrePaid()` is `false`. The Python `Payment` object exposes the equivalent `is_post_paid=True` and `is_pre_paid=False`. For prepaid `/pp` and `/pm` messages, these values are reversed. Payment type is independent from the pending and success flags.
+
 `/moa` is separate from `/mpp` and `/mos`. It can be configured for prepaid or postpaid items because both payment modes can enter active service. Firmngin publishes the parent `/ds` status first, then publishes `/moa` only when **On Active Service** metadata exists.
 
 <Warning>
