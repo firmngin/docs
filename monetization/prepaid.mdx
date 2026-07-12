@@ -47,6 +47,14 @@ The current price field accepts amounts from IDR 10,000 to IDR 5,000,000. Your a
   If an item is below the minimum supported by the selected payment channels, it can appear unavailable on the public page.
 </Note>
 
+## Active-service metadata
+
+Use **On Active Service** under **Advanced Settings** when the device needs optional custom JSON after a prepaid service becomes active.
+
+Firmngin first publishes `/c/{device_secret_id}/ds` with `on_active_service`. If metadata is configured, it then publishes the raw JSON separately to `/c/{device_secret_id}/moa`. An empty field produces no `/moa` message.
+
+`/moa` is not payment-success metadata. **On Success Payments** remains associated with `/mos`, while **On Active Service** is associated only with the active device state.
+
 ## Quantity
 
 Enable **Allow Multiple Quantity** when one checkout may include more than one unit of the same item.

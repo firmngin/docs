@@ -46,6 +46,25 @@ Common postpaid use cases include:
 
 Postpaid items use one quantity per order. Multiple quantity is disabled because each order represents one measured service session.
 
+## Send catalog metadata to a device
+
+Open **Advanced Settings** in the catalog item editor when the device needs custom JSON alongside the service lifecycle.
+
+| Field | MQTT topic | When it is sent |
+| --- | --- | --- |
+| **On Postpaid Ready** | `/c/{device_secret_id}/mpp` | After the postpaid-ready parent `/pr`, before the device enters active service |
+| **On Active Service** | `/c/{device_secret_id}/moa` | After `/ds` reports `on_active_service` |
+
+Both fields accept a JSON object or an array of JSON objects. Metadata is optional; Firmngin does not publish the metadata topic when its field is empty.
+
+`/pr` carries the selected postpaid item as `{it, pc, oid, q}`. The quantity is always `1`. Firmngin creates the order and billing session, publishes `/pr`, publishes `/mpp` when configured, and then changes the device state to `on_active_service`.
+
+`/moa` is separate from `/mpp` and `/mos`. It can be configured for prepaid or postpaid items because both payment modes can enter active service. Firmngin publishes the parent `/ds` status first, then publishes `/moa` only when **On Active Service** metadata exists.
+
+<Warning>
+  Treat `/ds` as the authoritative service state. Metadata delivery does not replace the `on_active_service` state, and a metadata failure does not roll back a service that is already active.
+</Warning>
+
 ## Configure a price rule
 
 A price rule defines the base charge, billable quantity, unit price, and optional spending limit.
