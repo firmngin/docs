@@ -69,7 +69,7 @@ The Arduino `Payments` object exposes `isPostPaid()` and `isPrePaid()` as mutual
 
 ## Configure a price rule
 
-A price rule defines the base charge, billable quantity, unit price, and optional spending limit.
+A price rule defines the base charge, billable quantity, unit price, and optional spending limit. A rule can contain any number of pricing components; Firmngin calculates every active component and adds their charges together. Components that reference the same unit share one Usage calculation policy.
 
 ### Start amount
 
@@ -101,7 +101,7 @@ Choose the component that matches how you sell the service:
 
 Choose a unit that customers understand and that matches the values produced by the device, such as kWh, liter, minute, hour, kilometer, or cycle.
 
-Tiered components use contiguous `[From, Until)` brackets: **From** is included and **Until** is excluded. The first bracket starts at 0, and the final bracket has no upper limit. The selected bracket contributes its configured fixed total once; the charge is not multiplied by usage.
+Tiered components use contiguous `[From, Until)` brackets: **From** is included and **Until** is excluded. Both fields display the component unit so each boundary is readable without referring back to the component header. The first bracket starts at 0, and the final bracket has no upper limit. The selected bracket contributes its configured fixed total once; the charge is not multiplied by usage.
 
 ## Usage calculation
 
