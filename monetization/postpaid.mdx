@@ -73,6 +73,8 @@ A price rule defines the base charge, billable quantity, unit price, and optiona
 
 Physical meter entities follow the components. Different measured units such as `kwh` and `count` generate separate device entities. Components that reference the same unit share one generated entity and one Usage calculation policy. Per Time and Tiered Per Duration use the internal session timer and generate no physical meter entity.
 
+The Price Rule form shows **Will be generated** before creation. When editing an existing rule, it loads the persisted generated-entity status and displays the actual key and linked-device coverage. Partial generation and missing linked devices are shown explicitly; the browser does not predict the key.
+
 ### Start amount
 
 **Start Amount** is a base charge added to the usage charge.
