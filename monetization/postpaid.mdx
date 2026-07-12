@@ -69,7 +69,9 @@ The Arduino `Payments` object exposes `isPostPaid()` and `isPrePaid()` as mutual
 
 ## Configure a price rule
 
-A price rule defines the base charge, billable quantity, unit price, and optional spending limit. A rule can contain any number of pricing components; Firmngin calculates every active component and adds their charges together. Components that reference the same unit share one Usage calculation policy.
+A price rule defines the base charge, billable quantity, unit price, and optional spending limit. A rule can contain any number of pricing components; Firmngin calculates every active component and adds their charges together.
+
+Physical meter entities follow the components. Different measured units such as `kwh` and `count` generate separate device entities. Components that reference the same unit share one generated entity and one Usage calculation policy. Per Time and Tiered Per Duration use the internal session timer and generate no physical meter entity.
 
 ### Start amount
 
@@ -97,11 +99,14 @@ Choose the component that matches how you sell the service:
 | --- | --- | --- |
 | Per Unit | A price multiplied by measured usage | IDR 2,500 per kWh |
 | Per Time | A price multiplied by session duration | IDR 300 per minute |
-| Tiered | One fixed total charge selected by the measured usage bracket | Usage below 10 kWh costs IDR 25,000; usage from 10 kWh costs IDR 40,000 |
+| Tiered | Fixed totals by measured-unit bracket, or progressive rates by duration bracket | Unit: usage below 10 kWh costs IDR 25,000. Duration: first hour at IDR 500/hour plus second hour at IDR 1,000/hour totals IDR 1,500 |
 
 Choose a unit that customers understand and that matches the values produced by the device, such as kWh, liter, minute, hour, kilometer, or cycle.
 
-Tiered components use contiguous `[From, Until)` brackets: **From** is included and **Until** is excluded. Both fields display the component unit so each boundary is readable without referring back to the component header. The first bracket starts at 0, and the final bracket has no upper limit. The selected bracket contributes its configured fixed total once; the charge is not multiplied by usage.
+Tiered components provide a **Per Unit** or **Per Duration** basis and use contiguous `[From, Until)` brackets: **From** is included and **Until** is excluded. Both fields display the component unit. The first bracket starts at 0, and the final bracket has no upper limit.
+
+- **Per Unit** selects one fixed total from the measured-usage bracket. The charge is not multiplied by usage.
+- **Per Duration** is progressive. Each duration slice is multiplied by that bracket's rate, and partial duration is prorated. It supports second, minute, and hour.
 
 ## Usage calculation
 
