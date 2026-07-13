@@ -3,7 +3,7 @@ title: "Overview"
 description: "Device monetization, public pages, orders, payments, and sessions"
 ---
 
-Monetization turns connected devices into paid services. A merchant can publish a public page, let customers start paid sessions, accept invoice or QR payments, and review orders, sessions, revenue, and device-level logs.
+Monetization turns connected devices into paid services. A merchant can publish a public page, sell prepaid services, meter postpaid usage, accept invoice or QR payments, withdraw settled balance through payouts, and review orders, sessions, revenue, and device-level logs.
 
 [image:monetization dashboard with revenue, orders, sessions, and merchant public page status]
 
@@ -26,14 +26,23 @@ The main difference is when the final amount becomes known and when the customer
 
 Choose **Prepaid** when every customer should see and pay the final amount before the service begins. Choose **Postpaid** when the final bill depends on what happens during the session.
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
   <Card title="Prepaid" icon="credit-card" href="/monetization/prepaid">
     Charge a fixed amount before the customer starts using the service.
   </Card>
   <Card title="Postpaid" icon="gauge" href="/monetization/postpaid">
     Calculate the final amount from usage or duration and collect payment after the session.
   </Card>
+  <Card title="Payouts" icon="landmark" href="/monetization/payouts">
+    Withdraw available settled merchant balance to a supported payout destination.
+  </Card>
 </CardGroup>
+
+## Payouts
+
+Customer payments move through their payment and settlement lifecycle before becoming available merchant balance. When balance is settled, use **Payout** to withdraw it to a supported bank account or e-wallet.
+
+The current dashboard requires a minimum payout of IDR 20,000 and prevents withdrawal above the available settled balance. See [Payouts](/monetization/payouts) for the direct payout and payout link flows.
 
 ## Prepaid flow
 

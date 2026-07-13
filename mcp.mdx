@@ -1,0 +1,108 @@
+---
+title: "MCP server"
+description: "Connect AI clients to Firmngin devices and automations with scoped OAuth access"
+---
+
+Firmngin provides a Model Context Protocol (MCP) server for external AI clients. The server exposes curated tools for devices, entity logs, OTA activity, alarms, automations, schedules, and execution history.
+
+The production MCP endpoint is:
+
+```text
+https://mcp.firmngin.dev
+```
+
+<Note>
+  Your AI client must support a remote MCP server and OAuth authorization. The client opens Firmngin in your browser so you can review and approve the requested permissions.
+</Note>
+
+## Connect an MCP client
+
+<Steps>
+  <Step title="Add the Firmngin server">
+    Add `https://mcp.firmngin.dev` as a remote MCP server in your AI client.
+  </Step>
+  <Step title="Sign in to Firmngin">
+    The client opens the Firmngin OAuth authorization page. Sign in with the account that owns or can access the target workspace.
+  </Step>
+  <Step title="Review requested permissions">
+    Check the permission list shown on the authorization page. Select **Allow** only when the client and requested access are expected.
+  </Step>
+  <Step title="Return to the client">
+    Firmngin redirects you to the AI client after authorization. The client can then discover the tools allowed by the granted scopes.
+  </Step>
+</Steps>
+
+## Cursor configuration
+
+Add the following server to `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "firmngin": {
+      "url": "https://mcp.firmngin.dev"
+    }
+  }
+}
+```
+
+Cursor discovers the Firmngin OAuth configuration automatically. Complete the browser authorization flow when Cursor asks you to authenticate.
+
+## Permissions
+
+Firmngin separates read, control, management, and log access.
+
+| Permission | Allows the client to |
+| --- | --- |
+| `devices:read` | Read devices, entities, alarm events, and OTA logs |
+| `devices:control` | Send commands to device entities |
+| `devices:manage` | Create, update, and delete devices |
+| `automations:read` | Read automations, schedules, and executions |
+| `automations:manage` | Create, update, and delete automations and schedules |
+| `entities:logs` | Read entity state logs |
+
+<Warning>
+  Device control and management permissions can change your workspace or connected devices. Review the requested scopes before approving a client.
+</Warning>
+
+## Available capabilities
+
+The curated MCP tools cover these workflows:
+
+- Read your account and available workspaces.
+- List and inspect devices and entities.
+- Create, update, or delete devices when management access is granted.
+- Send a command to a device entity when control access is granted.
+- Read entity logs, device alarm events, and OTA logs.
+- List and inspect automations, schedules, and executions.
+- Create, update, or delete automations and schedules when management access is granted.
+
+Destructive tools require an explicit `confirm: true` argument. A client cannot complete those operations by calling the destructive tool without confirmation.
+
+## Workspace selection
+
+List operations use your default workspace when `workspace_id` is omitted. For another workspace, ask the client to list your workspaces first and use the required workspace ID.
+
+If your account does not have a default workspace, the MCP tool asks the client to select a workspace before continuing.
+
+## Sensitive data
+
+The MCP server redacts sensitive response fields before data reaches an external client. This includes certificates, tokens, secrets, financial balances, fraud metadata, and large internal automation debug payloads.
+
+Download device certificates from the Firmngin dashboard. The MCP server does not return certificate downloads to external clients.
+
+## Revoke or reconnect access
+
+If a client returns `401`, reconnect it through the OAuth flow. The access token may have expired or been revoked.
+
+If a tool returns `missing required scope`, reconnect and approve the required permission only when that access is appropriate.
+
+## Troubleshooting
+
+| Problem | What to check |
+| --- | --- |
+| The client cannot discover Firmngin | Confirm that the server URL is exactly `https://mcp.firmngin.dev` |
+| Authorization returns to the wrong app | Remove the server and add it again from the intended client |
+| A tool reports a missing scope | Reconnect and review the requested Firmngin permissions |
+| A delete action is rejected | Confirm that the client supplied `confirm: true` |
+| A workspace list is empty | Confirm that the signed-in Firmngin account can access a workspace |

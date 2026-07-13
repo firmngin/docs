@@ -1,0 +1,64 @@
+---
+title: "Payouts"
+description: "Withdraw settled merchant balance to a bank account or supported e-wallet"
+---
+
+Payouts move your merchant's settled balance to a supported bank account or e-wallet. Only the available settled balance can be withdrawn.
+
+<Note>
+  The minimum payout amount shown by the current dashboard is IDR 20,000. Available channels and processing behavior can depend on the active payout configuration.
+</Note>
+
+## Before you create a payout
+
+Confirm that:
+
+- Your merchant has an available settled balance.
+- The withdrawal amount does not exceed that balance.
+- The amount is at least IDR 20,000.
+- You have added and selected a valid payout account when direct payout mode is active.
+
+Pending payments do not become available for withdrawal until settlement completes.
+
+## Direct payout
+
+Direct payout sends the selected amount to a saved payout account.
+
+<Steps>
+  <Step title="Open Payout">
+    Open **Monetization**, select the merchant, and open **Payout**.
+  </Step>
+  <Step title="Add a destination account">
+    Add a supported bank account or e-wallet. For e-wallet accounts, use a mobile number beginning with `08`.
+  </Step>
+  <Step title="Enter the amount">
+    Enter an amount between IDR 20,000 and the available settled balance.
+  </Step>
+  <Step title="Submit the withdrawal">
+    Select the destination account and submit the payout. The dashboard shows the reference and current payout status.
+  </Step>
+</Steps>
+
+The dashboard currently describes direct payout processing as 1-2 business days. Provider processing and bank availability can affect the final completion time.
+
+## Payout link mode
+
+Some deployments use payout link mode instead of a saved destination account. In this mode, Firmngin creates a payout link and sends it to the merchant's registered email address.
+
+The recipient opens the link and completes the required payout details. Pending payout links can be cancelled from the dashboard.
+
+<Warning>
+  Treat payout links as sensitive financial links. Share them only with the intended recipient.
+</Warning>
+
+## Payout history
+
+Use payout history to review the amount, destination or payout link, reference, timestamps, and current status. You can search and filter payout records from the merchant transaction view.
+
+## How payouts relate to orders
+
+Prepaid and postpaid define when a customer pays for a connected service. Payout is the later merchant settlement step.
+
+- [Prepaid](/monetization/prepaid) collects the customer payment before service use.
+- [Postpaid](/monetization/postpaid) calculates the final bill from measured usage or duration.
+- Payout withdraws the resulting settled merchant balance.
