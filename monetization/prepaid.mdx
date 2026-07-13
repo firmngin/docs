@@ -47,18 +47,6 @@ The current price field accepts amounts from IDR 10,000 to IDR 5,000,000. Your a
   If an item is below the minimum supported by the selected payment channels, it can appear unavailable on the public page.
 </Note>
 
-## SDK payment type flags
-
-For prepaid `/pp` and `/pm` messages, the Arduino `Payments` object returns `isPrePaid() == true` and `isPostPaid() == false`. The Python `Payment` object returns `is_pre_paid=True` and `is_post_paid=False`. These payment-type booleans are separate from the pending and success flags.
-
-## Active-service metadata
-
-Use **On Active Service** under **Advanced Settings** when the device needs optional custom JSON after a prepaid service becomes active.
-
-Firmngin first publishes `/c/{device_secret_id}/ds` with `on_active_service`. If metadata is configured, it then publishes the raw JSON separately to `/c/{device_secret_id}/moa`. An empty field produces no `/moa` message.
-
-`/moa` is not payment-success metadata. **On Success Payments** remains associated with `/mos`, while **On Active Service** is associated only with the active device state.
-
 ## Quantity
 
 Enable **Allow Multiple Quantity** when one checkout may include more than one unit of the same item.
@@ -73,7 +61,7 @@ Your linked-device **Flow** settings can require customer verification or a devi
 
 - **PIN Verification** confirms that the customer is near the device.
 - **Order Prerequisites** check whether the device is ready for the order.
-- A prerequisite can run before payment or after payment, depending on your setup.
+- Prerequisites are validated before payment using the latest entity values from the linked device.
 
 Test the complete checkout and device behavior before making the merchant live.
 

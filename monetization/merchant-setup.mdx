@@ -5,7 +5,7 @@ description: "Test and live merchant modes, linked devices, map entity, verifica
 
 Merchant setup connects a merchant profile to the devices that can be sold, rented, or activated from a public page. Use this page to understand the setup order before opening the merchant page to customers.
 
-[image:merchant detail page showing sidebar with Linked Devices, Catalog, Orders, Transactions, and Settings]
+\[image:merchant detail page showing sidebar with Linked Devices, Catalog, Orders, Transactions, and Settings\]
 
 ## Setup sequence
 
@@ -49,7 +49,7 @@ You can:
 - See when the device was linked.
 - Open the device's public store page when a public page is available.
 
-[image:merchant linked devices table with Link Devices dialog and linked device action menu]
+\[image:merchant linked devices table with Link Devices dialog and linked device action menu\]
 
 ## Linked device setup order
 
@@ -79,7 +79,7 @@ Example: a firmware entity may use a short internal key, while the merchant page
   Do not expose internal-only entities on public pages. Only show values that help customers understand or use the service.
 </Warning>
 
-[image:linked device setup drawer showing Map Entity with show/hide toggles, map name fields, and value mapping]
+\[image:linked device setup drawer showing Map Entity with show/hide toggles, map name fields, and value mapping\]
 
 ## Flow
 
@@ -96,12 +96,9 @@ Available verification options include:
 | PIN Verification | The device shows a PIN, and the customer enters it on the order page to prove they are near the device. |
 | Order Prerequisites | The system checks selected device entity values before the order continues. |
 
-Order prerequisites can be checked before payment or after payment:
+Order prerequisites are checked before payment. The customer can only continue to payment after all configured device conditions are met.
 
-- **Before payment**: the customer can only continue to payment when the device is ready.
-- **After payment**: the payment can complete first, then the device readiness check runs. If the check fails, the order needs follow-up handling.
-
-[image:linked device Flow tab showing PIN Verification and Order Prerequisites]
+\[image:linked device Flow tab showing PIN Verification and Order Prerequisites\]
 
 ### PIN verification flow
 
@@ -111,63 +108,46 @@ Use PIN verification when the customer must prove that they are physically near 
 sequenceDiagram
     participant Client as Client (Payer)
     participant Firmngin
-    participant Merchant
+    participant Device
     Client->>Firmngin: Start the order
-    Firmngin->>Merchant: Request PIN verification
-    Merchant->>Client: Display the PIN
+    Firmngin->>Firmngin: Generate the PIN
+    Firmngin->>Device: Send the PIN
+    Device->>Client: Display the PIN
     Client->>Firmngin: Enter the PIN
-    Firmngin->>Merchant: Confirm successful verification
-    Merchant->>Client: Make the service available
+    Firmngin->>Firmngin: Validate the PIN
+    Firmngin->>Device: Send the verification result
 ```
 
-If the PIN is incorrect or expires, the client must use the current PIN shown by the merchant before continuing.
+If the PIN is incorrect or expires, the client must use the current PIN shown by the device before continuing.
 
 ### Prerequisite before payment flow
 
-Choose **Before Payment** when the client should only pay after the merchant confirms that the service is ready.
+Choose **Before Payment** when the client should only pay after Firmngin validates that the linked device's entity values satisfy every configured prerequisite.
 
 ```mermaid actions={false}
 sequenceDiagram
     participant Client as Client (Payer)
     participant Firmngin
     participant Merchant
+    participant Device
     Client->>Firmngin: Continue the order
-    Firmngin->>Merchant: Check service readiness
-    Merchant->>Firmngin: Return readiness result
-    alt Service is ready
+    loop Until all prerequisites pass
+        Device->>Firmngin: Publish entity values
+        Firmngin->>Firmngin: Validate all configured rules
+        Firmngin->>Client: Update prerequisite status
+    end
+    alt All prerequisites pass
         Firmngin->>Client: Show payment step
         Client->>Firmngin: Complete payment
         Firmngin->>Merchant: Confirm paid order
-        Merchant->>Client: Provide the service
-    else Service is not ready
+        Firmngin->>Device: Activate the service
+        Device->>Client: Provide the service
+    else One or more prerequisites fail
         Firmngin->>Client: Explain that the order cannot continue
     end
 ```
 
 This option reduces the chance that a customer pays while the service is unavailable.
-
-### Prerequisite after payment flow
-
-Choose **After Payment** when payment should be completed before the final readiness check.
-
-```mermaid actions={false}
-sequenceDiagram
-    participant Client as Client (Payer)
-    participant Firmngin
-    participant Merchant
-    Client->>Firmngin: Complete payment
-    Firmngin->>Merchant: Confirm paid order
-    Firmngin->>Merchant: Check service readiness
-    Merchant->>Firmngin: Return readiness result
-    alt Service is ready
-        Firmngin->>Client: Confirm service access
-        Merchant->>Client: Provide the service
-    else Service is not ready
-        Firmngin->>Client: Show the required next step
-    end
-```
-
-Use this option only when your operating process is prepared to assist a paid customer if the service is not ready.
 
 ### Stop mode
 
