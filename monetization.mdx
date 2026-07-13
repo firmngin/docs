@@ -5,7 +5,7 @@ description: "Device monetization, public pages, orders, payments, and sessions"
 
 Monetization turns connected devices into paid services. A merchant can publish a public page, sell prepaid services, meter postpaid usage, accept invoice or QR payments, withdraw settled balance through payouts, and review orders, sessions, revenue, and device-level logs.
 
-[image:monetization dashboard with revenue, orders, sessions, and merchant public page status]
+\[image:monetization dashboard with revenue, orders, sessions, and merchant public page status\]
 
 <Note>
   Monetization is currently available for Indonesia-focused payment flows. Available payment methods depend on the channels enabled for your merchant.
@@ -15,11 +15,11 @@ Monetization turns connected devices into paid services. A merchant can publish 
 
 The main difference is when the final amount becomes known and when the customer pays.
 
-| | Prepaid | Postpaid |
+|  | Prepaid | Postpaid |
 | --- | --- | --- |
 | When the price is known | Before the service starts | After usage or duration is measured |
 | When the customer pays | Before using the service | After the session ends |
-| How the amount is calculated | Fixed item price × quantity | Start amount + measured usage or duration |
+| How the amount is calculated | Fixed item price × quantity | Start amount \+ measured usage or duration |
 | Quantity | Can allow multiple quantities | One measured session per order |
 | Best for | Fixed packages, access fees, and known-price services | Energy, water, rental time, sensor values, and event-based services |
 | Configuration | Set a fixed catalog price | Attach an active price rule |
@@ -30,9 +30,11 @@ Choose **Prepaid** when every customer should see and pay the final amount befor
   <Card title="Prepaid" icon="credit-card" href="/monetization/prepaid">
     Charge a fixed amount before the customer starts using the service.
   </Card>
+
   <Card title="Postpaid" icon="gauge" href="/monetization/postpaid">
     Calculate the final amount from usage or duration and collect payment after the session.
   </Card>
+
   <Card title="Payouts" icon="landmark" href="/monetization/payouts">
     Withdraw available settled merchant balance to a supported payout destination.
   </Card>
@@ -51,10 +53,12 @@ sequenceDiagram
     participant Client as Client (Payer)
     participant Firmngin
     participant Merchant
+    participant Device
     Client->>Firmngin: Select item and review fixed price
     Client->>Firmngin: Complete payment
     Firmngin->>Merchant: Confirm paid order
-    Merchant->>Client: Provide the purchased service
+    Firmngin->>Device: Activate the purchased service
+    Device->>Client: Provide the purchased service
 ```
 
 ## Postpaid flow
@@ -64,10 +68,13 @@ sequenceDiagram
     participant Client as Client (Payer)
     participant Firmngin
     participant Merchant
+    participant Device
     Client->>Firmngin: Start a postpaid session
     Firmngin->>Merchant: Confirm the service session
-    Merchant->>Client: Provide the metered service
+    Firmngin->>Device: Start the metered service
+    Device->>Client: Provide the metered service
     Client->>Firmngin: End the session
+    Firmngin->>Device: End the metered service
     Firmngin->>Client: Show the final bill
     Client->>Firmngin: Complete payment
     Firmngin->>Merchant: Confirm payment
