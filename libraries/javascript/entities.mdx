@@ -1,0 +1,74 @@
+---
+title: "Entities and State"
+description: "Send device state and receive entity commands from JavaScript"
+---
+
+## Entity patterns
+
+```typescript
+import { Entity } from 'firmngin'
+
+const relay = new Entity('relay')
+const temperature = new Entity('temperature')
+```
+
+## Push state
+
+```typescript
+await client.pushEntity(relay, 'on')
+await client.pushEntity(temperature, 27.5)
+```
+
+Boolean values are serialized as `"1"` / `"0"`.
+
+## Batch entities
+
+```typescript
+const batch = client.pushBatchEntities()
+batch.add(relay, 'on')
+batch.add(temperature, 27.5)
+await batch.send()
+```
+
+Or pass a map:
+
+```typescript
+await client.updateEntities({
+  relay: 'on',
+  temperature: 27.5,
+})
+```
+
+## Location updates
+
+```typescript
+await client.pushLocationValues({
+  lat: -6.2,
+  lon: 106.8,
+  accuracy: 12,
+})
+```
+
+## Entity commands
+
+```typescript
+import { EntityCommand } from 'firmngin'
+
+client.onEntity(relay, (command: EntityCommand) => {
+  console.log('relay:', command.value)
+})
+```
+
+## Image upload
+
+```typescript
+const camera = new Entity('camera')
+await client.uploadImage(camera, 'snapshot.jpg')
+```
+
+Image upload requires Node.js and a valid file path.
+
+## See also
+
+- [Events and Callbacks](/libraries/javascript/events)
+- [Examples](/libraries/javascript/examples)

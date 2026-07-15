@@ -1,0 +1,92 @@
+---
+title: "Examples"
+description: "JavaScript SDK usage examples"
+---
+
+Repository: [github.com/firmngin/firmngin-sdk-js](https://github.com/firmngin/firmngin-sdk-js)
+
+## AsyncClient
+
+```typescript
+import { AsyncClient, ClientConfig, Entity, Event, Payment } from 'firmngin'
+
+async function onPayment(payment: Payment) {
+  if (payment.isSuccess) {
+    console.log('paid:', payment.orderId)
+  }
+}
+
+async function main() {
+  const config = await ClientConfig.fromFile('keys.json')
+  const client = new AsyncClient(config)
+
+  client.on(Event.PAYMENT, onPayment)
+  await client.connect()
+  await client.pushEntity(new Entity('relay'), 'on')
+  await client.run()
+}
+
+main().catch(console.error)
+```
+
+## Client
+
+```typescript
+import { Client, ClientConfig, Entity, EntityCommand } from 'firmngin'
+
+const relay = new Entity('relay')
+const temperature = new Entity('temperature')
+
+async function main() {
+  const client = new Client(await ClientConfig.fromFile('keys.json'))
+
+  client.onEntity(relay, (command: EntityCommand) => {
+    console.log('relay:', command.value)
+  })
+
+  await client.connect()
+  await client.pushEntity(relay, 'off')
+  await client.pushEntity(temperature, 27.5)
+  await client.run()
+}
+
+main().catch(console.error)
+```
+
+## Payment metadata
+
+```typescript
+import { Event } from 'firmngin'
+
+client.on(Event.METADATA_PENDING, (rawJson: string) => {
+  const data = JSON.parse(rawJson)
+})
+```
+
+## Entity command
+
+```typescript
+import { Entity, EntityCommand } from 'firmngin'
+
+client.onEntity(new Entity('relay'), (command: EntityCommand) => {
+  console.log(command.value)
+})
+```
+
+## Bundler / library build
+
+```bash
+npm run build
+```
+
+Outputs:
+
+- `dist/firmngin.js` — ESM (Node)
+- `dist/firmngin.cjs` — CommonJS (Node)
+- `dist/firmngin.browser.js` — browser bundle entry
+
+## See also
+
+- [Overview](/libraries/javascript)
+- [Installation](/libraries/javascript/installation)
+- [Entities and State](/libraries/javascript/entities)
