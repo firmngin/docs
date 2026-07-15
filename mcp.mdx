@@ -1,40 +1,123 @@
 ---
-title: "MCP server"
-description: "Connect AI clients to Firmngin devices and automations with scoped OAuth access"
+title: "Connect AI clients"
+description: "Use Firmngin devices and automations from ChatGPT, Codex, Claude, Cursor, OpenCode, and other MCP clients"
 ---
 
-Firmngin provides a Model Context Protocol (MCP) server for external AI clients. The server exposes curated tools for devices, entity logs, OTA activity, alarms, automations, schedules, and execution history.
+Connect your AI client to Firmngin to inspect devices, review entity history, operate permitted controls, and work with automations using natural language.
 
-The production MCP endpoint is:
+Use this Firmngin MCP server URL in every supported client:
 
 ```text
 https://mcp.firmngin.dev
 ```
 
-<Note>
-  Your AI client must support a remote MCP server and OAuth authorization. The client opens Firmngin in your browser so you can review and approve the requested permissions.
-</Note>
+<CardGroup cols={2}>
+  <Card title="ChatGPT and Codex" icon="message-circle" href="#chatgpt-and-codex">
+    Connect from the ChatGPT desktop app, Codex CLI, or Codex IDE extension.
+  </Card>
+  <Card title="Claude" icon="sparkles" href="#claude">
+    Connect Claude, Claude Desktop, or Claude Code to your workspace.
+  </Card>
+  <Card title="Cursor" icon="mouse-pointer-2" href="#cursor">
+    Add Firmngin as a remote MCP server in Cursor.
+  </Card>
+  <Card title="OpenCode" icon="terminal" href="#opencode">
+    Add and authenticate the Firmngin remote server from OpenCode.
+  </Card>
+</CardGroup>
 
-## Connect an MCP client
+## Before you connect
+
+You need:
+
+- A Firmngin account with access to at least one workspace.
+- An AI client that supports remote MCP servers and OAuth.
+- Permission to add custom connectors when your AI client is managed by an organization.
+
+During connection, your browser opens Firmngin. Sign in, review the requested permissions, and approve only the access you expect the AI client to use.
+
+## ChatGPT and Codex
+
+### ChatGPT desktop app
 
 <Steps>
-  <Step title="Add the Firmngin server">
-    Add `https://mcp.firmngin.dev` as a remote MCP server in your AI client.
+  <Step title="Open MCP settings">
+    Open **Settings**, select **MCP servers**, then select **Add server**.
   </Step>
-  <Step title="Sign in to Firmngin">
-    The client opens the Firmngin OAuth authorization page. Sign in with the account that owns or can access the target workspace.
+  <Step title="Add Firmngin">
+    Enter `Firmngin` as the name, choose **Streamable HTTP**, and use `https://mcp.firmngin.dev` as the URL.
   </Step>
-  <Step title="Review requested permissions">
-    Check the permission list shown on the authorization page. Select **Allow** only when the client and requested access are expected.
+  <Step title="Authenticate">
+    Save the server, select **Authenticate**, and approve the required access on the Firmngin authorization page.
   </Step>
-  <Step title="Return to the client">
-    Firmngin redirects you to the AI client after authorization. The client can then discover the tools allowed by the granted scopes.
+  <Step title="Restart and verify">
+    Restart the app. Type `/mcp` in the composer to confirm that Firmngin is connected.
   </Step>
 </Steps>
 
-## Cursor configuration
+### Codex CLI
 
-Add the following server to `~/.cursor/mcp.json`:
+Run these commands:
+
+```bash
+codex mcp add firmngin --url https://mcp.firmngin.dev
+codex mcp login firmngin
+codex mcp list
+```
+
+The second command opens Firmngin in your browser for OAuth authorization. Codex CLI, the Codex IDE extension, and the ChatGPT desktop app share the MCP configuration on the same Codex host.
+
+<Note>
+  In the Codex IDE extension, you can also open the gear menu, select **MCP servers**, and add the same Streamable HTTP URL without using the CLI.
+</Note>
+
+### ChatGPT web
+
+Custom MCP apps in ChatGPT web depend on your plan and workspace policy. A workspace administrator may need to enable developer mode, add the Firmngin remote MCP server, configure allowed actions, and publish it to the workspace before members can connect.
+
+See [Developer mode and MCP apps in ChatGPT](https://help.openai.com/en/articles/12584461-developer-mode-and-full-mcp-connectors-in-chatgpt-beta) for current availability and administrator steps.
+
+## Claude
+
+### Claude, Claude Desktop, and Cowork
+
+<Steps>
+  <Step title="Open Connectors">
+    In Claude, open **Customize**, then select **Connectors**.
+  </Step>
+  <Step title="Add a custom connector">
+    Select **+**, choose **Add custom connector**, and enter `https://mcp.firmngin.dev` as the remote MCP server URL.
+  </Step>
+  <Step title="Connect your account">
+    Add the connector, select **Connect**, then sign in to Firmngin and approve the required permissions.
+  </Step>
+  <Step title="Enable it in a conversation">
+    Use the **+** menu in a conversation, open **Connectors**, and enable Firmngin.
+  </Step>
+</Steps>
+
+For Team and Enterprise organizations, an Owner or Primary Owner must add the custom connector before members can connect their accounts. See [Claude custom connector setup](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).
+
+### Claude Code
+
+Add Firmngin for your user account, then authenticate from an interactive Claude Code session:
+
+```bash
+claude mcp add --transport http --scope user firmngin https://mcp.firmngin.dev
+claude
+```
+
+Inside Claude Code, run:
+
+```text
+/mcp
+```
+
+Select Firmngin and complete the browser authorization flow. See the [Claude Code MCP guide](https://code.claude.com/docs/en/mcp) for scope and authentication options.
+
+## Cursor
+
+Create or update `~/.cursor/mcp.json`:
 
 ```json
 {
@@ -46,13 +129,75 @@ Add the following server to `~/.cursor/mcp.json`:
 }
 ```
 
-Cursor discovers the Firmngin OAuth configuration automatically. Complete the browser authorization flow when Cursor asks you to authenticate.
+Restart Cursor after saving the file. Open Cursor's MCP settings, locate Firmngin, and complete OAuth authentication when prompted. Cursor then makes the permitted Firmngin tools available to Agent.
+
+<Note>
+  Use `.cursor/mcp.json` in a project instead when the connection should only be available in that project.
+</Note>
+
+See the [Cursor MCP documentation](https://docs.cursor.com/context/model-context-protocol) for configuration locations and authentication behavior.
+
+## OpenCode
+
+<Steps>
+  <Step title="Add the server">
+    Run `opencode mcp add`, choose a remote server, name it `firmngin`, and enter `https://mcp.firmngin.dev`.
+  </Step>
+  <Step title="Authenticate">
+    Run `opencode mcp auth firmngin`. OpenCode opens the Firmngin authorization page in your browser.
+  </Step>
+  <Step title="Verify the connection">
+    Run `opencode mcp list` and confirm that Firmngin is connected.
+  </Step>
+</Steps>
+
+<Accordion title="Manual OpenCode configuration">
+  Add this entry to your OpenCode configuration when you prefer manual setup:
+
+  ```json
+  {
+    "$schema": "https://opencode.ai/config.json",
+    "mcp": {
+      "firmngin": {
+        "type": "remote",
+        "url": "https://mcp.firmngin.dev",
+        "enabled": true
+      }
+    }
+  }
+  ```
+
+  Then run `opencode mcp auth firmngin`.
+</Accordion>
+
+See the [OpenCode MCP documentation](https://dev.opencode.ai/docs/mcp-servers/) for remote server and OAuth options.
+
+## Other MCP clients
+
+Firmngin can connect to another AI client when that client supports:
+
+- Remote MCP servers over Streamable HTTP.
+- OAuth authentication for the signed-in Firmngin user.
+- Tool discovery and tool calls.
+
+Add `https://mcp.firmngin.dev` as the server URL, complete OAuth authorization, then confirm that the client can list Firmngin tools. Client-specific availability and administrator controls still apply.
+
+## What you can ask
+
+After connecting, try prompts such as:
+
+- “List the devices in my default Firmngin workspace.”
+- “Show the current entities for the charging station device.”
+- “Summarize alarm events from the last 24 hours.”
+- “Show recent OTA activity for this device.”
+- “List my active automations and their latest executions.”
+- “Turn on this entity after I confirm the target device.”
+
+The available result depends on the permissions you approved and the workspace selected for the request.
 
 ## Permissions
 
-Firmngin separates read, control, management, and log access.
-
-| Permission | Allows the client to |
+| Permission | Allows the AI client to |
 | --- | --- |
 | `devices:read` | Read devices, entities, alarm events, and OTA logs |
 | `devices:control` | Send commands to device entities |
@@ -62,47 +207,24 @@ Firmngin separates read, control, management, and log access.
 | `entities:logs` | Read entity state logs |
 
 <Warning>
-  Device control and management permissions can change your workspace or connected devices. Review the requested scopes before approving a client.
+  Device control and management permissions can change your workspace or connected devices. Review every requested permission and tool confirmation before approving it.
 </Warning>
-
-## Available capabilities
-
-The curated MCP tools cover these workflows:
-
-- Read your account and available workspaces.
-- List and inspect devices and entities.
-- Create, update, or delete devices when management access is granted.
-- Send a command to a device entity when control access is granted.
-- Read entity logs, device alarm events, and OTA logs.
-- List and inspect automations, schedules, and executions.
-- Create, update, or delete automations and schedules when management access is granted.
-
-Destructive tools require an explicit `confirm: true` argument. A client cannot complete those operations by calling the destructive tool without confirmation.
 
 ## Workspace selection
 
-List operations use your default workspace when `workspace_id` is omitted. For another workspace, ask the client to list your workspaces first and use the required workspace ID.
+Firmngin uses your default workspace when `workspace_id` is not specified. To work with another workspace, ask the AI client to list your Firmngin workspaces first, then name or select the required workspace.
 
-If your account does not have a default workspace, the MCP tool asks the client to select a workspace before continuing.
+## Disconnect access
 
-## Sensitive data
-
-The MCP server redacts sensitive response fields before data reaches an external client. This includes certificates, tokens, secrets, financial balances, fraud metadata, and large internal automation debug payloads.
-
-Download device certificates from the Firmngin dashboard. The MCP server does not return certificate downloads to external clients.
-
-## Revoke or reconnect access
-
-If a client returns `401`, reconnect it through the OAuth flow. The access token may have expired or been revoked.
-
-If a tool returns `missing required scope`, reconnect and approve the required permission only when that access is appropriate.
+Remove or disable Firmngin from the AI client's MCP or connector settings to stop future tool calls. You can reconnect later and approve a new set of permissions.
 
 ## Troubleshooting
 
 | Problem | What to check |
 | --- | --- |
-| The client cannot discover Firmngin | Confirm that the server URL is exactly `https://mcp.firmngin.dev` |
-| Authorization returns to the wrong app | Remove the server and add it again from the intended client |
-| A tool reports a missing scope | Reconnect and review the requested Firmngin permissions |
-| A delete action is rejected | Confirm that the client supplied `confirm: true` |
-| A workspace list is empty | Confirm that the signed-in Firmngin account can access a workspace |
+| Firmngin does not appear in the client | Confirm that the server URL is exactly `https://mcp.firmngin.dev` |
+| The browser authorization does not open | Use the client's MCP login or authenticate action manually |
+| A tool reports a missing scope | Reconnect and approve the required permission only when appropriate |
+| The wrong workspace is used | Ask the client to list workspaces and select the intended workspace |
+| A write or delete action is rejected | Review the tool confirmation and verify that the required management scope was granted |
+| ChatGPT web cannot add the server | Confirm plan availability and ask the workspace administrator to enable custom MCP apps |
