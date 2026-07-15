@@ -1,0 +1,91 @@
+---
+title: "Messaging channels"
+description: "Connect your workspace AI agent to Telegram and Discord"
+---
+
+Channel connectors let people reach your workspace AI agent from Telegram or Discord. Messages use the agent, model, instructions, and permissions configured for that workspace.
+
+| Channel | What you need |
+| --- | --- |
+| Telegram | A bot token from `@BotFather` |
+| Discord | A bot token from the Discord Developer Portal |
+
+<Note>
+  Create your workspace AI agent before adding a channel. The **Channels** tab appears in the agent configuration after the agent has been created.
+</Note>
+
+## Open the channel settings
+
+<Steps>
+  <Step title="Open AI Agents">
+    In the Firmngin dashboard, open **AI Agents**, then select **Configure Agent**.
+  </Step>
+  <Step title="Select Channels">
+    Open the **Channels** tab in the agent configuration.
+  </Step>
+  <Step title="Choose a provider">
+    Select **Add Telegram** or **Add Discord**. Firmngin shows only channel types available for your workspace.
+  </Step>
+</Steps>
+
+## Connect Telegram
+
+<Steps>
+  <Step title="Create a Telegram bot">
+    Open Telegram and start a chat with `@BotFather`. Send `/newbot`, then follow the prompts to choose the bot name and username.
+  </Step>
+  <Step title="Copy the bot token">
+    Copy the token returned by `@BotFather`. Treat this token as a secret because it controls access to your bot.
+  </Step>
+  <Step title="Add the Telegram channel">
+    In the Firmngin **Channels** tab, select **Add Telegram**, paste the bot token, and optionally enter a display name.
+  </Step>
+  <Step title="Save and test">
+    Select **Save & Activate**. When the channel appears in the list, select **Test Connection** and confirm that it remains active.
+  </Step>
+</Steps>
+
+People can then open the bot in Telegram and send a message to your workspace AI agent.
+
+## Connect Discord
+
+<Steps>
+  <Step title="Create a Discord application">
+    Open the [Discord Developer Portal](https://discord.com/developers/applications), create an application, then open its **Bot** section.
+  </Step>
+  <Step title="Create the bot and copy its token">
+    Add a bot to the application if one does not exist. Copy the bot token and keep it private.
+  </Step>
+  <Step title="Add the Discord channel">
+    In the Firmngin **Channels** tab, select **Add Discord**, paste the bot token, and optionally enter a display name.
+  </Step>
+  <Step title="Save and test">
+    Select **Save & Activate**. When the channel appears in the list, use **Test Connection** to check its current connection status.
+  </Step>
+</Steps>
+
+<Note>
+  Discord availability also depends on the channel connector configuration for your Firmngin deployment. If **Add Discord** is unavailable or the channel reports an error, contact your workspace operator.
+</Note>
+
+## Manage a connected channel
+
+Each connected channel shows its provider, display name, status, connection date, recent activity, and the latest provider error when one is available.
+
+- Select **Test Connection** to check the saved channel configuration.
+- Select **Edit** to change its display name, status, or rotate the bot token.
+- Select **Delete** to permanently remove the channel and its associated conversation history.
+
+<Warning>
+  Bot tokens are credentials. Never publish them in source code, screenshots, support messages, or public documentation. Rotate the token in the provider dashboard and update the channel immediately if a token is exposed.
+</Warning>
+
+## Troubleshooting
+
+| Problem | What to check |
+| --- | --- |
+| The Channels tab is missing | Confirm that the workspace AI agent has been created and saved |
+| A provider cannot be added | Confirm that the provider is available in the channel catalog for your deployment |
+| A channel reports an error | Open the channel card, review the latest error, and verify that the bot token is current |
+| The connection test fails | Rotate the provider token, update the channel, and run **Test Connection** again |
+| Messages do not reach the agent | Confirm that the channel is active and that the workspace agent is configured |
