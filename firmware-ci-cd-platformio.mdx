@@ -1,0 +1,276 @@
+---
+title: "PlatformIO CI/CD"
+description: "Build and deploy PlatformIO firmware with GitHub Actions"
+---
+
+This guide covers CI/CD for firmware projects that use [PlatformIO](https://platformio.org/) — projects with a `platformio.ini` at the repository root (or in a known subdirectory checked out by your workflow).
+
+The [`firmngin/ota`](https://github.com/firmngin/ota) action auto-detects PlatformIO when `platformio.ini` is present and `platform` is `auto` (default).
+
+## When to use PlatformIO CI/CD
+
+| Scenario | PlatformIO CI/CD fit |
+| --- | --- |
+| Multi-environment builds (`esp32dev`, `esp8266`, custom envs) | Excellent — use `platformio-env` per target |
+| PlatformIO library dependencies | Supported — `lib_deps` resolved during `pio run` |
+| Monorepo with firmware in a subfolder | Supported — run workflow with `working-directory` |
+| Arduino sketch without `platformio.ini` | Use [Arduino CLI CI/CD](/firmware-ci-cd-arduino-cli) instead |
+
+## Project requirements
+
+Your repository should include:
+
+| File / setting | Purpose |
+| --- | --- |
+| `platformio.ini` | PlatformIO project definition |
+| `[env:...]` section | At least one build environment |
+| Valid `board` and `platform` | Produces a flashable `.bin` |
+| Matching firmngin board/model | Device or template board fields align with your PlatformIO target |
+
+Example minimal `platformio.ini`:
+
+```ini
+[env:esp32dev]
+platform = espressif32
+board = esp32dev
+framework = arduino
+monitor_speed = 115200
+lib_deps =
+  firmngin/Firmngin-Arduino
+```
+
+## How auto-detection works
+
+When `platform: auto` (default):
+
+1. The action checks for `platformio.ini` in the repository root.
+2. If found, PlatformIO is selected.
+3. If `platformio-env` is empty, the action resolves the environment in this order:
+   - `default_envs` from `platformio.ini`
+   - First `[env:name]` block in the file
+4. Runs `pio run --environment <env>`.
+5. Locates `.pio/build/<env>/firmware.bin`.
+
+<Tip>
+  Always set `platformio-env` explicitly in production workflows to avoid surprises when you add new environments to `platformio.ini`.
+</Tip>
+
+## Basic workflow
+
+```yaml
+name: PlatformIO OTA
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  ota:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: firmngin/ota@v1.1
+        with:
+          token: ${{ secrets.FIRMNGIN_API_TOKEN }}
+          device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
+          platform: platformio
+          platformio-env: esp32dev
+          version: ${{ github.run_number }}
+```
+
+## Firmware in a subdirectory
+
+If `platformio.ini` is not at the repo root:
+
+```yaml
+jobs:
+  ota:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: firmngin/ota@v1.1
+        with:
+          token: ${{ secrets.FIRMNGIN_API_TOKEN }}
+          device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
+          platform: platformio
+          platformio-env: esp32dev
+```
+
+The action runs from the job working directory, so `platformio.ini` must be inside `firmware/`.
+
+## Multiple environments
+
+### Option A: Matrix jobs (recommended)
+
+Upload one artifact per hardware target:
+
+```yaml
+jobs:
+  ota:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platformio-env: esp32dev
+            target-board: esp32
+            target-model: esp32
+            template-var: FIRMNGIN_ESP32_TEMPLATE_ID
+          - platformio-env: esp8266
+            target-board: esp8266
+            target-model: esp8266
+            template-var: FIRMNGIN_ESP8266_TEMPLATE_ID
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: firmngin/ota@v1.1
+        with:
+          token: ${{ secrets.FIRMNGIN_API_TOKEN }}
+          device-template-id: ${{ vars[matrix.template-var] }}
+          platform: platformio
+          platformio-env: ${{ matrix.platformio-env }}
+          version: ${{ github.sha }}
+```
+
+Define one template variable per fleet in GitHub **Variables**.
+
+### Option B: Single environment per workflow file
+
+Maintain separate workflow files per product line, each with a fixed `platformio-env`.
+
+## Board and model alignment
+
+firmngin uses **board name** and **board model** to match firmware artifacts to devices. Your PlatformIO `board` setting must correspond to the values configured on:
+
+- The **device template** (fleet OTA), or
+- The **device** (single-device OTA), or
+- The `target-board` / `target-model` inputs (artifact-only upload).
+
+| PlatformIO `board` (example) | Typical firmngin `target-board` | Typical firmngin `target-model` |
+| --- | --- | --- |
+| `esp32dev` | `esp32` | `esp32` |
+| `esp8266` | `esp8266` | `esp8266` |
+
+If upload fails with a target mismatch error, compare your template or device board fields with the values sent by CI/CD.
+
+## Optimizing binary size
+
+CI/CD uploads are limited to **10 MB**. Common PlatformIO optimizations:
+
+```ini
+build_flags =
+  -Os
+  -DCORE_DEBUG_LEVEL=0
+board_build.partitions = default.csv
+```
+
+Additional tips:
+
+- Disable verbose logging in release builds.
+- Remove unused libraries from `lib_deps`.
+- Use partition schemes appropriate for your flash size.
+
+## Build flags per environment
+
+Use environment-specific sections for release vs debug:
+
+```ini
+[env:esp32dev]
+platform = espressif32
+board = esp32dev
+framework = arduino
+build_type = release
+build_flags =
+  -DFIRMNGIN_RELEASE=1
+
+[env:esp32dev_debug]
+extends = env:esp32dev
+build_type = debug
+build_flags =
+  -DCORE_DEBUG_LEVEL=5
+```
+
+Point CI/CD at the release environment only:
+
+```yaml
+platformio-env: esp32dev
+```
+
+## Caching PlatformIO dependencies (optional)
+
+Speed up builds by caching PlatformIO packages:
+
+```yaml
+jobs:
+  ota:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+          key: platformio-${{ runner.os }}-${{ hashFiles('**/platformio.ini') }}
+
+      - uses: firmngin/ota@v1.1
+        with:
+          token: ${{ secrets.FIRMNGIN_API_TOKEN }}
+          device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
+          platform: platformio
+          platformio-env: esp32dev
+```
+
+The `firmngin/ota` action installs PlatformIO on each run; caching reduces download time for platforms and libraries.
+
+## Local verification before CI/CD
+
+Run the same commands locally that the action runs:
+
+```bash
+pip install platformio
+pio run --environment esp32dev
+ls -la .pio/build/esp32dev/firmware.bin
+```
+
+Fix compile errors locally before pushing — CI/CD will fail on the same errors.
+
+## PlatformIO + single device
+
+For one device without a template:
+
+```yaml
+- uses: firmngin/ota@v1.1
+  with:
+    token: ${{ secrets.FIRMNGIN_API_TOKEN }}
+    device-secret-id: ${{ vars.FIRMNGIN_DEVICE_SECRET_ID }}
+    platform: platformio
+    platformio-env: esp32dev
+```
+
+Ensure the device has board name and model set in the dashboard to match your PlatformIO target.
+
+## Common PlatformIO errors
+
+| Error | Cause | Fix |
+| --- | --- | --- |
+| `Unable to detect PlatformIO environment` | No `default_envs` and ambiguous env list | Set `platformio-env` explicitly |
+| `firmware.bin not found` | Custom output name or failed link step | Verify build output path; fix compile errors |
+| `Firmware target does not match device template` | Board/model mismatch | Align template board fields with CI target |
+| Build works locally, fails in CI | Missing files in git, wrong branch | Confirm all sources are committed; check `working-directory` |
+
+## Related
+
+- [CI/CD overview](/firmware-ci-cd)
+- [GitHub Actions reference](/firmware-ci-cd-github-actions)
+- [Arduino CLI CI/CD](/firmware-ci-cd-arduino-cli)
+- [Arduino library installation](/libraries/arduino/installation)

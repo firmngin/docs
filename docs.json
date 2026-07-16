@@ -41,7 +41,16 @@
                   "ota-updates",
                   "firmware-fleet-rollout",
                   "firmware-ota-policy",
-                  "firmware-workflow-control"
+                  "firmware-workflow-control",
+                  {
+                    "group": "CI/CD",
+                    "pages": [
+                      "firmware-ci-cd",
+                      "firmware-ci-cd-github-actions",
+                      "firmware-ci-cd-platformio",
+                      "firmware-ci-cd-arduino-cli"
+                    ]
+                  }
                 ]
               },
               "automations",

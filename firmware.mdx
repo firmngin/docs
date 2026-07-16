@@ -48,7 +48,16 @@ For large fleets, deploy via **device template** so firmngin orchestrates multi-
 
 ## CI/CD path
 
-For automated releases, use the dedicated CI/CD upload path configured for firmware artifacts. Do not widen manual upload permissions to simulate CI/CD access.
+Automate build and upload with GitHub Actions and the [`firmngin/ota`](https://github.com/firmngin/ota) action. Generate a scoped token from **Dashboard → Integrations** (scope: **Firmware OTA**).
+
+| Guide | Description |
+| --- | --- |
+| [CI/CD overview](/firmware-ci-cd) | Setup, deployment modes, and prerequisites |
+| [GitHub Actions](/firmware-ci-cd-github-actions) | Workflow examples, inputs, troubleshooting |
+| [PlatformIO](/firmware-ci-cd-platformio) | `platformio.ini` projects |
+| [Arduino CLI](/firmware-ci-cd-arduino-cli) | `.ino` sketch projects |
+
+Do not share dashboard credentials in CI. Use a dedicated API token with the minimum required scope.
 
 ## Related pages
 
@@ -56,3 +65,4 @@ For automated releases, use the dedicated CI/CD upload path configured for firmw
 - [Fleet rollout](/firmware-fleet-rollout) — waves and staged expansion
 - [OTA policy](/firmware-ota-policy) — template policy fields
 - [Workflow control](/firmware-workflow-control) — approve, pause, resume, abort
+- [CI/CD overview](/firmware-ci-cd) — GitHub Actions OTA automation
