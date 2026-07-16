@@ -49,7 +49,7 @@ When `platform: auto` (default):
    - `default_envs` from `platformio.ini`
    - First `[env:name]` block in the file
 4. Runs `pio run --environment <env>`.
-5. Locates `.pio/build/<env>/firmware.bin`.
+5. Uploads the compiled firmware to firmngin.
 
 <Tip>
   Always set `platformio-env` explicitly in production workflows to avoid surprises when you add new environments to `platformio.ini`.
@@ -74,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: firmngin/ota@v1.1
+      - uses: firmngin/ota@v1.1.3
         with:
           token: ${{ secrets.FIRMNGIN_API_TOKEN }}
           device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
@@ -97,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: firmngin/ota@v1.1
+      - uses: firmngin/ota@v1.1.3
         with:
           token: ${{ secrets.FIRMNGIN_API_TOKEN }}
           device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
@@ -131,7 +131,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: firmngin/ota@v1.1
+      - uses: firmngin/ota@v1.1.3
         with:
           token: ${{ secrets.FIRMNGIN_API_TOKEN }}
           device-template-id: ${{ vars[matrix.template-var] }}
@@ -222,7 +222,7 @@ jobs:
             ~/.platformio
           key: platformio-${{ runner.os }}-${{ hashFiles('**/platformio.ini') }}
 
-      - uses: firmngin/ota@v1.1
+      - uses: firmngin/ota@v1.1.3
         with:
           token: ${{ secrets.FIRMNGIN_API_TOKEN }}
           device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
@@ -234,39 +234,38 @@ The `firmngin/ota` action installs PlatformIO on each run; caching reduces downl
 
 ## Local verification before CI/CD
 
-Run the same commands locally that the action runs:
+Run a local PlatformIO build with the same environment before pushing:
 
 ```bash
 pip install platformio
 pio run --environment esp32dev
-ls -la .pio/build/esp32dev/firmware.bin
 ```
 
-Fix compile errors locally before pushing — CI/CD will fail on the same errors.
+Fix compile errors locally first — CI will fail on the same issues.
 
 ## PlatformIO + single device
 
 For one device without a template:
 
 ```yaml
-- uses: firmngin/ota@v1.1
+- uses: firmngin/ota@v1.1.3
   with:
     token: ${{ secrets.FIRMNGIN_API_TOKEN }}
-    device-secret-id: ${{ vars.FIRMNGIN_DEVICE_SECRET_ID }}
+    device-secret-id: ${{ secrets.FIRMNGIN_DEVICE_SECRET_ID }}
     platform: platformio
     platformio-env: esp32dev
 ```
 
 Ensure the device has board name and model set in the dashboard to match your PlatformIO target.
 
-## Common PlatformIO errors
+## Common issues
 
-| Error | Cause | Fix |
-| --- | --- | --- |
-| `Unable to detect PlatformIO environment` | No `default_envs` and ambiguous env list | Set `platformio-env` explicitly |
-| `firmware.bin not found` | Custom output name or failed link step | Verify build output path; fix compile errors |
-| `Firmware target does not match device template` | Board/model mismatch | Align template board fields with CI target |
-| Build works locally, fails in CI | Missing files in git, wrong branch | Confirm all sources are committed; check `working-directory` |
+| Issue | Fix |
+| --- | --- |
+| Environment not detected | Set `platformio-env` explicitly |
+| Build fails in CI | Confirm `pio run` succeeds locally for the same environment |
+| Board/model mismatch | Align device or template board fields with your PlatformIO target |
+| Works locally, fails in CI | Confirm all source files are committed; check workflow `working-directory` |
 
 ## Related
 

@@ -3,91 +3,47 @@ title: "Arduino CLI CI/CD"
 description: "Build and deploy Arduino sketch firmware with GitHub Actions"
 ---
 
-This guide covers CI/CD for Arduino-style projects built with [Arduino CLI](https://arduino.github.io/arduino-cli/) — repositories that contain `.ino` sketch files and use FQBN (Fully Qualified Board Name) to define the target board.
+Use this guide for Arduino-style projects — sketch folders with a matching `.ino` file and a board identifier (FQBN).
 
-The [`firmngin/ota`](https://github.com/firmngin/ota) action auto-detects Arduino projects when no `platformio.ini` is present and at least one `.ino` file exists within three directory levels of the repository root.
+The [`firmngin/ota`](https://github.com/firmngin/ota) GitHub Action handles build and upload when `platformio.ini` is not present.
 
 ## When to use Arduino CLI CI/CD
 
-| Scenario | Arduino CLI CI/CD fit |
+| Scenario | Fit |
 | --- | --- |
-| Standard Arduino sketch layout (`MyDevice/MyDevice.ino`) | Excellent |
-| Arduino IDE projects migrated to git | Supported with FQBN |
-| PlatformIO project | Use [PlatformIO CI/CD](/firmware-ci-cd-platformio) instead |
-| Multiple `.ino` files in one repo | Set `arduino-sketch` explicitly |
+| `MyDevice/MyDevice.ino` layout | Excellent |
+| Sketches with Firmngin library (`#include <firmngin.h>`) | Supported |
+| PlatformIO project | Use [PlatformIO CI/CD](/firmware-ci-cd-platformio) |
+| Multiple sketches in one repo | Set `arduino-sketch` explicitly |
 
-## Project requirements
+## Sketch folder layout (required)
 
-| Requirement | Details |
-| --- | --- |
-| Sketch file | At least one `.ino` file |
-| FQBN | Valid board identifier (for example `esp32:esp32:esp32`) |
-| Board cores | Installed automatically by `arduino-cli core update-index` in CI |
-| firmngin board/model | Device or template fields match your FQBN target |
-
-Example sketch layout:
+The **folder name and `.ino` filename must match**:
 
 ```text
-firmware/
-  greenhouse-node/
-    greenhouse-node.ino
-    config.h
+✅ Correct
+my-device/
+  my-device.ino
+  keys.h
+
+❌ Wrong
+my-device.ino          ← lone file at repo root
 ```
-
-The main sketch folder name must match the `.ino` filename (Arduino convention).
-
-## How auto-detection works
-
-When `platform: auto` and no `platformio.ini` exists:
-
-1. The action searches up to **three directory levels** for the first `.ino` file.
-2. Sets `platform` to `arduino`.
-3. Uses the detected sketch path unless you override with `arduino-sketch`.
-4. Requires `arduino-fqbn` — the action fails if FQBN is missing.
-
-<Warning>
-  Auto-detection picks the **first** `.ino` found. Repositories with multiple sketches must set `arduino-sketch` explicitly.
-</Warning>
-
-## Find your FQBN
-
-Run locally after installing Arduino CLI:
-
-```bash
-arduino-cli core update-index
-arduino-cli board listall esp32
-```
-
-Example output:
-
-```text
-Board Name          FQBN
-ESP32 Dev Module    esp32:esp32:esp32
-```
-
-Use the FQBN value in your workflow:
 
 ```yaml
-arduino-fqbn: esp32:esp32:esp32
+arduino-sketch: my-device
 ```
 
-Common FQBN values:
-
-| Hardware | Example FQBN |
-| --- | --- |
-| ESP32 Dev Module | `esp32:esp32:esp32` |
-| ESP8266 NodeMCU | `esp8266:esp8266:nodemcuv2` |
-| Arduino Uno | `arduino:avr:uno` |
-
-## Basic workflow
+## Complete workflow example (single device)
 
 ```yaml
-name: Arduino OTA
+name: Firmngin OTA
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -98,178 +54,82 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: firmngin/ota@v1.1
+      - name: Prepare keys.h
+        env:
+          KEYS_H: ${{ secrets.FIRMNGIN_KEYS_H }}
+        run: |
+          if [ -z "$KEYS_H" ]; then
+            echo "Missing secret FIRMNGIN_KEYS_H" >&2
+            exit 1
+          fi
+          printf '%s\n' "$KEYS_H" > my-device/keys.h
+
+      - uses: firmngin/ota@v1.1.3
         with:
           token: ${{ secrets.FIRMNGIN_API_TOKEN }}
-          device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
+          device-secret-id: ${{ secrets.FIRMNGIN_DEVICE_SECRET_ID }}
           platform: arduino
           arduino-fqbn: esp32:esp32:esp32
-          arduino-sketch: firmware/greenhouse-node/greenhouse-node.ino
-          version: ${{ github.run_number }}
+          arduino-sketch: my-device
+          version: ci-${{ github.run_number }}
 ```
 
-## Sketch in repository root
+### GitHub Secrets
 
-If your sketch is at `MyDevice/MyDevice.ino`:
+| Secret | Value |
+| --- | --- |
+| `FIRMNGIN_API_TOKEN` | Token from **Integrations** (Firmware OTA) |
+| `FIRMNGIN_KEYS_H` | Full contents of local `keys.h` |
+| `FIRMNGIN_DEVICE_SECRET_ID` | Device **Secret ID** from the dashboard |
 
-```yaml
-- uses: firmngin/ota@v1.1
-  with:
-    token: ${{ secrets.FIRMNGIN_API_TOKEN }}
-    device-secret-id: ${{ vars.FIRMNGIN_DEVICE_SECRET_ID }}
-    platform: arduino
-    arduino-fqbn: esp32:esp32:esp32
-    arduino-sketch: MyDevice/MyDevice.ino
-```
+Add `keys.h` to `.gitignore` — never commit it.
 
-When only one `.ino` exists and auto-detection finds it, `arduino-sketch` is optional.
+## What the action handles
 
-## Including the Firmngin Arduino library
+For Arduino builds, `firmngin/ota` prepares dependencies, compiles your sketch, uploads firmware, and triggers OTA when configured. No separate library install step is required in your workflow.
 
-If your sketch depends on the Firmngin Arduino library, install it before the OTA step or vendor it in your repository.
+## Board identifier (FQBN)
 
-### Option A: Install library in a prior step
+Find the correct value in Arduino IDE or Arduino CLI board list. Common ESP targets:
 
-```yaml
-steps:
-  - uses: actions/checkout@v4
+| Hardware | Example FQBN |
+| --- | --- |
+| ESP32 Dev Module | `esp32:esp32:esp32` |
+| ESP8266 NodeMCU | `esp8266:esp8266:nodemcuv2` |
 
-  - name: Install Firmngin library
-    run: |
-      arduino-cli lib install "Firmngin"
-
-  - uses: firmngin/ota@v1.1
-    with:
-      token: ${{ secrets.FIRMNGIN_API_TOKEN }}
-      device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
-      platform: arduino
-      arduino-fqbn: esp32:esp32:esp32
-      arduino-sketch: src/device/device.ino
-```
-
-<Note>
-  The `firmngin/ota` action runs `arduino-cli core update-index` and `arduino-cli compile` internally. Pre-install libraries in separate steps **before** the action if your sketch requires them.
-</Note>
-
-### Option B: Vendor library in `lib/` folder
-
-Copy required library sources into your repository under a `lib/` directory and reference them from your sketch. This makes CI builds deterministic without external library downloads.
-
-## Board and model alignment
-
-Map your FQBN target to firmngin board fields:
-
-| FQBN target | `target-board` (artifact-only) | `target-model` (artifact-only) |
-| --- | --- | --- |
-| `esp32:esp32:esp32` | `esp32` | `esp32` |
-| `esp8266:esp8266:nodemcuv2` | `esp8266` | `esp8266` |
-
-For `device-template-id` or `device-secret-id` modes, firmngin resolves board/model from the template or device. Your compiled binary must still be compatible with that hardware.
-
-## Deployment modes
-
-### Fleet OTA via template
+## Fleet OTA via template
 
 ```yaml
-device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
-```
-
-Requires a template with **Firmware OTA policy** configured.
-
-### Single device
-
-```yaml
-device-secret-id: ${{ vars.FIRMNGIN_DEVICE_SECRET_ID }}
-```
-
-Device must have board name and model populated in the dashboard.
-
-### Artifact only
-
-```yaml
-target-board: esp32
-target-model: esp32
-```
-
-Upload without triggering OTA. Deploy manually from the dashboard.
-
-## Version and release notes
-
-```yaml
-- uses: firmngin/ota@v1.1
+- uses: firmngin/ota@v1.1.3
   with:
     token: ${{ secrets.FIRMNGIN_API_TOKEN }}
     device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
     platform: arduino
     arduino-fqbn: esp32:esp32:esp32
-    version: "2.1.0"
-    release-notes: "Fix sensor polling interval; improve MQTT reconnect"
+    arduino-sketch: my-device
 ```
 
-If `version` is omitted, the action uses git describe or commit SHA.
+Inject `keys.h` in a prior step when using the Firmngin library.
 
 ## Local verification
 
-Reproduce the CI build locally:
+Build locally with the same board target before pushing. Install the [Firmngin Arduino library](/libraries/arduino/installation) and place `keys.h` beside your sketch.
 
-```bash
-arduino-cli core update-index
-arduino-cli core install esp32:esp32
-arduino-cli lib install "Firmngin"
-arduino-cli compile --fqbn esp32:esp32:esp32 MyDevice/MyDevice.ino
-find MyDevice -name "*.bin"
-```
+## Common issues
 
-Fix compile and linker errors before pushing to GitHub.
+| Issue | Fix |
+| --- | --- |
+| Sketch not found | Use `Folder/Folder.ino`; set `arduino-sketch: Folder` |
+| Upload target missing | Add `FIRMNGIN_DEVICE_SECRET_ID` to GitHub Secrets |
+| Build fails in CI | Upgrade to latest `firmngin/ota` tag; verify sketch layout |
+| Missing `keys.h` | Add `FIRMNGIN_KEYS_H` secret + Prepare step in workflow |
+| Library missing locally | Follow [Arduino library installation](/libraries/arduino/installation) |
 
-## Binary output location
+## Security
 
-After compile, the action searches the sketch directory for the first `.bin` file. If compile succeeds but upload fails with "Firmware binary not found":
-
-- Confirm the core actually produces a `.bin` for your board.
-- Some boards require export flags — test locally first.
-
-## Multiple sketches in one repository
-
-Use separate jobs or a matrix:
-
-```yaml
-strategy:
-  matrix:
-    sketch:
-      - path: products/sensor-a/sensor-a.ino
-        fqbn: esp32:esp32:esp32
-        template: FIRMNGIN_SENSOR_A_TEMPLATE
-      - path: products/sensor-b/sensor-b.ino
-        fqbn: esp8266:esp8266:nodemcuv2
-        template: FIRMNGIN_SENSOR_B_TEMPLATE
-steps:
-  - uses: actions/checkout@v4
-
-  - uses: firmngin/ota@v1.1
-    with:
-      token: ${{ secrets.FIRMNGIN_API_TOKEN }}
-      device-template-id: ${{ vars[matrix.template] }}
-      platform: arduino
-      arduino-fqbn: ${{ matrix.fqbn }}
-      arduino-sketch: ${{ matrix.sketch }}
-```
-
-## Security reminders
-
-- Add `keys.h` to `.gitignore` — never commit device credentials.
-- Store the firmngin API token only in GitHub Secrets.
-- Use branch protection on production branches.
-
-## Common Arduino CLI errors
-
-| Error | Cause | Fix |
-| --- | --- | --- |
-| `arduino-fqbn is required` | Missing FQBN input | Set `arduino-fqbn` in workflow |
-| `Unable to detect PlatformIO or Arduino project` | No `.ino` in search path | Add sketch or set `platform: arduino` + `arduino-sketch` |
-| Compile error: library not found | Missing dependency | Install library in prior step or vendor in repo |
-| Wrong sketch compiled | Multiple `.ino` files | Set `arduino-sketch` explicitly |
-| `device board_name is not set` | Single-device mode | Set board fields on device in dashboard |
+- Never commit `keys.h`.
+- Store credentials only in GitHub Secrets.
+- Remove hardcoded WiFi passwords from sketches before pushing to public repos.
 
 ## Related
 
@@ -277,4 +137,3 @@ steps:
 - [GitHub Actions reference](/firmware-ci-cd-github-actions)
 - [PlatformIO CI/CD](/firmware-ci-cd-platformio)
 - [Arduino library installation](/libraries/arduino/installation)
-- [Arduino OTA in firmware](/libraries/arduino/ota-media-location)

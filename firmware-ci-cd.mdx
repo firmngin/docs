@@ -15,7 +15,7 @@ Complete these steps **in order** before your first CI/CD run:
 | --- | --- |
 | **1** | [Generate an API token](#step-1-generate-an-api-token) in the dashboard |
 | **2** | [Add the token to GitHub Secrets](#step-2-add-the-token-to-github) |
-| **3** | Add template or device ID as a GitHub variable (if needed) |
+| **3** | [Add GitHub Secrets and variables](#step-3-add-github-secrets-and-variables) (token, device ID, `keys.h` if needed) |
 | **4** | Add the workflow file to your firmware repository |
 
 <Warning>
@@ -56,16 +56,7 @@ After generation, firmngin shows the full token **once**. A warning banner remin
 
 ### Token format
 
-Generated tokens look like:
-
-```text
-fng_pat_<random>@api.firmngin.dev
-```
-
-- `fng_pat_` — identifies a workspace API token.
-- `@api.firmngin.dev` — API host suffix used by the GitHub Action when no host is embedded in the token.
-
-Copy the **entire string**, including the `@host` suffix if present.
+Copy the **entire token** exactly as shown on the Generate Token screen.
 
 ### Manage tokens later
 
@@ -73,7 +64,7 @@ From **Integrations**, you can:
 
 | Action | How |
 | --- | --- |
-| View active tokens | See name, scopes, prefix, created date, and last used date |
+| View active tokens | See name, scopes, created date, and last used date |
 | Revoke a token | Click **Revoke** on the token row — revoked tokens stop working immediately |
 | Create another token | Click **Generate Token** — use separate tokens per environment (production vs staging) |
 
@@ -95,14 +86,42 @@ After copying the token from Step 1, store it as a GitHub **secret** (never as a
 
 Reference it in workflows as `${{ secrets.FIRMNGIN_API_TOKEN }}`.
 
-## Step 3: Add deployment identifiers (optional)
+## Step 3: Add GitHub Secrets and variables
 
-Depending on your deployment mode, add GitHub **variables** under **Settings → Secrets and variables → Actions → Variables**:
+Go to **Settings → Secrets and variables → Actions**.
 
-| Variable | When to set |
+### Secrets (required)
+
+| Name | When to set | Value |
+| --- | --- | --- |
+| `FIRMNGIN_API_TOKEN` | Always | Full token from [Step 1](#step-1-generate-an-api-token) |
+| `FIRMNGIN_DEVICE_SECRET_ID` | Single-device OTA | Device **Secret ID** from the dashboard |
+| `FIRMNGIN_KEYS_H` | Arduino sketches using `#include <firmngin.h>` | Full contents of your local `keys.h` file |
+
+<Warning>
+  Never commit `keys.h` to git. Add it to `.gitignore` and inject it in CI from the `FIRMNGIN_KEYS_H` secret.
+</Warning>
+
+Example workflow step for Arduino projects:
+
+```yaml
+- name: Prepare keys.h
+  env:
+    KEYS_H: ${{ secrets.FIRMNGIN_KEYS_H }}
+  run: printf '%s\n' "$KEYS_H" > MySketch/keys.h
+```
+
+Place `keys.h` in the **same folder as your `.ino` file**.
+
+### Variables (optional)
+
+Non-secret identifiers can live in **Variables**:
+
+| Name | When to set |
 | --- | --- |
 | `FIRMNGIN_DEVICE_TEMPLATE_ID` | Fleet OTA via device template |
-| `FIRMNGIN_DEVICE_SECRET_ID` | Single-device OTA (no template) |
+
+You can also store `FIRMNGIN_DEVICE_SECRET_ID` as a **secret** (recommended) instead of a variable.
 
 See [Where to find IDs](#where-to-find-ids) below.
 
@@ -134,7 +153,7 @@ Choose **one** target mode per workflow run:
 Before adding CI/CD to a repository:
 
 1. A firmngin workspace with at least one registered device or device template.
-2. Firmware source that builds with **PlatformIO** (`platformio.ini`) or **Arduino CLI** (`.ino` sketch).
+2. Firmware source that builds with **PlatformIO** (`platformio.ini`) or **Arduino CLI** (sketch folder with matching `.ino` filename).
 3. Board and model on your device or template must match the compiled firmware target.
 4. For fleet rollouts, a **Firmware OTA policy** attached to the target device template (see [OTA policy](/firmware-ota-policy)).
 5. For single-device deploy, the device must have **board name** and **board model** set in the dashboard.
@@ -146,7 +165,7 @@ flowchart LR
   A[Git push] --> B[GitHub Actions]
   B --> C[Build firmware]
   C --> D[firmngin/ota action]
-  D --> E[firmngin API upload]
+  D --> E[Upload to firmngin]
   E --> F{Target mode}
   F -->|Template| G[Fleet rollout via policy]
   F -->|Secret ID| H[Single device OTA trigger]
@@ -166,15 +185,14 @@ In your firmware repository, go to **Settings → Secrets and variables → Acti
 | Name | Value |
 | --- | --- |
 | `FIRMNGIN_API_TOKEN` | Full token copied in [Step 1](#step-1-generate-an-api-token) |
+| `FIRMNGIN_DEVICE_SECRET_ID` | Device Secret ID (single-device OTA) |
+| `FIRMNGIN_KEYS_H` | Full `keys.h` content (Arduino + Firmngin library) |
 
 ### Variables
-
-Use variables for non-secret identifiers:
 
 | Name | Used when |
 | --- | --- |
 | `FIRMNGIN_DEVICE_TEMPLATE_ID` | Fleet OTA via device template |
-| `FIRMNGIN_DEVICE_SECRET_ID` | Single-device OTA |
 
 ### Where to find IDs
 
@@ -188,9 +206,11 @@ Use variables for non-secret identifiers:
 
 1. Open **Dashboard → Devices**.
 2. Select your device.
-3. Copy the **Secret ID** shown on the device page (not the internal database UUID).
+3. Copy the **Secret ID** shown on the device page.
 
 ## Step 4: Minimal workflow
+
+### Fleet OTA (device template)
 
 ```yaml
 name: Firmngin OTA
@@ -209,10 +229,53 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: firmngin/ota@v1.1
+      - uses: firmngin/ota@v1.1.3
         with:
           token: ${{ secrets.FIRMNGIN_API_TOKEN }}
           device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
+```
+
+### Single device (Arduino + Firmngin library)
+
+```yaml
+name: Firmngin OTA
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ota:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare keys.h
+        env:
+          KEYS_H: ${{ secrets.FIRMNGIN_KEYS_H }}
+        run: printf '%s\n' "$KEYS_H" > my-device/keys.h
+
+      - uses: firmngin/ota@v1.1.3
+        with:
+          token: ${{ secrets.FIRMNGIN_API_TOKEN }}
+          device-secret-id: ${{ secrets.FIRMNGIN_DEVICE_SECRET_ID }}
+          platform: arduino
+          arduino-fqbn: esp32:esp32:esp32
+          arduino-sketch: my-device
+          version: ci-${{ github.run_number }}
+```
+
+Sketch layout for the example above:
+
+```text
+my-device/
+  my-device.ino
+  keys.h          ← generated in CI, gitignored locally
 ```
 
 See [GitHub Actions](/firmware-ci-cd-github-actions) for complete workflow examples, all inputs, versioning, and troubleshooting.
@@ -229,8 +292,8 @@ See [GitHub Actions](/firmware-ci-cd-github-actions) for complete workflow examp
 | Constraint | Value |
 | --- | --- |
 | Maximum firmware file size | 10 MB |
-| Required upload field | `version` (auto-generated by the action if you omit the input) |
-| Supported binary | `.bin` produced by PlatformIO or Arduino CLI compile |
+| Version label | Set via workflow input, or auto-generated from git tag / commit |
+| Supported binary | `.bin` from PlatformIO or Arduino CLI |
 
 The action resolves version in this order:
 
