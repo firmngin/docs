@@ -38,7 +38,10 @@
                 "group": "Firmware",
                 "root": "firmware",
                 "pages": [
-                  "ota-updates"
+                  "ota-updates",
+                  "firmware-fleet-rollout",
+                  "firmware-ota-policy",
+                  "firmware-workflow-control"
                 ]
               },
               "automations",
@@ -94,7 +97,8 @@
           {
             "group": "API documentation",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/introduction",
+              "api-reference/firmware-pipeline-runs"
             ]
           }
         ]

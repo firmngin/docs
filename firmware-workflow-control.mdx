@@ -1,0 +1,77 @@
+---
+title: "Workflow control"
+description: "Approve, pause, resume, and abort firmware workflow runs"
+---
+
+Workflow runs represent OTA execution in your workspace. Fleet rollouts expose extra controls for workspace owners.
+
+## Who can control rollouts
+
+| Action | Who |
+| --- | --- |
+| Approve rollout | Workspace **owner** (not the run creator) |
+| Pause / Resume / Abort | Workspace **owner** |
+| Cancel small batch / scheduled run | User with deploy access |
+
+<Warning>
+  The user who **created** a rollout cannot approve their own run when `approval_required` is enabled (maker-checker).
+</Warning>
+
+## Approval workflow
+
+When policy has `approval_required`:
+
+1. Deploy creates a run in **Pending approval**.
+2. No OTA trigger is sent to devices yet.
+3. A workspace owner (other than the creator) clicks **Approve rollout**.
+4. Waves begin according to schedule and strategy.
+
+If approval is not required, the rollout starts immediately after deploy.
+
+## Pause, resume, and abort
+
+Available on fleet rollouts from the workflow detail panel (**Dashboard → Firmware → Workflow runs**).
+
+| Action | Effect |
+| --- | --- |
+| **Pause** | Stop scheduling new waves. In-flight device updates may continue until they report a terminal state. |
+| **Resume** | Continue the rollout from the next wave or stage. |
+| **Abort rollout** | Permanently stop the rollout plan. No new waves are created. |
+
+Abort is also available from the workflow list (**Abort** button on fleet runs).
+
+## Run statuses
+
+| Status | Meaning |
+| --- | --- |
+| Pending approval | Waiting for owner approval. |
+| Scheduled | Waiting for `scheduled_at`. |
+| Running | Waves active or devices updating. |
+| Paused | Manually paused or gate/window blocked. |
+| Completed | Full rollout finished successfully. |
+| Partial failed | Some devices failed; review logs. |
+| Failed | Rollout aborted due to failure threshold or errors. |
+| Aborted | Stopped manually by an owner. |
+| Cancelled | Small batch or scheduled run cancelled before completion. |
+
+## FAQ
+
+### Rollout stuck on Paused
+
+Common causes:
+
+- `min_observation_minutes` has not elapsed since the last wave.
+- `min_success_percent` was not met — fix failures, then **Resume**.
+- Maintenance window ended — rollout resumes when the window opens again.
+
+### Only some devices updated
+
+Expected with **canary** or **staged_expand**. The current stage percent defines how much of the fleet is eligible. Wait for the next stage or check the **Rollout stages** timeline.
+
+### Approve button missing
+
+You are not the workspace owner, you are the creator, or the run is not in **Pending approval**.
+
+## API
+
+Programmatic control uses the firmware pipeline runs API. See [Firmware pipeline API](/api-reference/firmware-pipeline-runs).
