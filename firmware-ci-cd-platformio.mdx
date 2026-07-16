@@ -49,7 +49,7 @@ When `platform: auto` (default):
    - `default_envs` from `platformio.ini`
    - First `[env:name]` block in the file
 4. Runs `pio run --environment <env>`.
-5. Locates `.pio/build/<env>/firmware.bin`.
+5. Uploads the compiled firmware to firmngin.
 
 <Tip>
   Always set `platformio-env` explicitly in production workflows to avoid surprises when you add new environments to `platformio.ini`.
