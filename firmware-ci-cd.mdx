@@ -258,7 +258,7 @@ jobs:
       - name: Prepare keys.h
         env:
           KEYS_H: ${{ secrets.FIRMNGIN_KEYS_H }}
-        run: printf '%s\n' "$KEYS_H" > my-device/keys.h
+        run: printf '%s\n' "$KEYS_H" > path_to_your_folder/keys.h
 
       - uses: firmngin/ota@v1.1.3
         with:
@@ -266,17 +266,19 @@ jobs:
           device-secret-id: ${{ secrets.FIRMNGIN_DEVICE_SECRET_ID }}
           platform: arduino
           arduino-fqbn: esp32:esp32:esp32
-          arduino-sketch: my-device
+          arduino-sketch: path_to_your_folder/path_to_your_file.ino
           version: ci-${{ github.run_number }}
 ```
 
 Sketch layout for the example above:
 
 ```text
-my-device/
-  my-device.ino
+path_to_your_folder/
+  path_to_your_file.ino
   keys.h          ← generated in CI, gitignored locally
 ```
+
+For a sketch at the repo root instead, use `arduino-sketch: path_to_your_file.ino` and write `keys.h` to the repository root. See [Arduino CLI CI/CD](/firmware-ci-cd-arduino-cli) for both layouts.
 
 See [GitHub Actions](/firmware-ci-cd-github-actions) for complete workflow examples, all inputs, versioning, and troubleshooting.
 

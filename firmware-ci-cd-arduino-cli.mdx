@@ -11,28 +11,63 @@ The [`firmngin/ota`](https://github.com/firmngin/ota) GitHub Action handles buil
 
 | Scenario | Fit |
 | --- | --- |
-| `MyDevice/MyDevice.ino` layout | Excellent |
+| Sketch folder or root `.ino` layout | Excellent |
 | Sketches with Firmngin library (`#include <firmngin.h>`) | Supported |
 | PlatformIO project | Use [PlatformIO CI/CD](/firmware-ci-cd-platformio) |
 | Multiple sketches in one repo | Set `arduino-sketch` explicitly |
 
-## Sketch folder layout (required)
+## Sketch path in your repo
 
-The **folder name and `.ino` filename must match**:
+Set `arduino-sketch` to the sketch path **relative to the repository root**. You can include or omit the `.ino` extension — the action accepts both.
+
+```yaml
+arduino-sketch: path_to_your_file.ino
+```
+
+The path must match where the `.ino` file actually lives in your repo after checkout.
+
+### Layout A — sketch in a subfolder (Arduino IDE default)
+
+Use a folder whose name matches the `.ino` filename (Arduino convention):
 
 ```text
-✅ Correct
-my-device/
-  my-device.ino
+path_to_your_folder/
+  path_to_your_file.ino    ← filename must match folder name
   keys.h
-
-❌ Wrong
-my-device.ino          ← lone file at repo root
 ```
 
 ```yaml
-arduino-sketch: my-device
+arduino-sketch: path_to_your_folder/path_to_your_file.ino
+# or shorthand when folder and file share the same name:
+arduino-sketch: path_to_your_folder
 ```
+
+Place `keys.h` in the **same folder** as the `.ino` file:
+
+```yaml
+run: printf '%s\n' "$KEYS_H" > path_to_your_folder/keys.h
+```
+
+### Layout B — sketch at repo root
+
+A single `.ino` at the repository root is also valid:
+
+```text
+path_to_your_file.ino
+keys.h
+```
+
+```yaml
+arduino-sketch: path_to_your_file.ino
+```
+
+```yaml
+run: printf '%s\n' "$KEYS_H" > keys.h
+```
+
+<Note>
+  A lone `.ino` at the root is fine when you set `arduino-sketch` explicitly. If you omit `arduino-sketch` and rely on auto-detect, the action picks the first `.ino` it finds — use an explicit path when the repo has more than one sketch.
+</Note>
 
 ## Complete workflow example (single device)
 
@@ -62,7 +97,7 @@ jobs:
             echo "Missing secret FIRMNGIN_KEYS_H" >&2
             exit 1
           fi
-          printf '%s\n' "$KEYS_H" > my-device/keys.h
+          printf '%s\n' "$KEYS_H" > path_to_your_folder/keys.h
 
       - uses: firmngin/ota@v1.1.3
         with:
@@ -70,7 +105,7 @@ jobs:
           device-secret-id: ${{ secrets.FIRMNGIN_DEVICE_SECRET_ID }}
           platform: arduino
           arduino-fqbn: esp32:esp32:esp32
-          arduino-sketch: my-device
+          arduino-sketch: path_to_your_folder/path_to_your_file.ino
           version: ci-${{ github.run_number }}
 ```
 
@@ -106,7 +141,7 @@ Find the correct value in Arduino IDE or Arduino CLI board list. Common ESP targ
     device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
     platform: arduino
     arduino-fqbn: esp32:esp32:esp32
-    arduino-sketch: my-device
+    arduino-sketch: path_to_your_folder/path_to_your_file.ino
 ```
 
 Inject `keys.h` in a prior step when using the Firmngin library.
@@ -119,7 +154,7 @@ Build locally with the same board target before pushing. Install the [Firmngin A
 
 | Issue | Fix |
 | --- | --- |
-| Sketch not found | Use `Folder/Folder.ino`; set `arduino-sketch: Folder` |
+| Sketch not found | Match `arduino-sketch` to your repo path (for example `path_to_your_folder/path_to_your_file.ino` or root `path_to_your_file.ino`) |
 | Upload target missing | Add `FIRMNGIN_DEVICE_SECRET_ID` to GitHub Secrets |
 | Build fails in CI | Upgrade to latest `firmngin/ota` tag; verify sketch layout |
 | Missing `keys.h` | Add `FIRMNGIN_KEYS_H` secret + Prepare step in workflow |
