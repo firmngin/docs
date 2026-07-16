@@ -49,17 +49,13 @@ The [`firmngin/ota`](https://github.com/firmngin/ota) action is a composite GitH
 - `device-secret-id`
 - `target-board` **and** `target-model`
 
-## What the action does internally
+## What happens on each run
 
-Each run executes these steps in order:
-
-1. **Detect firmware project** — reads `platform` input or auto-detects from `platformio.ini` / `.ino` files.
-2. **Setup build tools** — installs PlatformIO (pip) or Arduino CLI (official setup action).
-3. **Build** — compiles firmware and locates the output `.bin` file.
-   - **PlatformIO:** runs `pio run`, finds `.pio/build/.../firmware.bin`.
-   - **Arduino CLI:** installs the board core from FQBN, clones the [Firmngin Arduino library](https://github.com/firmngin/Firmngin-Arduino), compiles with `--export-binaries`, finds `sketch/build/**/*.ino.bin`.
-4. **Resolve version** — uses your input, git tags, or commit SHA.
-5. **Upload** — POST to `https://api.firmngin.dev/api/v1/firmware-ci-cd/upload` (or host embedded in token).
+1. **Detect project** — PlatformIO or Arduino, from your repo layout or `platform` input.
+2. **Install tools** — build toolchain for your board.
+3. **Build** — compile firmware to a `.bin` file.
+4. **Version** — use your input, git tag, or commit SHA.
+5. **Upload** — publish the artifact to firmngin and start OTA when a target is configured.
 
 ## Workflow examples
 
@@ -269,33 +265,16 @@ Pin the action to a release tag for reproducible pipelines:
 | --- | --- |
 | `v1` | Initial release — template or board/model targets |
 | `v1.1` | Adds `device-secret-id` for single-device OTA |
-| `v1.1.1` | Default API host `api.firmngin.dev`; auto-install board core + Firmngin library |
+| `v1.1.1` | Auto-install board core + Firmngin Arduino library |
 | `v1.1.2` | Normalize Arduino sketch folder path for `arduino-cli compile` |
-| `v1.1.3` | ESP32 binary export (`--export-binaries`) — **recommended** |
+| `v1.1.3` | ESP32 Arduino build fix — **recommended** |
 
 Avoid `@main` in production workflows unless you explicitly want to track the latest action changes.
 
-## API upload details
+### After a successful run
 
-The upload step sends a `multipart/form-data` POST with:
-
-| Field | Source |
-| --- | --- |
-| `firmware` | Compiled `.bin` file |
-| `version` | Resolved version string |
-| `device_template_id` | When using fleet mode |
-| `device_secret_id` | When using single-device mode |
-| `target_board` | Board name (optional override or artifact-only) |
-| `target_model` | Board model (optional override or artifact-only) |
-| `release_notes` | When `release-notes` input is set |
-
-Authentication header: `X-API-Key: <token>`.
-
-### Successful response
-
-On success, the action prints the JSON response body. A typical upload returns the firmware artifact metadata (ID, version, board, model, SHA256).
-
-When `device-secret-id` is used and OTA trigger succeeds, the response also includes deployment details.
+- Check **Dashboard → Firmware → Artifacts** for the new version.
+- For fleet or single-device deploy, check **Firmware → Workflow runs** for OTA progress.
 
 ## Troubleshooting
 
@@ -323,18 +302,11 @@ When `device-secret-id` is used and OTA trigger succeeds, the response also incl
 
 ### `Firmware binary not found after Arduino compile`
 
-- Usually fixed in `v1.1.3+` via `--export-binaries`.
 - Upgrade to `firmngin/ota@v1.1.3` or newer.
-- Confirm compile succeeds locally with `arduino-cli compile --export-binaries --fqbn ...`.
 
 ### `Cloning into '.../Firmngin-Arduino'`
 
-- Normal — the action downloads the Firmngin Arduino library before compile. Not an error.
-
-### `--git-url and --zip-path are disabled by default`
-
-- Do **not** use `arduino-cli lib install --git-url` in recent Arduino CLI versions.
-- Use `firmngin/ota@v1.1.1+` — the action clones the library automatically.
+- Normal — the action installs the Firmngin Arduino library. Not an error.
 
 ### `device-template-id and device-secret-id cannot be used together`
 

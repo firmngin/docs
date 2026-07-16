@@ -107,19 +107,9 @@ ard-ci-test/keys.h
 
 ## What the action does for Arduino builds
 
-On each run, `firmngin/ota` automatically:
-
-1. Installs the board core from your FQBN (for example `esp32:esp32`)
-2. Clones [Firmngin-Arduino](https://github.com/firmngin/Firmngin-Arduino) into the Arduino libraries folder
-3. Compiles with `arduino-cli compile --export-binaries`
-4. Locates the binary in `sketch/build/**/*.ino.bin`
-5. Uploads to firmngin and triggers OTA (when `device-secret-id` or template is set)
+On each run, `firmngin/ota` automatically installs the board core, the Firmngin Arduino library, compiles your sketch, uploads the firmware, and triggers OTA when configured.
 
 You do **not** need a separate step to install the Firmngin library.
-
-<Note>
-  Log line `Cloning into '.../Firmngin-Arduino'` is normal — it is the library install step, not your repository.
-</Note>
 
 ## Find your FQBN
 
@@ -155,8 +145,8 @@ Still inject `keys.h` in a prior step if your sketch uses the Firmngin library.
 arduino-cli core update-index
 arduino-cli core install esp32:esp32
 git clone --depth 1 https://github.com/firmngin/Firmngin-Arduino.git ~/Arduino/libraries/Firmngin-Arduino
-arduino-cli compile --export-binaries --fqbn esp32:esp32:esp32 my-device
-find my-device/build -name '*.ino.bin'
+arduino-cli compile --fqbn esp32:esp32:esp32 my-device
+find my-device -name '*.bin'
 ```
 
 ## Common errors
@@ -165,8 +155,8 @@ find my-device/build -name '*.ino.bin'
 | --- | --- | --- |
 | `Can't open sketch: main file missing` | Invalid sketch layout | Use `Folder/Folder.ino`; set `arduino-sketch: Folder` |
 | `device-secret-id ... is required` | Empty secret/variable | Add `FIRMNGIN_DEVICE_SECRET_ID` to **GitHub Secrets** |
-| `Firmware binary not found after Arduino compile` | ESP32 binary not exported | Use `firmngin/ota@v1.1.3+` |
-| `--git-url ... disabled by default` | Old manual library install | Remove `arduino-cli lib install --git-url`; use action v1.1.1+ |
+| `Firmware binary not found after Arduino compile` | Build output not found | Upgrade to `firmngin/ota@v1.1.3` or newer |
+| `Cloning into '.../Firmngin-Arduino'` in logs | Library install step | Normal — wait for the workflow to finish |
 | Compile error: `firmngin.h` not found | Library missing locally | Clone Firmngin-Arduino locally or use CI action |
 | Missing `keys.h` | File gitignored, not injected in CI | Add `FIRMNGIN_KEYS_H` secret + Prepare step |
 
