@@ -1,38 +1,57 @@
 ---
-title: "OTA Updates"
+title: "OTA updates"
 description: "Safe over-the-air firmware rollout practices"
 ---
 
-OTA updates deliver firmware to devices without physical access. In firmngin, OTA should be treated as a controlled rollout, not a simple file download.
+OTA updates deliver firmware to devices without physical access. In firmngin, OTA is a **controlled fleet rollout**, not a one-shot file push.
 
-[image:OTA rollout dashboard with phases, target devices, and per-device results]
+[image:OTA workflow run detail with rollout stages timeline and fleet progress]
 
-## OTA rollout phases
+## OTA rollout lifecycle
 
 | Phase | Purpose |
 | --- | --- |
-| Draft | Define version, artifact, policy, and target segment. |
-| Scheduled | Prepare rollout timing and batch size. |
-| Running | Devices are receiving or applying updates. |
-| Monitoring | Verify per-device result and fleet health. |
-| Completed | Rollout reached its intended target set. |
-| Failed or paused | Stop rollout and investigate device logs or artifact compatibility. |
+| Pending approval | Policy requires workspace owner sign-off before triggers. |
+| Scheduled | Waiting for a future deploy time or maintenance window. |
+| Running | Waves are triggering devices; fleet progress increases. |
+| Paused | Manually paused or blocked by gate/window. |
+| Monitoring | Observe canary/stage success before expanding. |
+| Completed | Target fleet segment finished. |
+| Failed / aborted | Stopped due to errors, threshold, or operator action. |
+
+## Rollout sizes
+
+| Deploy target | Behavior |
+| --- | --- |
+| Selected devices (small count) | Single batch run, suitable for testing. |
+| Device template (fleet) | **Rollout plan** with automatic waves across all compatible devices. |
+
+Wave size comes from policy `max_devices_per_batch`. It does **not** limit total fleet size.
 
 ## Safe rollout practice
 
-- Start with a small canary group.
-- Keep batch size conservative until the firmware is proven.
-- Monitor failure rate before expanding.
+- Start with **canary** or **staged_expand** on production fleets.
+- Set `min_observation_minutes` between stages.
+- Set `max_failure_percent` to auto-stop bad releases.
+- Use **Pause** before expanding if failure rate spikes.
 - Keep rollback firmware available.
-- Avoid mixing unrelated firmware changes in one rollout.
+- Do not mix incompatible hardware in one artifact target set.
 
 ## Device requirements
 
-Firmware should support secure artifact download, version reporting, install result reporting, reconnect behavior after reboot, and failure reporting that can be shown in logs.
+Firmware should support secure artifact download, version reporting, install result reporting, reconnect after reboot, and failure reporting visible in workflow device logs.
 
 ## Common mistakes
 
-- Using one rollout for multiple hardware revisions without compatibility checks.
-- Assuming a device updated because it downloaded the artifact.
-- Losing device availability state during reboot and treating it as a business-session reset.
-- Reusing manual upload permissions for automated CI/CD upload.
+- Treating wave size as the maximum fleet size (fleet continues in further waves).
+- Assuming all devices update immediately in staged rollout.
+- Using one artifact for multiple hardware revisions without compatibility checks.
+- Assuming download equals install success.
+- Skipping approval when policy requires owner review.
+
+## Related
+
+- [Fleet rollout](/firmware-fleet-rollout)
+- [OTA policy](/firmware-ota-policy)
+- [Workflow control](/firmware-workflow-control)
+- [CI/CD overview](/firmware-ci-cd) — automate uploads with GitHub Actions

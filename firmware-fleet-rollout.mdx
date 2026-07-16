@@ -1,0 +1,62 @@
+---
+title: "Fleet rollout"
+description: "Large-scale OTA rollouts with waves, staged expansion, and fleet progress"
+---
+
+When you deploy firmware to a **device template** (or to a fleet larger than one wave), firmngin creates a **rollout plan** that covers the full compatible fleet. The platform processes devices in **waves** instead of stopping at a single batch limit.
+
+[image:Firmware workflow runs list showing fleet progress percent and rollout phase]
+
+## Artifacts vs workflow runs
+
+| View | Purpose |
+| --- | --- |
+| **Artifacts** | Upload and manage firmware binaries (version, board, model, SHA256). |
+| **Workflow runs** | Track OTA rollout execution, fleet progress, and per-device results. |
+
+Open **Dashboard → Firmware** and switch to **Workflow runs** to monitor active rollouts.
+
+## Rollout plan and waves
+
+| Concept | Meaning |
+| --- | --- |
+| Rollout plan | Parent job for the entire target fleet (one firmware + one target segment). |
+| Wave | A chunk of devices processed in one execution step (`max_devices_per_batch`). |
+| Fleet progress | Percent of the full fleet that reached a terminal result (passed, failed, or skipped). |
+| Wave progress | Progress inside the current wave only. |
+
+Example: 5,000 compatible devices with wave size 500 → about 10 waves until the full fleet is processed.
+
+## Rollout strategies
+
+Configure strategy in the template **Firmware OTA policy** (see [OTA policy](/firmware-ota-policy)).
+
+| Strategy | Behavior |
+| --- | --- |
+| `all_at_once` | Waves run back-to-back across the full eligible fleet (subject to gates). |
+| `canary` | Start with a small percent of devices (hash-stable selection), then stop for observation. |
+| `staged_expand` | Expand through configured percents (for example 1% → 10% → 25% → 50% → 100%). |
+
+The workflow detail panel shows a **Rollout stages** timeline (Canary → expand steps → Full fleet) when staged rollout is active.
+
+## Rollout phases (UI)
+
+| Phase label | Meaning |
+| --- | --- |
+| Canary | First small slice of the fleet. |
+| Expand | Intermediate percentage before full fleet. |
+| Full fleet | 100% of the eligible segment. |
+
+## Safe fleet practice
+
+- Prefer **template deploy** for production fleets; use manual device selection for small tests.
+- Use **canary** or **staged_expand** before full fleet on critical hardware.
+- Set `min_observation_minutes` so the next stage waits for real device feedback.
+- Set `max_failure_percent` to auto-stop unhealthy rollouts.
+- Use **Pause** if you need to investigate before the next wave.
+
+## Related
+
+- [Workflow control](/firmware-workflow-control) — approve, pause, resume, abort
+- [OTA policy](/firmware-ota-policy) — policy fields and gates
+- [OTA updates](/ota-updates) — general OTA practices

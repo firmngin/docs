@@ -1,0 +1,95 @@
+---
+title: "Firmware pipeline runs"
+description: "HTTP API for OTA workflow runs and fleet rollout control"
+---
+
+Base path: `/api/v1/firmware-pipeline-runs`
+
+All endpoints require authentication and a `workspace_id` query parameter (or resolved from session context).
+
+## List workflow runs
+
+```
+GET /api/v1/firmware-pipeline-runs?workspace_id={uuid}&limit=20&page=1
+```
+
+Returns rollout plans and standalone batch runs. Fleet rollouts include:
+
+| Field | Description |
+| --- | --- |
+| `fleet_target_count` | Total compatible devices in the rollout. |
+| `fleet_progress_percent` | Fleet-wide completion percent. |
+| `rollout_strategy` | `all_at_once`, `canary`, or `staged_expand`. |
+| `rollout_phase` | `canary`, `expand`, or `full`. |
+| `expand_stages` | Configured stage percents. |
+| `current_target_percent` | Active stage percent. |
+| `wave_index` | Latest wave number (on wave child runs). |
+
+## Get workflow run detail
+
+```
+GET /api/v1/firmware-pipeline-runs/{id}?workspace_id={uuid}
+```
+
+Returns summary plus per-device logs for batch runs. Rollout plan IDs return fleet summary (device list may be empty at plan level; open wave runs for device detail).
+
+## Approve rollout
+
+```
+POST /api/v1/firmware-pipeline-runs/{id}/approve?workspace_id={uuid}
+```
+
+Requires workspace owner (or platform admin). Creator cannot approve own run.
+
+## Pause rollout
+
+```
+POST /api/v1/firmware-pipeline-runs/{id}/pause?workspace_id={uuid}
+```
+
+## Resume rollout
+
+```
+POST /api/v1/firmware-pipeline-runs/{id}/resume?workspace_id={uuid}
+```
+
+## Abort fleet rollout
+
+```
+POST /api/v1/firmware-pipeline-runs/{id}/abort?workspace_id={uuid}
+```
+
+## Cancel batch run
+
+```
+POST /api/v1/firmware-pipeline-runs/{id}/cancel?workspace_id={uuid}
+```
+
+Use for scheduled or small non-fleet batch runs. Fleet rollouts should use **abort**.
+
+## Retry failed devices
+
+```
+POST /api/v1/firmware-pipeline-runs/{id}/retry?workspace_id={uuid}
+Content-Type: application/json
+
+{
+  "workspace_id": "{uuid}",
+  "device_ids": ["{device-uuid}", "..."]
+}
+```
+
+## Deploy firmware (creates run)
+
+```
+POST /api/v1/firmwares/{firmware_id}/batch-deploy?workspace_id={uuid}
+Content-Type: application/json
+
+{
+  "device_template_id": "{uuid}",
+  "device_ids": ["{optional-device-uuid}"],
+  "scheduled_at": "2026-07-16T10:00:00Z"
+}
+```
+
+Template deploy creates a fleet rollout plan when the compatible fleet exceeds one wave.

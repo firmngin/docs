@@ -101,15 +101,19 @@ The template list can show assigned and unassigned templates, so you can quickly
 
 ## Firmware OTA policy
 
-A template can include one firmware OTA policy. The current UI supports:
+A template can include one firmware OTA policy. Supported options include:
 
-- Latest compatible firmware selection.
-- Immediate rollout after firmware publish.
-- Scheduled rollout by selected days and time window.
-- Timezone selection.
-- Maximum devices per batch.
+- Latest compatible or fixed firmware selection.
+- Schedule: immediate, user-defined datetime, or maintenance window (days, time window, timezone).
+- Rollout strategy: `all_at_once`, `canary`, or `staged_expand`.
+- Canary percent and expand stage percents for staged rollouts.
+- `max_devices_per_batch` (wave size per execution step).
+- `approval_required` for owner sign-off before OTA triggers.
+- Safety gates: `min_success_percent`, `min_observation_minutes`, `max_failure_percent`, `retry_limit`.
 
-Use OTA policy carefully. Start with conservative rollout settings when a template is used by many devices.
+See [OTA policy](/firmware-ota-policy) for full field reference.
+
+Use OTA policy carefully. Start with conservative staged settings when a template is used by many devices.
 
 ## Before publishing
 

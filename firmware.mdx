@@ -5,35 +5,64 @@ description: "Firmware artifacts, versions, policies, and release workflow"
 
 Firmware management in firmngin tracks what version is available, which devices should receive it, and how rollout progress is observed.
 
+Open **Dashboard → Firmware** to manage artifacts and workflow runs.
+
+## Dashboard views
+
+| Tab | Purpose |
+| --- | --- |
+| **Artifacts** | Upload firmware, filter by board and release date range, deploy to devices or templates. |
+| **Workflow runs** | Monitor OTA execution, fleet progress, approval, and per-device results. |
+
 ## Firmware concepts
 
 | Concept | Meaning |
 | --- | --- |
-| Artifact | The compiled firmware file or binary produced by a build pipeline. |
+| Artifact | The compiled firmware file produced by a build or upload. |
 | Version | Human-readable release identifier such as `1.4.2`. |
-| Policy | Rules that decide which devices are eligible for a rollout. |
-| Batch | A controlled group of target devices in a rollout. |
+| Policy | Rules on a device template that define rollout timing, strategy, and gates. |
+| Rollout plan | Parent job for a full fleet OTA (template or large deploy). |
+| Wave | One execution chunk inside a rollout (`max_devices_per_batch`). |
 | Device result | Per-device install state, logs, and errors. |
 
 ## Artifact versus policy
 
 Keep firmware artifacts separate from rollout policies.
 
-- Artifact upload answers: "What binary can be installed?"
-- Rollout policy answers: "Which devices should receive it, when, and under what constraints?"
+- **Artifact upload** answers: "What binary can be installed?"
+- **Rollout policy** answers: "Which devices should receive it, when, and under what constraints?"
 
-This separation matters because manual upload, CI/CD upload, and fleet rollout governance do not have the same permissions or review process.
+This separation matters because manual upload, CI/CD upload, and fleet rollout governance do not share the same permissions or review process.
 
 ## Release workflow
 
 1. Build firmware from a trusted source.
-2. Upload or register the artifact.
-3. Create a release version.
-4. Define targeting policy.
-5. Start with a small batch.
-6. Monitor install progress and logs.
-7. Expand rollout only after the previous batch is healthy.
+2. Upload or register the artifact under **Artifacts**.
+3. Attach or verify **OTA policy** on the target device template.
+4. Deploy to a **device template** (fleet) or selected devices (test).
+5. Approve the rollout if policy requires it.
+6. Monitor **Workflow runs** — fleet %, stages, and device logs.
+7. Expand through staged percents or pause/abort if health checks fail.
+
+For large fleets, deploy via **device template** so firmngin orchestrates multi-wave rollout automatically. See [Fleet rollout](/firmware-fleet-rollout).
 
 ## CI/CD path
 
-For automated releases, use the dedicated CI/CD upload path configured for firmware artifacts. Do not widen manual upload behavior to simulate CI/CD permissions.
+Automate build and upload with GitHub Actions and the [`firmngin/ota`](https://github.com/firmngin/ota) action. Generate a scoped token from **Dashboard → Integrations** (scope: **Firmware OTA**).
+
+| Guide | Description |
+| --- | --- |
+| [CI/CD overview](/firmware-ci-cd) | Setup, deployment modes, and prerequisites |
+| [GitHub Actions](/firmware-ci-cd-github-actions) | Workflow examples, inputs, troubleshooting |
+| [PlatformIO](/firmware-ci-cd-platformio) | `platformio.ini` projects |
+| [Arduino CLI](/firmware-ci-cd-arduino-cli) | `.ino` sketch projects |
+
+Do not share dashboard credentials in CI. Use a dedicated API token with the minimum required scope.
+
+## Related pages
+
+- [OTA updates](/ota-updates) — safe OTA practices
+- [Fleet rollout](/firmware-fleet-rollout) — waves and staged expansion
+- [OTA policy](/firmware-ota-policy) — template policy fields
+- [Workflow control](/firmware-workflow-control) — approve, pause, resume, abort
+- [CI/CD overview](/firmware-ci-cd) — GitHub Actions OTA automation

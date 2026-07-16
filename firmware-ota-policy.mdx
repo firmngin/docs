@@ -1,0 +1,62 @@
+---
+title: "OTA policy"
+description: "Firmware rollout rules attached to device templates"
+---
+
+A device template can include one **Firmware OTA policy**. When compatible firmware is published, the policy defines how rollout is scheduled, gated, and expanded across the fleet.
+
+Policies are versioned with the template contract. Changing rollout rules publishes a new policy version.
+
+## Firmware selection
+
+| Mode | Behavior |
+| --- | --- |
+| Latest compatible | Use the newest firmware artifact that matches the template board/model. |
+| Fixed firmware | Pin a specific artifact ID. |
+
+## Schedule types
+
+| Type | Behavior |
+| --- | --- |
+| Immediate | Start rollout after publish (subject to approval and gates). |
+| User-defined datetime | Rollout waits until the scheduled time you set on deploy. |
+| Maintenance window | Rollout runs only inside the configured daily window and timezone. |
+
+## Rollout strategy
+
+| Field | Description |
+| --- | --- |
+| `rollout_strategy` | `all_at_once`, `canary`, or `staged_expand`. |
+| `canary_percent` | Target percent for canary strategy (default 1%). |
+| `expand_percentages` | Ordered stages for `staged_expand` (for example `[1, 10, 25, 50, 100]`). |
+| `max_devices_per_batch` | **Wave size** — devices per wave, not the total fleet cap. |
+
+<Note>
+  `max_devices_per_batch` controls how many devices are triggered per wave. The rollout plan continues with additional waves until the full eligible fleet is processed.
+</Note>
+
+## Gates and safety
+
+| Field | Description |
+| --- | --- |
+| `approval_required` | Rollout stays in **Pending approval** until a workspace owner approves (creator cannot self-approve). |
+| `min_success_percent` | Minimum success rate required before advancing to the next stage. |
+| `min_observation_minutes` | Wait time after a wave completes before starting the next stage. |
+| `max_failure_percent` | Abort rollout when fleet failure rate exceeds this threshold. |
+| `retry_limit` | Automatic retries per device on OTA failure. |
+
+## Example: conservative production policy
+
+- Strategy: `staged_expand` with `[1, 10, 25, 50, 100]`
+- `approval_required`: true
+- `min_observation_minutes`: 30
+- `max_failure_percent`: 10
+- `max_devices_per_batch`: 500
+
+## Where to configure
+
+1. Open **Device templates** and edit the template.
+2. Attach or update **Firmware OTA policy** in the template editor.
+3. Publish a new template version when contract or policy rules change.
+
+See also [Device templates](/device-templates) and [Fleet rollout](/firmware-fleet-rollout).
