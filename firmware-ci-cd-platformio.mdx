@@ -234,15 +234,14 @@ The `firmngin/ota` action installs PlatformIO on each run; caching reduces downl
 
 ## Local verification before CI/CD
 
-Run the same commands locally that the action runs:
+Run a local PlatformIO build with the same environment before pushing:
 
 ```bash
 pip install platformio
 pio run --environment esp32dev
-ls -la .pio/build/esp32dev/firmware.bin
 ```
 
-Fix compile errors locally before pushing — CI/CD will fail on the same errors.
+Fix compile errors locally first — CI will fail on the same issues.
 
 ## PlatformIO + single device
 
@@ -259,14 +258,14 @@ For one device without a template:
 
 Ensure the device has board name and model set in the dashboard to match your PlatformIO target.
 
-## Common PlatformIO errors
+## Common issues
 
-| Error | Cause | Fix |
-| --- | --- | --- |
-| `Unable to detect PlatformIO environment` | No `default_envs` and ambiguous env list | Set `platformio-env` explicitly |
-| `firmware.bin not found` | Custom output name or failed link step | Verify build output path; fix compile errors |
-| `Firmware target does not match device template` | Board/model mismatch | Align template board fields with CI target |
-| Build works locally, fails in CI | Missing files in git, wrong branch | Confirm all sources are committed; check `working-directory` |
+| Issue | Fix |
+| --- | --- |
+| Environment not detected | Set `platformio-env` explicitly |
+| Build fails in CI | Confirm `pio run` succeeds locally for the same environment |
+| Board/model mismatch | Align device or template board fields with your PlatformIO target |
+| Works locally, fails in CI | Confirm all source files are committed; check workflow `working-directory` |
 
 ## Related
 

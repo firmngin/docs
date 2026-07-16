@@ -3,7 +3,7 @@ title: "GitHub Actions"
 description: "Complete reference for the firmngin/ota GitHub Action"
 ---
 
-The [`firmngin/ota`](https://github.com/firmngin/ota) action is a composite GitHub Action that builds firmware and uploads it to firmngin. It supports **PlatformIO** and **Arduino CLI**, auto-detects your project type, and integrates with fleet or single-device OTA.
+The [`firmngin/ota`](https://github.com/firmngin/ota) GitHub Action builds firmware and publishes it to firmngin. It supports **PlatformIO** and **Arduino CLI**, auto-detects your project type, and can start fleet or single-device OTA.
 
 <Info>
   **Before you start:** Generate an API token in **Dashboard → Integrations** with the **Firmware OTA** scope and add it to GitHub Secrets as `FIRMNGIN_API_TOKEN`. See [Step 1: Generate an API token](/firmware-ci-cd#step-1-generate-an-api-token).
@@ -22,7 +22,7 @@ The [`firmngin/ota`](https://github.com/firmngin/ota) action is a composite GitH
     platform: auto
     platformio-env: esp32dev
     arduino-fqbn: esp32:esp32:esp32
-    arduino-sketch: firmware/main.ino
+    arduino-sketch: my-device
     version: 1.0.0
     release-notes: "Bug fixes and performance improvements"
 ```
@@ -32,36 +32,30 @@ The [`firmngin/ota`](https://github.com/firmngin/ota) action is a composite GitH
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
 | `token` | Yes | — | API token from **Integrations** with **Firmware OTA** scope. Store as a GitHub secret. |
-| `device-template-id` | No* | `""` | Device template UUID. Upload + fleet rollout via template OTA policy. |
-| `device-secret-id` | No* | `""` | Device secret ID. Upload + immediate OTA to one device. |
+| `device-template-id` | No* | `""` | Device template UUID — fleet rollout via template OTA policy. |
+| `device-secret-id` | No* | `""` | Device Secret ID — upload and OTA to one device. |
 | `target-board` | No* | `""` | Board name for artifact-only upload (for example `esp32`). |
 | `target-model` | No* | `""` | Board model for artifact-only upload (for example `esp32`). |
 | `platform` | No | `auto` | Build tool: `auto`, `platformio`, or `arduino`. |
 | `platformio-env` | No | auto-detect | PlatformIO environment name from `platformio.ini`. |
-| `arduino-fqbn` | No | — | Fully Qualified Board Name for Arduino CLI (required when `platform: arduino`). |
-| `arduino-sketch` | No | auto-detect | Sketch **folder** name (for example `my-device`), or path to `.ino` (normalized automatically) |
-| `version` | No | git-based | Firmware version string sent to firmngin. |
-| `release-notes` | No | `""` | Optional release notes stored with the artifact. |
+| `arduino-fqbn` | No | — | Board identifier for Arduino builds (required when `platform: arduino`). |
+| `arduino-sketch` | No | auto-detect | Sketch **folder** name (for example `my-device`). |
+| `version` | No | git-based | Firmware version label. |
+| `release-notes` | No | `""` | Optional release notes shown in the dashboard. |
 
-\* Exactly **one** of these target groups is required:
-
-- `device-template-id`
-- `device-secret-id`
-- `target-board` **and** `target-model`
+\* Use **one** target mode per run: `device-template-id`, `device-secret-id`, or `target-board` + `target-model`.
 
 ## What happens on each run
 
-1. **Detect project** — PlatformIO or Arduino, from your repo layout or `platform` input.
-2. **Install tools** — build toolchain for your board.
-3. **Build** — compile firmware to a `.bin` file.
-4. **Version** — use your input, git tag, or commit SHA.
-5. **Upload** — publish the artifact to firmngin and start OTA when a target is configured.
+1. Detect PlatformIO or Arduino project.
+2. Install the build toolchain for your board.
+3. Compile firmware.
+4. Resolve a version label.
+5. Upload to firmngin and start OTA when a target is configured.
 
 ## Workflow examples
 
 ### Fleet OTA on push to main
-
-Rolls out to all devices using a template when firmware is merged:
 
 ```yaml
 name: Production OTA
@@ -90,11 +84,7 @@ jobs:
           release-notes: ${{ github.event.head_commit.message }}
 ```
 
-`fetch-depth: 0` helps git-based version resolution when you rely on tags.
-
 ### Single device (no template)
-
-Useful for prototypes, demos, or workspaces with one standalone device:
 
 ```yaml
 name: Single device OTA
@@ -125,243 +115,83 @@ jobs:
           arduino-sketch: my-device
 ```
 
-Add secret `FIRMNGIN_KEYS_H` with the full contents of your local `keys.h` file. See [Arduino CLI CI/CD](/firmware-ci-cd-arduino-cli).
+See [Arduino CLI CI/CD](/firmware-ci-cd-arduino-cli) for `keys.h` setup.
 
 ### Artifact only (manual deploy later)
 
-Upload firmware without starting OTA:
-
 ```yaml
-name: Build and store firmware
-
-on:
-  push:
-    tags:
-      - "v*"
-
-permissions:
-  contents: read
-
-jobs:
-  upload:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: firmngin/ota@v1.1.3
-        with:
-          token: ${{ secrets.FIRMNGIN_API_TOKEN }}
-          target-board: esp32
-          target-model: esp32
-          version: ${{ github.ref_name }}
-          release-notes: "Release ${{ github.ref_name }}"
+- uses: firmngin/ota@v1.1.3
+  with:
+    token: ${{ secrets.FIRMNGIN_API_TOKEN }}
+    target-board: esp32
+    target-model: esp32
+    version: ${{ github.ref_name }}
 ```
 
-Deploy from **Dashboard → Firmware → Artifacts** when you are ready.
+Deploy later from **Dashboard → Firmware → Artifacts**.
 
 ### Pull request build (no upload)
 
-Validate that firmware compiles on every PR without publishing:
-
-```yaml
-name: Firmware build check
-
-on:
-  pull_request:
-
-permissions:
-  contents: read
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build PlatformIO
-        run: |
-          pip install platformio
-          pio run
-```
-
-Add the `firmngin/ota` step only on protected branches if you want upload gated to merge.
+Build only on PRs — add `firmngin/ota` on merge to `main` if you want upload gated to protected branches.
 
 ### Matrix build (multiple boards)
 
-Build and upload separate artifacts per hardware target:
-
-```yaml
-name: Multi-board OTA
-
-on:
-  push:
-    branches:
-      - main
-
-permissions:
-  contents: read
-
-jobs:
-  ota:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - env: esp32dev
-            board: esp32
-            model: esp32
-          - env: esp8266
-            board: esp8266
-            model: esp8266
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: firmngin/ota@v1.1.3
-        with:
-          token: ${{ secrets.FIRMNGIN_API_TOKEN }}
-          target-board: ${{ matrix.board }}
-          target-model: ${{ matrix.model }}
-          platform: platformio
-          platformio-env: ${{ matrix.env }}
-          version: ${{ github.sha }}
-```
-
-Pair each board/model with the correct template or deploy manually per artifact.
-
-### Scheduled nightly build
-
-```yaml
-name: Nightly firmware
-
-on:
-  schedule:
-    - cron: "0 2 * * *"
-
-permissions:
-  contents: read
-
-jobs:
-  ota:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: firmngin/ota@v1.1.3
-        with:
-          token: ${{ secrets.FIRMNGIN_API_TOKEN }}
-          device-template-id: ${{ vars.FIRMNGIN_DEVICE_TEMPLATE_ID }}
-          version: nightly-${{ github.run_number }}
-```
+Use a GitHub Actions matrix with different `platformio-env`, `target-board`, and `target-model` per hardware line.
 
 ## Version pinning
 
-Pin the action to a release tag for reproducible pipelines:
+Pin the action for reproducible pipelines:
 
 ```yaml
 - uses: firmngin/ota@v1.1.3
 ```
 
-| Tag | Notes |
-| --- | --- |
-| `v1` | Initial release — template or board/model targets |
-| `v1.1` | Adds `device-secret-id` for single-device OTA |
-| `v1.1.1` | Auto-install board core + Firmngin Arduino library |
-| `v1.1.2` | Normalize Arduino sketch folder path for `arduino-cli compile` |
-| `v1.1.3` | ESP32 Arduino build fix — **recommended** |
-
-Avoid `@main` in production workflows unless you explicitly want to track the latest action changes.
+Use the latest stable tag from the [firmngin/ota releases](https://github.com/firmngin/ota/releases). Avoid `@main` in production.
 
 ### After a successful run
 
-- Check **Dashboard → Firmware → Artifacts** for the new version.
-- For fleet or single-device deploy, check **Firmware → Workflow runs** for OTA progress.
+- **Dashboard → Firmware → Artifacts** — new firmware version
+- **Dashboard → Firmware → Workflow runs** — OTA progress (fleet or single device)
 
 ## Troubleshooting
 
-### `API token is required`
+### Token missing or invalid
 
-- Confirm `token:` references a GitHub **secret**, not an empty variable.
-- Verify the secret name matches your workflow (`FIRMNGIN_API_TOKEN`).
+- Store `FIRMNGIN_API_TOKEN` as a GitHub **secret**.
+- Regenerate the token in **Integrations** with **Firmware OTA** scope if auth fails.
 
-### `Token does not have firmware:deploy scope`
+### No deploy target configured
 
-- Regenerate the token in **Integrations** with **Firmware OTA** checked.
-- Revoke the old token after replacing the secret.
+- Set exactly one mode: `device-template-id`, `device-secret-id`, or both `target-board` and `target-model`.
+- For single-device mode, store `FIRMNGIN_DEVICE_SECRET_ID` in **Secrets** — an empty value causes this failure.
 
-### `device-template-id, device-secret-id, or target-board + target-model is required`
+### Arduino sketch not found
 
-- Set exactly one target mode in `with:`.
-- For artifact-only mode, both `target-board` and `target-model` must be non-empty.
-- If using `device-secret-id`, confirm the secret is set in **GitHub Secrets** (not only Variables). An empty `${{ secrets.FIRMNGIN_DEVICE_SECRET_ID }}` triggers this error.
+- Use `FolderName/FolderName.ino` layout.
+- Set `arduino-sketch` to the **folder name** (for example `my-device`).
 
-### `Can't open sketch: main file missing from sketch`
+### Build succeeded but upload step failed
 
-- Arduino requires `SketchName/SketchName.ino` — folder and `.ino` filename must match.
-- Set `arduino-sketch` to the **folder name** (for example `my-device`), not a mismatched path.
-- Do not place a lone `.ino` file at the repository root without its folder.
+- Upgrade to the latest `firmngin/ota` release tag.
+- Confirm secrets and workflow inputs are set.
 
-### `Firmware binary not found after Arduino compile`
+### Library download message in logs
 
-- Upgrade to `firmngin/ota@v1.1.3` or newer.
+- Normal during Arduino builds — the action prepares dependencies before compile.
 
-### `Cloning into '.../Firmngin-Arduino'`
+### Template or device mismatch
 
-- Normal — the action installs the Firmngin Arduino library. Not an error.
+- Confirm board/model on the device or template matches your build target.
+- For fleet OTA, verify the template has an active **Firmware OTA policy**.
 
-### `device-template-id and device-secret-id cannot be used together`
-
-- Remove one of the two inputs from the same step.
-
-### `Unable to detect PlatformIO or Arduino project`
-
-- Add `platformio.ini` for PlatformIO, or ensure an `.ino` file exists within three directory levels.
-- Or set `platform: platformio` or `platform: arduino` explicitly.
-
-### `Unable to detect PlatformIO environment`
-
-- Set `platformio-env` explicitly (for example `esp32dev`).
-- Ensure `[env:your_env]` exists in `platformio.ini`.
-
-### `arduino-fqbn is required for Arduino builds`
-
-- Set `arduino-fqbn` (for example `esp32:esp32:esp32`).
-- Run `arduino-cli board listall esp32` locally to find valid FQBN values.
-
-### `firmware.bin not found after PlatformIO build`
-
-- Confirm `pio run` succeeds locally for the same environment.
-- Some boards output to a non-default path; verify `.pio/build/<env>/firmware.bin` exists.
-
-### `File too large. Max 10MB`
-
-- Reduce binary size (disable debug symbols, optimize build flags).
-- Split optional assets out of the firmware binary if your product design allows it.
-
-### `Device template targets are invalid`
-
-- Open the template and confirm **board name** and **board model** are configured.
-- Ensure the template is not deleted.
-
-### `device not found in workspace`
-
-- Verify `device-secret-id` matches the **Secret ID** on the device page.
-- Confirm the API token belongs to the same workspace as the device.
-
-### `device board_name is not set` / `device board_model is not set`
-
-- Edit the device in the dashboard and set board fields before using single-device CI/CD.
-
-### Upload succeeds but no OTA on fleet
-
-- Confirm the template has an active **Firmware OTA policy**.
-- Check **Workflow runs** for **Pending approval** if policy requires owner sign-off.
-- Verify uploaded board/model matches the template and device hardware.
-
-### Upload succeeds but device does not update (single device)
+### Device does not update after upload
 
 - Confirm the device is online.
-- Check **Workflow runs** or device logs for download/install errors.
-- Ensure firmware board/model matches the device board/model.
+- Check **Firmware → Workflow runs** and device logs in the dashboard.
+
+### Firmware file too large
+
+- Maximum size is **10 MB**. Optimize build flags or reduce bundled assets.
 
 ## Related
 
