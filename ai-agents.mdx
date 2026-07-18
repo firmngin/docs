@@ -1,0 +1,71 @@
+---
+title: "AI Agents"
+description: "Use workspace AI agents and understand flat credit pricing per request"
+---
+
+Workspace AI Agents help you inspect devices, review logs, operate permitted controls, and manage automations with natural language from the Firmngin dashboard or connected messaging channels.
+
+## Open AI Agents
+
+In the Firmngin dashboard, open **AI Agents**, then configure the agent for your workspace:
+
+- Choose a model
+- Set instructions
+- Grant tool permissions
+- Connect [messaging channels](/channels) such as Telegram or Discord
+
+<Note>
+  Your plan must include AI credits, and your workspace must have enough remaining credit balance to run agent requests.
+</Note>
+
+## How credit billing works
+
+Firmngin charges **flat AI credits per successful agent request**, not per token.
+
+| What happens | Credit charge |
+| --- | --- |
+| First successful model turn for a user message | Flat credits for the selected model |
+| Tool-loop / continuation turns for the same request | `0` additional credits |
+| Failed request before a successful charge | No credit deducted for that charge attempt |
+
+Token counts may still be recorded for analytics and usage history. Customer billing for AI Agents uses the flat credit amount only.
+
+## Credit cost by model
+
+Credits are shown next to each model in the agent chat model selector. Current rates:
+
+| Model | Credits per request |
+| --- | --- |
+| `deepseek/deepseek-v4-flash` | 1 |
+| `openai/gpt-oss-safeguard-20b` | 1 |
+| `google/gemini-2.5-flash-lite` | 1 |
+| `xiaomi/mimo-v2.5` | 1 |
+| `deepseek/deepseek-v4-pro` | 2 |
+| `openai/gpt-4.1-mini` | 2 |
+| `tencent/hy3` | 2 |
+| `google/gemini-3.1-flash-lite` | 2 |
+| `qwen/qwen3.5-35b-a3b` | 2 |
+| `x-ai/grok-4.3` | 3 |
+| `nvidia/nemotron-3-ultra-550b-a55b` | 3 |
+| `google/gemini-3.5-flash` | 3 |
+| `anthropic/claude-sonnet-4.6` | 5 |
+
+<Tip>
+  Prefer lower-credit models for routine monitoring and troubleshooting. Use higher-credit models when you need stronger reasoning or longer complex workflows.
+</Tip>
+
+## Insufficient credits
+
+If the workspace does not have enough AI credits for the selected model, Firmngin rejects the request and does not complete the agent turn.
+
+To continue:
+
+1. Check your remaining AI credit balance in the dashboard.
+2. Buy more AI credits, or wait for included plan credits to renew.
+3. Or switch to a model with a lower credit cost.
+
+## Related
+
+- [Plans](/plans) — included AI credits and concurrent AI task limits
+- [Messaging channels](/channels) — connect Telegram or Discord to your workspace agent
+- [Connect AI clients](/mcp) — use Firmngin tools from external MCP clients
