@@ -1,0 +1,150 @@
+---
+title: "Master firmware for fresh boards"
+description: "Prepare a complete factory image for batch burning before device provisioning"
+---
+
+Master firmware is the complete flash image used to initialize fresh boards on a factory line. It is different from the application-only binary used for OTA updates.
+
+## Choose the correct binary
+
+| Use case | Binary | Flash location |
+| --- | --- | --- |
+| Fresh-board batch burning | Full merged image such as `firmware.merged.bin` | Beginning of flash (`0x0`) |
+| OTA update | Application image such as `firmware.bin` | Managed by the device OTA partition |
+
+<Warning>
+  Do not upload an application-only binary as master firmware. A fresh board also needs its bootloader, partition table, and other required boot images.
+</Warning>
+
+## Arduino IDE
+
+1. Select the production **Board**, **Flash Size**, and **Partition Scheme**.
+2. Open **Sketch → Export Compiled Binary**.
+3. Locate the generated file ending in `.merged.bin`.
+4. Open **Dashboard → Firmware → Upload Firmware**.
+5. Enable **As Master Firmware Fleet** and upload the `.merged.bin` file.
+
+Arduino also exports a regular `.bin` file. Keep that application-only file for OTA updates.
+
+## PlatformIO
+
+PlatformIO normally produces `.pio/build/<environment>/firmware.bin` as an application-only image. For fresh boards, merge the exact bootloader, partition table, boot application data, and application images produced by the selected environment.
+
+### Generate it automatically from `platformio.ini`
+
+Add a post-build script to the production environment:
+
+```ini
+[env:esp32dev-factory]
+platform = espressif32
+board = esp32dev
+framework = arduino
+extra_scripts = post:scripts/merge_firmware.py
+```
+
+Create `scripts/merge_firmware.py` in the PlatformIO project:
+
+```python
+Import("env")
+
+import os
+import subprocess
+
+
+def merge_factory_image(source, target, build_env):
+    build_dir = build_env.subst("$BUILD_DIR")
+    program_name = build_env.subst("$PROGNAME")
+    output_path = os.path.join(build_dir, f"{program_name}.merged.bin")
+
+    command = [
+        build_env.subst("$PYTHONEXE"),
+        build_env.subst("$UPLOADER"),
+        "--chip",
+        build_env.BoardConfig().get("build.mcu"),
+        "merge_bin",
+        "-o",
+        output_path,
+        "--flash_mode",
+        "keep",
+        "--flash_freq",
+        "keep",
+        "--flash_size",
+        "keep",
+    ]
+
+    for offset, image_path in build_env.get("FLASH_EXTRA_IMAGES", []):
+        command.extend([str(offset), build_env.subst(str(image_path))])
+
+    command.extend([
+        build_env.subst("$ESP32_APP_OFFSET"),
+        target[0].get_abspath(),
+    ])
+
+    subprocess.run(command, check=True)
+    print(f"Factory image: {output_path}")
+
+
+env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", merge_factory_image)
+```
+
+Build the environment normally:
+
+```bash
+pio run --environment esp32dev-factory
+```
+
+The post-build script generates:
+
+```text
+.pio/build/esp32dev-factory/firmware.merged.bin
+```
+
+The script reads PlatformIO's `FLASH_EXTRA_IMAGES` and `ESP32_APP_OFFSET`, so it follows the selected board instead of assuming every ESP32 variant uses the same bootloader offset.
+
+### Generate it manually
+
+Replace `esp32dev-factory` with the production environment name from your `platformio.ini`.
+
+First, confirm the image offsets:
+
+```bash
+pio run --environment esp32dev-factory --target upload --verbose
+```
+
+You do not need to complete the upload. Copy the image-offset pairs shown in the generated `esptool write-flash` command. Bootloader offsets can differ between ESP32 variants, so do not reuse offsets from another board.
+
+Then merge the images:
+
+For a classic ESP32 build whose upload command uses `0x1000`, `0x8000`, `0xe000`, and `0x10000`, run:
+
+```bash
+esptool --chip esp32 merge-bin \
+  -o .pio/build/esp32dev-factory/firmware.merged.bin \
+  --flash-mode keep \
+  --flash-freq keep \
+  --flash-size keep \
+  0x1000 .pio/build/esp32dev-factory/bootloader.bin \
+  0x8000 .pio/build/esp32dev-factory/partitions.bin \
+  0xe000 ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin \
+  0x10000 .pio/build/esp32dev-factory/firmware.bin
+```
+
+Replace the environment directory, chip, image paths, and offsets with the values from your PlatformIO upload command.
+
+<Warning>
+  ESP32-C3, ESP32-S3, ESP32-C6, and other variants may use a different bootloader offset. Always use the offsets generated for the selected PlatformIO board.
+</Warning>
+
+The resulting factory artifact should be named clearly, for example:
+
+```text
+.pio/build/esp32dev-factory/firmware.merged.bin
+```
+
+Upload that merged image with **As Master Firmware Fleet** enabled. Continue uploading the regular `firmware.bin` for OTA releases.
+
+## Keep factory and OTA builds compatible
+
+Build the merged image and OTA image with the same board, flash size, and partition scheme. Changing the partition layout later can prevent boot or overwrite persistent device identity stored during factory provisioning.
+
+After the master image is uploaded, use Firmngin Factory CLI to burn each board and inject its unique device identity.

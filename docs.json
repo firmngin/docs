@@ -39,6 +39,7 @@
                 "root": "firmware",
                 "pages": [
                   "ota-updates",
+                  "firmware-master-fleet",
                   "firmware-fleet-rollout",
                   "firmware-ota-policy",
                   "firmware-workflow-control",
