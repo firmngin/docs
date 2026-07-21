@@ -86,7 +86,7 @@ fngin.on(DEVICE_STATUS, [](DeviceStates &ds) {
 
 ## Init flow
 
-The `Inits` object provides the initial device configuration after connection. It can include entity configuration, merchant status, active order ID, verification flags, and business mode (`md`: `1` = service, `2` = vending).
+The `Inits` object provides the initial device configuration after connection. It can include entity configuration, merchant status, active order ID, verification flags, and business mode (service or vending).
 
 ```cpp
 fngin.on(INIT, [](Inits &i) {
@@ -98,9 +98,6 @@ fngin.on(INIT, [](Inits &i) {
 
   Serial.print("Active order: ");
   Serial.println(i.activeOrderId());
-
-  Serial.print("Mode flag: ");
-  Serial.println(i.modeFlag());
 
   if (i.isVendingMode()) {
     Serial.println("Business mode: vending");
@@ -117,7 +114,7 @@ fngin.on(INIT, [](Inits &i) {
 
 ## Vending dispense
 
-When the device business mode is **vending**, a successful prepaid payment publishes a SKU array on `/c/{device_id}/dp`. Use the typed `Dispenses` object (or `ON_DISPENSES`) to drive motors/servos.
+When the device business mode is **vending**, a successful prepaid payment delivers catalog SKUs to dispense. Use the typed `Dispenses` object (or `ON_DISPENSES`) to drive motors or servos.
 
 ```cpp
 fngin.on(DISPENSES, [](Dispenses &d) {

@@ -12,18 +12,18 @@ Register handlers with `client.on(Event.X, handler)` on `AsyncClient` or `Client
 | `Event.PAYMENT` | `Payment` | Payment updates |
 | `Event.PAYMENT_PENDING` | `Payment` | Payment is pending |
 | `Event.PAYMENT_SUCCESS` | `Payment` | Payment succeeded |
-| `Event.INIT` | `Init` | Initial device configuration (includes business mode `md`) |
-| `Event.DISPENSE` | `Dispense` | Vending SKU array from `/dp` |
+| `Event.INIT` | `Init` | Initial device configuration, including business mode |
+| `Event.DISPENSE` | `Dispense` | Vending SKU list to dispense |
 | `Event.MERCHANT_STATUS` | `str` | Merchant status changed |
 | `Event.VERIFICATION` | `Verification` | Verification result |
 | `Event.PIN` | `Verification` | PIN displayed on device |
 | `Event.DEVICE_STATUS` | `DeviceStatus` | Device lifecycle change |
 | `Event.ENTITY_COMMAND` | `EntityCommand` | Entity command (all entities) |
 | `Event.ACTIVE_SESSION` | `ActiveSession` | Active paid session |
-| `Event.USAGE` | `Usage` | Usage / limit topics (`ur`, `le`, `nl`) |
-| `Event.METADATA_PENDING` | `str` | Raw JSON from `mop` |
-| `Event.METADATA_EXPIRED` | `str` | Raw JSON from `moe` |
-| `Event.METADATA_SUCCESS` | `str` | Raw JSON from `mos` |
+| `Event.USAGE` | `Usage` | Usage / limit updates |
+| `Event.METADATA_PENDING` | `str` | Pending-payment metadata JSON |
+| `Event.METADATA_EXPIRED` | `str` | Expired-payment metadata JSON |
+| `Event.METADATA_SUCCESS` | `str` | Successful-payment metadata JSON |
 | `Event.ERROR` | `Exception` | Runtime error |
 
 ## Register handlers
@@ -42,7 +42,7 @@ async with AsyncClient(config) as client:
 
 ## Init business mode
 
-`Init.mode` comes from init key `md`: `1` = service, `2` = vending.
+Use `Init` helpers to detect service vs vending business mode.
 
 ```python
 from firmngin import Event, Init
@@ -57,7 +57,7 @@ def on_init(init: Init) -> None:
 
 ## Vending dispense
 
-When business mode is vending, a paid prepaid order delivers SKUs as a JSON array on `/dp`:
+When business mode is vending, a paid prepaid order delivers catalog SKUs to dispense:
 
 ```python
 from firmngin import Dispense, Event
