@@ -10,7 +10,7 @@ Use the Firmngin Python SDK on Raspberry Pi, Linux-based devices, integration te
 
 Two entry points, one protocol — choose what fits your code:
 
-| | `AsyncClient` | `Client` |
+|  | `AsyncClient` | `Client` |
 | --- | --- | --- |
 | Style | `async` / `await` | Regular blocking calls |
 | Handlers | `client.on(...)`, `client.on_entity(...)` | Same |
@@ -26,6 +26,7 @@ Both use `ClientConfig.from_file("keys.json")` and support the same events.
 - LWT online/offline on connect and disconnect
 - Auto `request_init()` on connect
 - Typed events, entity publishing, batch updates, location, offline queue
+- Vending mode on `Init` (`md` / `is_vending_mode`) and `Event.DISPENSE` SKU payloads
 - Payment metadata callbacks (`mop` / `moe` / `mos`) as raw JSON strings
 - Optional image upload via `firmngin[http]`
 
@@ -33,7 +34,7 @@ OTA firmware updates are not available in the Python SDK.
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.9\+
 - A `keys.json` file from the Firmngin dashboard
 
 ## Dependencies
@@ -41,7 +42,7 @@ OTA firmware updates are not available in the Python SDK.
 | Package | Purpose |
 | --- | --- |
 | `aiomqtt` | MQTT transport |
-| `cryptography` | TLS + E2EE encryption |
+| `cryptography` | TLS \+ E2EE encryption |
 
 Image upload: `pip install firmngin[http]`
 

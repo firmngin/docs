@@ -12,7 +12,8 @@ Register handlers with `client.on(Event.X, handler)` on `AsyncClient` or `Client
 | `Event.PAYMENT` | `Payment` | Payment updates |
 | `Event.PAYMENT_PENDING` | `Payment` | Payment is pending |
 | `Event.PAYMENT_SUCCESS` | `Payment` | Payment succeeded |
-| `Event.INIT` | `Init` | Initial device configuration |
+| `Event.INIT` | `Init` | Initial device configuration (includes business mode `md`) |
+| `Event.DISPENSE` | `Dispense` | Vending SKU array from `/dp` |
 | `Event.MERCHANT_STATUS` | `str` | Merchant status changed |
 | `Event.VERIFICATION` | `Verification` | Verification result |
 | `Event.PIN` | `Verification` | PIN displayed on device |
@@ -37,6 +38,36 @@ async with AsyncClient(config) as client:
     async def handle_payment(payment: Payment) -> None:
         if payment.is_success:
             print("paid:", payment.order_id)
+```
+
+## Init business mode
+
+`Init.mode` comes from init key `md`: `1` = service, `2` = vending.
+
+```python
+from firmngin import Event, Init
+
+@client.on(Event.INIT)
+def on_init(init: Init) -> None:
+    if init.is_vending_mode:
+        print("vending mode")
+    if init.is_service_mode:
+        print("service mode")
+```
+
+## Vending dispense
+
+When business mode is vending, a paid prepaid order delivers SKUs as a JSON array on `/dp`:
+
+```python
+from firmngin import Dispense, Event
+
+@client.on(Event.DISPENSE)
+def on_dispense(dispense: Dispense) -> None:
+    if not dispense.is_valid:
+        return
+    for sku in dispense.skus:
+        print("dispense:", sku)
 ```
 
 Remove a handler:
