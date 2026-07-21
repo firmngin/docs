@@ -77,9 +77,9 @@ client.off(Event.PAYMENT, handle_payment)
 client.clear_handlers()
 ```
 
-## Payment metadata (raw JSON)
+## Payment metadata
 
-Topics `mop`, `moe`, and `mos` deliver decrypted JSON as a plain string. Parse it yourself for custom fields:
+These events deliver custom metadata as a JSON string. Parse it in your handler for catalog-defined fields:
 
 ```python
 import json
