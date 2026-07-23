@@ -52,6 +52,21 @@ with Client(ClientConfig.from_file("keys.json")) as client:
 
 All events are registered with `client.on(...)` on both clients.
 
+## Vending dispense
+
+```python
+from firmngin import Dispense, Event, Init
+
+@client.on(Event.INIT)
+def on_init(init: Init) -> None:
+    print("vending:" if init.is_vending_mode else "service")
+
+@client.on(Event.DISPENSE)
+def on_dispense(dispense: Dispense) -> None:
+    for sku in dispense.skus:
+        print("dispense:", sku)
+```
+
 ## Payment metadata
 
 ```python
