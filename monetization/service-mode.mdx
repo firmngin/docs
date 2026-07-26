@@ -72,6 +72,26 @@ Stop mode decides who can end an active session:
 
 Configure stop mode in the device's **Flow** settings. See [Merchant Setup](/monetization/merchant-setup) for the full flow reference.
 
+### Session states
+
+```mermaid actions={false}
+stateDiagram-v2
+    [*] --> Ordered: Customer selects a service item
+    Ordered --> Verifying: Verification is required
+    Ordered --> Awaiting: No verification required
+    Verifying --> Verifying: PIN or prerequisite retry
+    Verifying --> Awaiting: Verification passed
+    Awaiting --> Active: Prepaid payment completed
+    Awaiting --> Active: Postpaid session started
+    Active --> Ended: Customer ends the session
+    Active --> Ended: Device ends the session
+    Active --> Ended: Dashboard force-ends the session
+    Ended --> Billed: Postpaid final amount is calculated
+    Billed --> Closed: Customer completes payment
+    Ended --> Closed: Prepaid order is already paid
+    Closed --> [*]
+```
+
 ## Service flow
 
 ```mermaid actions={false}

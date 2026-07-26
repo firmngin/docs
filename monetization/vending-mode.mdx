@@ -72,6 +72,16 @@ When a device uses vending mode, the linked device drawer adds a **Vending Stock
 - Items with unlimited stock never reserve or restore anything.
 - A paid order never returns stock, because the units were already dispensed.
 
+```mermaid actions={false}
+stateDiagram-v2
+    [*] --> Available: Stock is set for this device
+    Available --> Reserved: Order is created
+    Reserved --> Dispensed: Payment is confirmed
+    Reserved --> Available: Order is cancelled
+    Reserved --> Available: Payment expires
+    Dispensed --> [*]
+```
+
 <Warning>
   Refill the physical machine and update **Vending Stock** together. A stock number that is higher than the real inventory lets customers pay for units the device cannot dispense.
 </Warning>
@@ -114,6 +124,27 @@ Kiosk mode uses a simplified, screen-friendly version of the public page:
 | Theme and language selectors | Hidden | Shown |
 
 After the QR is scanned and payment is confirmed, the kiosk screen shows the receipt and the device dispenses the items.
+
+### Kiosk checkout flow
+
+```mermaid actions={false}
+sequenceDiagram
+    participant Client as Client (Payer)
+    participant Device as Kiosk Device
+    participant Firmngin
+    participant Merchant
+    Client->>Device: Pick items on the kiosk screen
+    Device->>Firmngin: Create the order
+    Firmngin->>Firmngin: Reserve stock for this device
+    Firmngin->>Device: Return the QRIS code
+    Device->>Client: Show the QR on screen
+    Client->>Firmngin: Pay by scanning the QR
+    Firmngin->>Merchant: Confirm the paid order
+    Firmngin->>Device: Send the units to dispense
+    Device->>Client: Dispense the items and show the receipt
+```
+
+If the customer walks away, the order can be cancelled or left to expire. Either outcome returns the reserved stock to the device.
 
 <Note>
   Keep kiosk mode off when customers should pay from their own phone with the full range of payment channels.
