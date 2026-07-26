@@ -12,17 +12,18 @@ Register handlers with `client.on(Event.X, handler)` on `AsyncClient` or `Client
 | `Event.PAYMENT` | `Payment` | Payment updates |
 | `Event.PAYMENT_PENDING` | `Payment` | Payment is pending |
 | `Event.PAYMENT_SUCCESS` | `Payment` | Payment succeeded |
-| `Event.INIT` | `Init` | Initial device configuration |
+| `Event.INIT` | `Init` | Initial device configuration, including business mode |
+| `Event.DISPENSE` | `Dispense` | Vending SKU list to dispense |
 | `Event.MERCHANT_STATUS` | `str` | Merchant status changed |
 | `Event.VERIFICATION` | `Verification` | Verification result |
 | `Event.PIN` | `Verification` | PIN displayed on device |
 | `Event.DEVICE_STATUS` | `DeviceStatus` | Device lifecycle change |
 | `Event.ENTITY_COMMAND` | `EntityCommand` | Entity command (all entities) |
 | `Event.ACTIVE_SESSION` | `ActiveSession` | Active paid session |
-| `Event.USAGE` | `Usage` | Usage / limit topics (`ur`, `le`, `nl`) |
-| `Event.METADATA_PENDING` | `str` | Raw JSON from `mop` |
-| `Event.METADATA_EXPIRED` | `str` | Raw JSON from `moe` |
-| `Event.METADATA_SUCCESS` | `str` | Raw JSON from `mos` |
+| `Event.USAGE` | `Usage` | Usage / limit updates |
+| `Event.METADATA_PENDING` | `str` | Pending-payment metadata JSON |
+| `Event.METADATA_EXPIRED` | `str` | Expired-payment metadata JSON |
+| `Event.METADATA_SUCCESS` | `str` | Successful-payment metadata JSON |
 | `Event.ERROR` | `Exception` | Runtime error |
 
 ## Register handlers
@@ -39,6 +40,36 @@ async with AsyncClient(config) as client:
             print("paid:", payment.order_id)
 ```
 
+## Init business mode
+
+Use `Init` helpers to detect service vs vending business mode.
+
+```python
+from firmngin import Event, Init
+
+@client.on(Event.INIT)
+def on_init(init: Init) -> None:
+    if init.is_vending_mode:
+        print("vending mode")
+    if init.is_service_mode:
+        print("service mode")
+```
+
+## Vending dispense
+
+When business mode is vending, a paid prepaid order delivers catalog SKUs to dispense:
+
+```python
+from firmngin import Dispense, Event
+
+@client.on(Event.DISPENSE)
+def on_dispense(dispense: Dispense) -> None:
+    if not dispense.is_valid:
+        return
+    for sku in dispense.skus:
+        print("dispense:", sku)
+```
+
 Remove a handler:
 
 ```python
@@ -46,9 +77,9 @@ client.off(Event.PAYMENT, handle_payment)
 client.clear_handlers()
 ```
 
-## Payment metadata (raw JSON)
+## Payment metadata
 
-Topics `mop`, `moe`, and `mos` deliver decrypted JSON as a plain string. Parse it yourself for custom fields:
+These events deliver custom metadata as a JSON string. Parse it in your handler for catalog-defined fields:
 
 ```python
 import json

@@ -5,7 +5,7 @@ description: "Handle payments, verification, and active sessions from Arduino fi
 
 Use monetization callbacks when the device needs to react to paid orders, PIN verification, or active service sessions.
 
-[image:paid IoT session flow from checkout to device active service]
+\[image:paid IoT session flow from checkout to device active service\]
 
 <Note>
   Firmware should react to the typed events it receives. It should not expose internal broker topics, raw device secrets, or backend-only identifiers to end users.
@@ -86,7 +86,7 @@ fngin.on(DEVICE_STATUS, [](DeviceStates &ds) {
 
 ## Init flow
 
-The `Inits` object provides the initial device configuration after connection. It can include entity configuration, merchant status, active order ID, and verification flags.
+The `Inits` object provides the initial device configuration after connection. It can include entity configuration, merchant status, active order ID, verification flags, and business mode (service or vending).
 
 ```cpp
 fngin.on(INIT, [](Inits &i) {
@@ -99,11 +99,40 @@ fngin.on(INIT, [](Inits &i) {
   Serial.print("Active order: ");
   Serial.println(i.activeOrderId());
 
+  if (i.isVendingMode()) {
+    Serial.println("Business mode: vending");
+  }
+  if (i.isServiceMode()) {
+    Serial.println("Business mode: service");
+  }
+
   if (i.isVerificationRequired()) {
     Serial.println("Verification is required");
   }
 });
 ```
+
+## Vending dispense
+
+When the device business mode is **vending**, a successful prepaid payment delivers catalog SKUs to dispense. Use the typed `Dispenses` object (or `ON_DISPENSES`) to drive motors or servos.
+
+```cpp
+fngin.on(DISPENSES, [](Dispenses &d) {
+  if (!d.isValid()) {
+    Serial.println("Invalid dispense payload");
+    return;
+  }
+
+  for (int i = 0; i < d.itemCount(); i++) {
+    Serial.print("Dispense SKU: ");
+    Serial.println(d.skuAt(i));
+  }
+});
+```
+
+Common helpers: `isValid()`, `itemCount()`, `skuAt(i)`, `metadata()`.
+
+Vending checkout requires **prepaid** catalog items. Postpaid items are not available in vending mode.
 
 ## Active session end
 
