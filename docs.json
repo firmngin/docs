@@ -66,6 +66,9 @@
             "pages": [
               "monetization",
               "monetization/merchant-setup",
+              "monetization/business-modes",
+              "monetization/service-mode",
+              "monetization/vending-mode",
               "monetization/prepaid",
               "monetization/postpaid",
               "monetization/payouts",

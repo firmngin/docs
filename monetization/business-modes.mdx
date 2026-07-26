@@ -1,0 +1,94 @@
+---
+title: "Business Modes"
+description: "Choose whether a linked device runs a paid session or dispenses items after payment"
+---
+
+Business mode decides how a linked device delivers what the customer paid for. Each linked device uses one mode: **Service** or **Vending**.
+
+Business mode is different from prepaid and postpaid. Prepaid and postpaid describe _when_ the customer pays. Business mode describes _what happens_ after the order is confirmed.
+
+## Service or Vending
+
+|  | Service | Vending |
+| --- | --- | --- |
+| What the customer buys | Time-bound or usage-bound use of the device | One or more physical items |
+| What happens after payment | A session starts on the device | The device dispenses the paid units |
+| Items per order | One item per order | Multiple items in one cart |
+| Payment type | Prepaid or postpaid | Prepaid only |
+| Per-device inventory | Not used | Vending Stock per device |
+| Session tracking | Yes, with start, end, and duration | No, the order completes at dispense |
+| Kiosk mode | Not available | Available on supported devices |
+| Examples | Laundry, massage chair, EV charging, locker storage | Snack machine, drink dispenser, capsule vendor |
+
+<CardGroup cols={2}>
+  <Card title="Service Mode" icon="timer" href="/monetization/service-mode">
+    Session-based use of the device after payment.
+  </Card>
+
+  <Card title="Vending Mode" icon="box" href="/monetization/vending-mode">
+    Instant dispense after payment, with a multi-item cart and per-device stock.
+  </Card>
+</CardGroup>
+
+## Set the business mode
+
+1. Open **Monetization** in the dashboard and select your merchant.
+2. Go to **Linked Devices**.
+3. Open the setup drawer for the device you want to configure.
+4. Find the **Business Mode** card.
+5. Choose **Service** or **Vending**.
+
+The dashboard confirms the change after it is saved.
+
+\[image:linked device setup drawer showing the Business Mode card with Service and Vending options\]
+
+<Note>
+  Business mode is set per linked device, not per merchant. One merchant can have a service device and a vending device at the same time.
+</Note>
+
+## What changes when you switch
+
+Switching business mode changes the dashboard setup and the customer experience on the public page.
+
+| Area | Service | Vending |
+| --- | --- | --- |
+| Device drawer menu | Overview, Sessions, Map Entity, Flow | Adds **Vending Stock** |
+| Public page | Single-item checkout | Cart with quantity per item |
+| Catalog items used | Prepaid and postpaid items | Prepaid items only |
+| After payment | Session controls on the order page | Dispense and receipt |
+
+Switching a device to **Service** also turns **Kiosk mode** off, because kiosk is a vending-only option.
+
+## Choose the right mode
+
+Choose **Service** when the customer pays to use the device for a period of time or for measured usage, and the order should stay open until the session ends.
+
+Choose **Vending** when the customer pays for physical units and the order is complete as soon as the device dispenses them.
+
+```mermaid actions={false}
+flowchart TD
+    A[What does the customer pay for?] --> B{Physical items the device releases?}
+    B -->|No, time or usage on the device| C[Service]
+    B -->|Yes, a number of units| D[Vending]
+    C --> E{Is the final amount known before use?}
+    E -->|Yes| F[Prepaid item]
+    E -->|No, measured during the session| G[Postpaid item]
+    D --> H[Prepaid items only]
+    H --> I{Should the customer pay on the device screen?}
+    I -->|Yes, supported device| J[Enable Kiosk mode]
+    I -->|No, pay on their own phone| K[Standard vending checkout]
+```
+
+<Warning>
+  Review your catalog after switching modes. Postpaid and usage-based items cannot be sold from a vending device, so they stay unavailable on that device's public page.
+</Warning>
+
+## Checklist
+
+Before opening the device to customers:
+
+- The device uses the intended business mode.
+- Catalog items match the mode's supported payment types.
+- Vending devices have stock reviewed for every item sold on that device.
+- Flow settings, verification, and stop behavior are tested in the selected mode.
+- The public page has been reviewed end to end.

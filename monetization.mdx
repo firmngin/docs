@@ -11,6 +11,31 @@ Monetization turns connected devices into paid services. A merchant can publish 
   Monetization is currently available for Indonesia-focused payment flows. Available payment methods depend on the channels enabled for your merchant.
 </Note>
 
+## Business modes
+
+Every linked device runs in one business mode. **Service** sells session-based use of the device. **Vending** sells physical items that the device dispenses after payment, and it can also run an on-device kiosk checkout.
+
+Business mode decides what happens after the order is confirmed. Prepaid and postpaid decide when the customer pays.
+
+```mermaid actions={false}
+flowchart LR
+    A[Paid order] --> B{Device business mode}
+    B -->|Service| C[Session starts on the device]
+    C --> D[Session ends and the order closes]
+    B -->|Vending| E[Device dispenses the paid units]
+    E --> F[Receipt, no open session]
+```
+
+<CardGroup cols={2}>
+  <Card title="Business Modes" icon="shuffle" href="/monetization/business-modes">
+    Compare Service and Vending, and set the mode for a linked device.
+  </Card>
+
+  <Card title="Vending and kiosk" icon="box" href="/monetization/vending-mode">
+    Multi-item carts, per-device stock, and kiosk checkout on the device screen.
+  </Card>
+</CardGroup>
+
 ## Prepaid and postpaid
 
 The main difference is when the final amount becomes known and when the customer pays.
