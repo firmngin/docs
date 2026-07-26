@@ -65,23 +65,6 @@ When a device uses vending mode, the linked device drawer adds a **Vending Stock
 
 \[image:Vending Stock view listing catalog items with per-device stock values\]
 
-### How reservations work
-
-- Stock is reserved when the order is created, so two customers cannot buy the last unit at the same time.
-- Reserved stock returns to the device when the order is cancelled or the payment expires.
-- Items with unlimited stock never reserve or restore anything.
-- A paid order never returns stock, because the units were already dispensed.
-
-```mermaid actions={false}
-stateDiagram-v2
-    [*] --> Available: Stock is set for this device
-    Available --> Reserved: Order is created
-    Reserved --> Dispensed: Payment is confirmed
-    Reserved --> Available: Order is cancelled
-    Reserved --> Available: Payment expires
-    Dispensed --> [*]
-```
-
 <Warning>
   Refill the physical machine and update **Vending Stock** together. A stock number that is higher than the real inventory lets customers pay for units the device cannot dispense.
 </Warning>

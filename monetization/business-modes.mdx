@@ -66,17 +66,23 @@ Choose **Service** when the customer pays to use the device for a period of time
 Choose **Vending** when the customer pays for physical units and the order is complete as soon as the device dispenses them.
 
 ```mermaid actions={false}
-flowchart TD
-    A[What does the customer pay for?] --> B{Physical items the device releases?}
-    B -->|No, time or usage on the device| C[Service]
-    B -->|Yes, a number of units| D[Vending]
-    C --> E{Is the final amount known before use?}
-    E -->|Yes| F[Prepaid item]
-    E -->|No, measured during the session| G[Postpaid item]
-    D --> H[Prepaid items only]
-    H --> I{Should the customer pay on the device screen?}
-    I -->|Yes, supported device| J[Enable Kiosk mode]
-    I -->|No, pay on their own phone| K[Standard vending checkout]
+sequenceDiagram
+    participant Merchant
+    participant Firmngin
+    participant Device
+    Merchant->>Firmngin: Choose a business mode for the linked device
+    alt Service mode
+        Merchant->>Firmngin: Add prepaid or postpaid service items
+        Firmngin->>Device: Apply session-based order behavior
+    else Vending mode
+        Merchant->>Firmngin: Add prepaid vending items
+        Merchant->>Firmngin: Set stock for this device
+        opt Kiosk mode on a supported device
+            Merchant->>Firmngin: Enable Kiosk mode
+            Firmngin->>Device: Use on-device QRIS checkout
+        end
+        Firmngin->>Device: Apply dispense-based order behavior
+    end
 ```
 
 <Warning>
