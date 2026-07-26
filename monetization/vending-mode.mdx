@@ -73,13 +73,21 @@ When a device uses vending mode, the linked device drawer adds a **Vending Stock
 - A paid order never returns stock, because the units were already dispensed.
 
 ```mermaid actions={false}
-stateDiagram-v2
-    [*] --> Available: Stock is set for this device
-    Available --> Reserved: Order is created
-    Reserved --> Dispensed: Payment is confirmed
-    Reserved --> Available: Order is cancelled
-    Reserved --> Available: Payment expires
-    Dispensed --> [*]
+sequenceDiagram
+    participant Client as Client (Payer)
+    participant Firmngin
+    participant Stock as Device Stock
+    participant Device
+    Client->>Firmngin: Create an order
+    Firmngin->>Stock: Check and reserve the requested units
+    alt Payment is confirmed
+        Firmngin->>Device: Send the units to dispense
+        Device->>Client: Dispense the items
+        Firmngin->>Client: Show the receipt
+    else Order is cancelled or payment expires
+        Firmngin->>Stock: Return the reserved units
+        Firmngin->>Client: Close the unpaid order
+    end
 ```
 
 <Warning>
