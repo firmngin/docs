@@ -18,12 +18,22 @@ Every linked device runs in one business mode. **Service** sells session-based u
 Business mode decides what happens after the order is confirmed. Prepaid and postpaid decide when the customer pays.
 
 ```mermaid actions={false}
-flowchart LR
-    A[Paid order] --> B{Device business mode}
-    B -->|Service| C[Session starts on the device]
-    C --> D[Session ends and the order closes]
-    B -->|Vending| E[Device dispenses the paid units]
-    E --> F[Receipt, no open session]
+sequenceDiagram
+    participant Client as Client (Payer)
+    participant Firmngin
+    participant Device
+    Client->>Firmngin: Complete the order
+    alt Service mode
+        Firmngin->>Device: Start the paid session
+        Device->>Client: Provide the service
+        Client->>Firmngin: End the session
+        Firmngin->>Device: Stop the service
+        Firmngin->>Client: Close the order
+    else Vending mode
+        Firmngin->>Device: Send the paid units to dispense
+        Device->>Client: Dispense the items
+        Firmngin->>Client: Show the receipt
+    end
 ```
 
 <CardGroup cols={2}>
