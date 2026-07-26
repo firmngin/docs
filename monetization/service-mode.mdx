@@ -72,39 +72,6 @@ Stop mode decides who can end an active session:
 
 Configure stop mode in the device's **Flow** settings. See [Merchant Setup](/monetization/merchant-setup) for the full flow reference.
 
-### Session sequence
-
-```mermaid actions={false}
-sequenceDiagram
-    participant Client as Client (Payer)
-    participant Firmngin
-    participant Device
-    Client->>Firmngin: Select a service item
-    opt Verification is configured
-        Firmngin->>Device: Request PIN or readiness status
-        loop Until verification passes
-            Device->>Client: Show PIN or readiness state
-            Client->>Firmngin: Submit verification
-            Firmngin->>Client: Return the result
-        end
-    end
-    alt Prepaid item
-        Client->>Firmngin: Complete payment
-        Firmngin->>Device: Start the paid session
-    else Postpaid item
-        Firmngin->>Device: Start the measured session
-    end
-    Device->>Client: Provide the service
-    Client->>Firmngin: End the session
-    Firmngin->>Device: Stop the service
-    alt Postpaid item
-        Firmngin->>Client: Show the final bill
-        Client->>Firmngin: Complete payment
-    else Prepaid item
-        Firmngin->>Client: Show the session summary
-    end
-```
-
 ## Service flow
 
 ```mermaid actions={false}
