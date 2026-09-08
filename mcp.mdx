@@ -12,8 +12,8 @@ https://mcp.firmngin.dev
 ```
 
 <CardGroup cols={2}>
-  <Card title="ChatGPT and Codex" icon="message-circle" href="#chatgpt-and-codex">
-    Connect from the ChatGPT desktop app, Codex CLI, or Codex IDE extension.
+  <Card title="Codex and ChatGPT" icon="message-circle" href="#codex-cli-and-ide">
+    Connect Codex clients or configure Firmngin as a custom app in ChatGPT web.
   </Card>
   <Card title="Claude" icon="sparkles" href="#claude">
     Connect Claude, Claude Desktop, or Claude Code to your workspace.
@@ -36,28 +36,11 @@ You need:
 
 During connection, your browser opens Firmngin. Sign in, review the requested permissions, and approve only the access you expect the AI client to use.
 
-## ChatGPT and Codex
-
-### ChatGPT desktop app
-
-<Steps>
-  <Step title="Open MCP settings">
-    Open **Settings**, select **MCP servers**, then select **Add server**.
-  </Step>
-  <Step title="Add Firmngin">
-    Enter `Firmngin` as the name, choose **Streamable HTTP**, and use `https://mcp.firmngin.dev` as the URL.
-  </Step>
-  <Step title="Authenticate">
-    Save the server, select **Authenticate**, and approve the required access on the Firmngin authorization page.
-  </Step>
-  <Step title="Restart and verify">
-    Restart the app. Type `/mcp` in the composer to confirm that Firmngin is connected.
-  </Step>
-</Steps>
+## Codex CLI and IDE
 
 ### Codex CLI
 
-Run these commands:
+Add Firmngin as a remote MCP server, authenticate it, then verify the connection:
 
 ```bash
 codex mcp add firmngin --url https://mcp.firmngin.dev
@@ -65,17 +48,25 @@ codex mcp login firmngin
 codex mcp list
 ```
 
-The second command opens Firmngin in your browser for OAuth authorization. Codex CLI, the Codex IDE extension, and the ChatGPT desktop app share the MCP configuration on the same Codex host.
+The login command opens Firmngin in your browser for OAuth authorization. If your Codex version does not recognize `login`, update Codex before continuing.
 
-<Note>
-  In the Codex IDE extension, you can also open the gear menu, select **MCP servers**, and add the same Streamable HTTP URL without using the CLI.
-</Note>
+### Codex IDE
+
+Open the MCP server settings from the gear menu, add a remote server, and use:
+
+- Name: `firmngin`
+- Transport: **Streamable HTTP**
+- URL: `https://mcp.firmngin.dev`
+
+Save the server, authenticate when prompted, and confirm that Firmngin's tools are available in the MCP panel.
 
 ### ChatGPT web
 
-Custom MCP apps in ChatGPT web depend on your plan and workspace policy. A workspace administrator may need to enable developer mode, add the Firmngin remote MCP server, configure allowed actions, and publish it to the workspace before members can connect.
+ChatGPT web uses **Apps** rather than a generic desktop “MCP servers” screen. For an existing app, open **Settings → Apps**, select the app, choose **Connect**, and complete OAuth.
 
-See [Developer mode and MCP apps in ChatGPT](https://help.openai.com/en/articles/12584461-developer-mode-and-full-mcp-connectors-in-chatgpt-beta) for current availability and administrator steps.
+To connect a private Firmngin MCP server as a custom app, your plan and workspace policy must support custom MCP apps. An admin or authorized developer may need to enable developer mode, add the Firmngin endpoint, scan its tools, configure allowed actions, and publish the app before other workspace members can use it.
+
+See [Apps in ChatGPT](https://help.openai.com/en/articles/11487775-connecting-mcp-servers-to-chatgpt) and [Developer mode and MCP apps in ChatGPT](https://help.openai.com/en/articles/12584461-developer-mode-and-full-mcp-connectors-in-chatgpt-beta) for the current availability and administrator steps.
 
 ## Claude
 
