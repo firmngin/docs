@@ -100,6 +100,11 @@
                   "libraries/raspi/events",
                   "libraries/raspi/examples"
                 ]
+              },
+              {
+                "group": "JavaScript",
+                "root": "libraries/javascript",
+                "pages": []
               }
             ]
           }
