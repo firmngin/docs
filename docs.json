@@ -167,5 +167,10 @@
   "description": "AIoT platform for your hardware business. Build, deploy, analyze, and monetize connected devices on a production-ready platform.",
   "fonts": {
     "family": "Poppins"
+  },
+  "integrations": {
+    "ga4": {
+      "measurementId": "G-NSL04D6QEV"
+    }
   }
 }
