@@ -2,6 +2,12 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "luma",
   "name": "Firmngin AIoT Platform",
+  "redirects": [
+    {
+      "source": "/mcp",
+      "destination": "/mcp-setup"
+    }
+  ],
   "colors": {
     "primary": "#5F4CFE",
     "light": "#8B7CFF",
@@ -55,7 +61,7 @@
                 ]
               },
               "automations",
-              "mcp",
+              "mcp-setup",
               "channels",
               "ai-agents",
               "plans"

@@ -14,11 +14,7 @@ OTA lets the device check for remote firmware updates, download firmware, verify
 Before using OTA, set firmware metadata such as the firmware version and optional target model.
 
 ```cpp
-#if defined(ESP8266)
-fngin.setFirmwareInfo("1.0.0", "ESP8266", "esp8266:esp8266:generic");
-#elif defined(ESP32)
 fngin.setFirmwareInfo("1.0.0", "ESP32", "esp32:esp32:esp32");
-#endif
 
 fngin.onOTAStatus([](const char *status, const char *message) {
   Serial.print("[OTA] ");

@@ -11,7 +11,7 @@ The [`firmngin/ota`](https://github.com/firmngin/ota) action auto-detects Platfo
 
 | Scenario | PlatformIO CI/CD fit |
 | --- | --- |
-| Multi-environment builds (`esp32dev`, `esp8266`, custom envs) | Excellent — use `platformio-env` per target |
+| Multi-environment builds (`esp32dev`, custom envs) | Excellent — use `platformio-env` per target |
 | PlatformIO library dependencies | Supported — `lib_deps` resolved during `pio run` |
 | Monorepo with firmware in a subfolder | Supported — run workflow with `working-directory` |
 | Arduino sketch without `platformio.ini` | Use [Arduino CLI CI/CD](/firmware-ci-cd-arduino-cli) instead |
@@ -124,10 +124,6 @@ jobs:
             target-board: esp32
             target-model: esp32
             template-var: FIRMNGIN_ESP32_TEMPLATE_ID
-          - platformio-env: esp8266
-            target-board: esp8266
-            target-model: esp8266
-            template-var: FIRMNGIN_ESP8266_TEMPLATE_ID
     steps:
       - uses: actions/checkout@v4
 
@@ -157,7 +153,6 @@ firmngin uses **board name** and **board model** to match firmware artifacts to 
 | PlatformIO `board` (example) | Typical firmngin `target-board` | Typical firmngin `target-model` |
 | --- | --- | --- |
 | `esp32dev` | `esp32` | `esp32` |
-| `esp8266` | `esp8266` | `esp8266` |
 
 If upload fails with a target mismatch error, compare your template or device board fields with the values sent by CI/CD.
 

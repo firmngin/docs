@@ -3,7 +3,7 @@ title: "Installation"
 description: "Install the Firmngin Arduino library and prepare device credentials"
 ---
 
-Install the Firmngin Arduino library on firmware projects that target ESP32 or ESP8266.
+Install the Firmngin Arduino library on firmware projects that target ESP32.
 
 [image:Arduino IDE and PlatformIO setup screen for Firmngin library]
 
@@ -47,7 +47,7 @@ The public template supports two validation modes:
 | Mode | Recommended use | Notes |
 | --- | --- | --- |
 | CA certificate | ESP32 and production firmware | Stronger validation and safer certificate renewal behavior. |
-| Fingerprint | ESP8266 or prototypes | Lighter, but must be updated when the server certificate changes. |
+| Fingerprint | Prototypes | Lighter, but must be updated when the server certificate changes. |
 
 ## First connection checklist
 
@@ -63,11 +63,7 @@ The public template supports two validation modes:
 #include "keys.h"
 #include <firmngin.h>
 
-#if defined(ESP8266)
-#include <ESP8266WiFi.h>
-#elif defined(ESP32)
 #include <WiFi.h>
-#endif
 
 const char *ssid = "YOUR_SSID";
 const char *password = "YOUR_PASSWORD";
