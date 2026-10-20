@@ -75,6 +75,7 @@
               "monetization/business-modes",
               "monetization/service-mode",
               "monetization/vending-mode",
+              "monetization/terminal-mode",
               "monetization/prepaid",
               "monetization/postpaid",
               "monetization/payouts",
