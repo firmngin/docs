@@ -68,6 +68,10 @@
             ]
           },
           {
+            "group": "Fleet Batches",
+            "pages": []
+          },
+          {
             "group": "Monetization",
             "pages": [
               "monetization",
