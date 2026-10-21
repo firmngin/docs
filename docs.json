@@ -71,6 +71,7 @@
             "group": "Fleet Batches",
             "pages": [
               "fleet-batches/overview",
+              "fleet-batches/workflow-diagrams",
               "fleet-batches/prepare",
               "fleet-batches/create-batch",
               "fleet-batches/factory-checks",
