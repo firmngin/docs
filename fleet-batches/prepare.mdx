@@ -1,0 +1,59 @@
+---
+title: "Prepare your device product"
+description: "Get the hardware, template, firmware, and customer experience ready before producing a batch."
+---
+
+Start with one working device. Confirm that the hardware and firmware do what you intend to sell before creating a larger batch.
+
+## Prepare one representative unit
+
+Use the board model, sensors, controls, power supply, and firmware that you intend to ship. Check that the device connects, sends the expected readings, and responds to its controls.
+
+Write down what a passing unit should do. For a temperature monitor, this could include a plausible reading, a working alert, and reconnection after restarting. These checks become your production checklist.
+
+## Create the device template
+
+A device template describes the common setup for your product. In Firmngin, an **entity** is a data point or control, such as temperature, battery level, or relay state.
+
+1. Select the workspace where you will manage the product.
+2. Open **Devices → Device Templates**.
+3. Select **Add Template**.
+4. Enter a clear **Template name** and a description of the product.
+5. Choose the **Board** and **Board model** that match the hardware.
+6. Select the protocols the device uses.
+7. Use **Add Entity** for product-specific readings and controls. Check each entity's name, key, type, and unit against the firmware.
+8. Select **Create Template**.
+
+Use one template for units that share the same device setup. If you later change the hardware or entity definition, the template editor provides **Publish Version** to create a new version.
+
+See [Device Templates](/device-templates) for more detail.
+
+## Prepare the factory firmware
+
+The firmware installed on fresh boards must match the production hardware. For the master firmware workflow, prepare a complete file ending in **`.merged.bin`**.
+
+In **Firmware → Upload Firmware**, enable **As Master Firmware Fleet** when uploading this factory image. Keep the regular application-only **`.bin`** file for OTA releases.
+
+<Warning>
+  A regular OTA file is not the complete image needed for a fresh board. Use the correct factory image for the board you are producing.
+</Warning>
+
+Follow [Master firmware for fresh boards](/firmware-master-fleet) for image preparation. Selecting a device template does not install firmware on physical boards.
+
+Use the current Firmngin library with factory provisioning support. Prepare one shared factory image for matching boards, without embedding a particular unit's production credentials. The factory workflow gives each unit its own identity.
+
+The template's optional **Firmware OTA policy** controls later firmware updates. It is separate from the initial factory setup.
+
+## Prepare what the customer receives
+
+Before selling units, decide how customers will install and use the product. Prepare:
+
+- A short setup guide, including power and network requirements.
+- Any application or customer access experience your product needs.
+- A way to identify the unit when a customer contacts support.
+- Clear warranty, return, and support information.
+- Your sales channel, payment process, and delivery arrangements.
+
+Keep device credentials private. Customer instructions should contain only the information customers need to use their product.
+
+When the representative unit and product information are ready, continue to [Create and manage a batch](/fleet-batches/create-batch).

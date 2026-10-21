@@ -1,0 +1,58 @@
+---
+title: "Workflow diagrams"
+description: "Follow the production, sales, and customer access steps at a glance."
+---
+
+Follow these diagrams alongside the step-by-step guides. Each diagram shows one part of preparing, selling, and supporting your device product.
+
+## From production to delivery
+
+```mermaid actions={false}
+flowchart TD
+  A["Prepare and test the product"] --> B["Create the batch"]
+  B --> C["Set up each board with the factory app"]
+  C --> D{"Physical unit passes your checks?"}
+  D -->|No| E["Fix the unit"]
+  E --> D
+  D -->|Yes| F["Prepare: mark Ready to sell"]
+  F --> G["Print and attach the unit QR label"]
+  G --> H["Confirm sale and payment in your sales channel"]
+  H --> I["Record sale in Fleet Batches"]
+  I --> J["Pack and deliver with your setup instructions"]
+```
+
+A batch creates device records. Each physical unit still needs factory setup and your product checks. Confirm payment through your own sales channel before recording the sale.
+
+Continue with [Prepare your device product](/fleet-batches/prepare), [Create and manage a batch](/fleet-batches/create-batch), [Factory setup and unit checks](/fleet-batches/factory-checks), and [Sell and deliver devices](/fleet-batches/sell-and-deliver).
+
+## Stock and ownership changes
+
+```mermaid actions={false}
+flowchart TD
+  A["Not for sale"] -->|Prepare| B["Ready to sell"]
+  B -->|Remove from sale| A
+  B -->|Record sale| C["Sold"]
+  C -->|Release owner| B
+  C -->|Transfer owner| C
+  B -->|Mark broken| D["Broken / Retired"]
+  C -->|Mark broken| D
+  D -->|Return to stock| B
+```
+
+These actions update the unit record. **Sold** means an owner has been recorded. A return or transfer also needs the matching update to customer permissions in your app.
+
+Read [Sell and deliver devices](/fleet-batches/sell-and-deliver) for the buttons, buyer details, returns, and label handling.
+
+## Customer access through your app
+
+```mermaid actions={false}
+flowchart TD
+  A["Customer signs in to your app"] --> B["Scan unit label or enter its code"]
+  B --> C{"Your app allows this customer to add the unit?"}
+  C -->|Yes| D["Show their unit and its permitted features"]
+  C -->|No| E["Keep access blocked and offer support"]
+```
+
+You provide the customer app and its permission checks. A printed code identifies a unit; scanning it does not grant access by itself.
+
+Read [Customer access](/fleet-batches/customer-access) for the complete customer journey and the changes needed after a return or transfer.

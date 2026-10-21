@@ -1,0 +1,69 @@
+---
+title: "Factory setup and unit checks"
+description: "Prepare each physical board and check that the finished unit works before offering it for sale."
+---
+
+A registered device record and a finished product are separate steps. Use factory setup to prepare each physical board, then check the completed unit before packing it.
+
+## Prepare the production station
+
+Have the correct boards, reliable power, a suitable USB connection, and the tested firmware for the product available. Select the workspace and batch that correspond to the units on the workbench.
+
+The **firmngin-factory** application runs in a terminal on your production computer. It supports factory registration, firmware flashing, and setting up each unit's own device identity.
+
+1. Get the application from the [public Factory CLI distribution](https://github.com/firmngin/factory-cli) and follow its installation instructions.
+2. Open a terminal and enter `firmngin-factory` to launch the interactive application.
+3. Choose **Sign in (Factory)** and sign in with the Firmngin account used for production. Review the requested factory access.
+4. At **Select Workspace**, choose the workspace you prepared in the dashboard.
+5. Have the tested factory firmware and the unit's network setup available.
+
+Use the application version and firmware appropriate to your production hardware. The firmware needs current Firmngin factory provisioning support.
+
+## Prepare each board
+
+Connect one board, then follow these steps in the interactive application:
+
+1. Choose **Provision Unit**.
+2. At **Select Batch**, choose the batch you created. The application selects the next available unit within that batch.
+3. At **Select Firmware**, choose **Cloud library** to use your uploaded master firmware, or **Local .merged.bin file** to use a file on your computer. Select the tested image for this product.
+4. At **Flash & Provision**, select the board's serial port. Keep **Skip flash** unchecked for a fresh board, then press Enter to start.
+5. Let the application install the image, set up the unit's identity, and wait for the board to restart and reconnect. Wait for **Congratulations!** and the success result.
+6. Match the finished board to its device record and keep it identified. Connect the next board, then choose **Provision next device** when you are ready to repeat the process.
+
+Each physical unit needs its own device identity. Keep completed and unfinished boards separate so that a board is not confused with another unit's record.
+
+For fresh-board master firmware, use the complete **`.merged.bin`** image uploaded as **As Master Firmware Fleet**. See [Master firmware for fresh boards](/firmware-master-fleet) for preparing the correct file.
+
+The factory workflow checks the new online connection before completing setup. Writing firmware alone does not complete provisioning. If a step fails, keep that board aside and resolve the reported issue before treating it as complete.
+
+After setup, return to **Fleet Batches** and review the unit's factory status. A successful factory setup is recorded as **provisioned**.
+
+<Note>
+  Provisioned means factory setup was recorded as complete. Check the unit's actual operation before treating it as ready to sell.
+</Note>
+
+## Check the finished unit
+
+Use the same checks for every unit of the product. Adapt the expected results to what your device is designed to do.
+
+| Check | What to confirm |
+| --- | --- |
+| Unit identity | The physical unit matches the device record and the label you will attach. |
+| First connection | The powered device connects and appears online in Firmngin. |
+| Sensor readings | The expected readings appear and are plausible for the test conditions. |
+| Controls | Each supported control produces the expected physical result. |
+| Restart | After restarting, the unit reconnects and still behaves correctly. |
+| Customer setup | The supplied instructions work for the setup customers will perform. |
+| Physical condition | The power connection, enclosure, connectors, and accessories are ready for delivery. |
+
+Open the device from the expanded batch to review its readings and controls. If a unit fails a check, keep it separate from passing units while you investigate.
+
+## Prepare the handover
+
+Keep the unit and its identifying label together throughout testing and packing. Include the setup guide, required accessories, and support details promised with your product.
+
+Keep a record of which unit was delivered against each customer order. If a code is replaced before shipment, update its printed label too.
+
+When a unit passes your checks, it can move to your stock and sales process. Payment, delivery, customer access, and warranty arrangements remain part of the product experience you manage.
+
+Continue to [Sell and deliver devices](/fleet-batches/sell-and-deliver) for stock, unit labels, and sale records. Read [Customer access](/fleet-batches/customer-access) to prepare the buyer experience.

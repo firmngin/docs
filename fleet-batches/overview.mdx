@@ -1,0 +1,47 @@
+---
+title: "Fleet Batches"
+description: "Prepare a repeatable device product, produce a batch, and manage units for sale."
+---
+
+Fleet Batches helps developers prepare and track many devices made from the same device template. Use it to organize a production run, follow each unit through factory setup, and keep track of stock and recorded sales.
+
+For example, you might develop a temperature monitor, prove it works on one board, and then prepare a batch of 50 units for customers.
+
+## From prototype to product
+
+| Stage | What you do |
+| --- | --- |
+| Prepare the product | Choose the hardware, test the firmware, and define a reusable device template. |
+| Create the batch | Register the required number of devices with a shared base name. |
+| Prepare each board | Use the factory application to install the firmware and set up each unit's own device identity. |
+| Check the units | Confirm connection, readings, controls, and behavior after restarting. |
+| Prepare for sale | Organize ready units, their labels, and the information customers need. |
+| Record and support sales | Keep the buyer and order reference with the unit, then manage returns or changes when needed. |
+
+Creating a batch registers devices in Firmngin. Physical boards still need factory setup and testing before they are ready to ship.
+
+## How selling works
+
+You manage the customer sale through your own store, sales team, or other sales channel. Prepare the price, payment method, delivery, warranty, and support arrangements for your product.
+
+Fleet Batches helps you track the units and record sales. A recorded sale is a unit record; it does not collect payment or arrange shipping.
+
+There is no built-in buyer application in this workflow. If your product needs an application for buyers to sign in, add a device, or use its features, prepare that experience as part of your product. A QR label or claim code alone does not provide it.
+
+## Where to find it
+
+Open **Devices**, then **Fleet Batches** under **Factories** in the dashboard.
+
+The batch list shows the number of registered devices and **Provisioning remaining**. Expand a batch to see its units and their factory setup status.
+
+## Choose the right guide
+
+Fleet Batches covers preparing physical devices for production and sale. Firmware fleet rollout covers updating firmware on devices that are already set up.
+
+- Start with [Prepare your device product](/fleet-batches/prepare).
+- Continue with [Create and manage a batch](/fleet-batches/create-batch).
+- Follow [Factory setup and unit checks](/fleet-batches/factory-checks) before shipping units.
+- Continue to [Sell and deliver devices](/fleet-batches/sell-and-deliver) for stock, labels, and sale records.
+- Read [Customer access](/fleet-batches/customer-access) when planning how buyers will use their devices.
+- Use [Device Templates](/device-templates) for the full template guide.
+- Use [Master firmware for fresh boards](/firmware-master-fleet) to prepare the factory firmware file.
