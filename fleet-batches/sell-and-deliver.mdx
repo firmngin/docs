@@ -1,0 +1,87 @@
+---
+title: "Sell and deliver devices"
+description: "Prepare individual units, print their labels, record buyers, and manage returns or ownership changes."
+---
+
+Use Fleet Batches to track which physical units are ready for sale and which have an owner. Your shop handles the purchase and delivery; firmngin keeps the unit records.
+
+Before starting, create your batch and complete its device setup. See the [Fleet Batches overview](/fleet-batches/overview) for the full workflow.
+
+## Prepare a unit for sale
+
+<Steps>
+  <Step title="Open the batch">
+    In the dashboard, open **Devices → Fleet Batches** and open the batch you want to sell.
+
+    Find the individual unit in the table. Check its name against the physical device so that you update the correct record.
+  </Step>
+  <Step title="Check the physical device">
+    Finish your own checks before offering the unit to a buyer: install the intended firmware, confirm that the device connects, and test the functions you are selling.
+
+    A unit's sale status is an inventory record. It does not confirm that these checks have passed.
+  </Step>
+  <Step title="Choose Prepare">
+    For a unit marked **Not for sale**, select **Prepare**. Its status becomes **Ready to sell**, and a claim code is created for the unit.
+
+    Preparing a unit does not record a buyer or take a payment.
+  </Step>
+  <Step title="Print the unit label">
+    On that unit's row, select **QR code**. Check the unit name in the label preview, then select **Print**.
+
+    Attach the label to the matching device or its packaging. Keep the printed code readable so your team can identify the unit later.
+
+    The QR code identifies the unit. To let a customer scan it in your app, you need to provide that experience in your own app. See [Customer access](/fleet-batches/customer-access).
+  </Step>
+</Steps>
+
+## Take the order and record the sale
+
+Sell the device through your own website, marketplace, shop, or other sales channel. Set the price, collect payment, and confirm the order there.
+
+After the sale is confirmed, record the buyer against the exact unit you will deliver:
+
+1. Open the batch and find a **Ready to sell** unit.
+2. Select **Record sale** on its row.
+3. Enter the information you want to keep: **Owner name**, **Email**, **Phone**, **Order no.**, and **Note**. These fields are optional.
+4. Select **Save**.
+5. Confirm that the unit now appears as **Sold**.
+
+Use **Order no.** to connect the unit to the order in your sales system. For example, if one order contains three devices, record the sale on each of the three unit rows and use the same order number where appropriate.
+
+<Note>
+  **Sold** means that an owner has been recorded. It does not confirm payment, dispatch the device, or give the buyer access to your app.
+</Note>
+
+## Pack and deliver
+
+Match the physical device, its label, and the recorded order before packing. Include your own setup instructions, app or portal details, and support contact.
+
+Arrange shipping or collection through your sales process. Manage tracking, delivery confirmation, invoices, and payment disputes in that process too. Fleet Batches does not provide shipping or payment tracking.
+
+Before handover, confirm that your customer can use the access method you provide. If your app supports scanning the unit label, explain where to scan it and what the customer should see afterward.
+
+## Read the batch totals
+
+The batch detail shows **Total**, **Sold**, **Ready to sell**, and **Broken**. The **Total** card also shows the number **Not for sale**.
+
+Each count represents units, rather than orders or customers. For example, a batch with 10 units could show 6 sold, 3 ready to sell, and 1 broken. One customer may own several of those sold units.
+
+Recording a sale changes the ownership record; it does not remove the unit from your workspace. Sold units remain part of your device usage.
+
+## Handle changes after the sale
+
+| Situation | Action in the unit row | What happens to the record |
+| --- | --- | --- |
+| An unsold unit should no longer be offered | **Remove from sale** | The unit returns to **Not for sale**. Use **Prepare** when it is ready again. |
+| A buyer returns a unit | **Release owner** | The current ownership record is closed and the unit returns to **Ready to sell**. |
+| A sold unit moves to another owner | **Transfer owner** | Enter the new owner's details, add a **Transfer reason**, and select **Transfer**. The previous ownership record is closed and a new one is created. |
+| A unit is damaged or withdrawn because it is broken | **Mark broken** | Add a reason if needed and select **Save**. The unit becomes **Broken**; any current ownership record is closed. |
+| A broken unit has been repaired and checked | **Return to stock** | The unit returns to **Ready to sell**. Its previous owner is not restored. |
+
+For a returned unit, complete your inspection before offering it again. If it needs work, use **Mark broken**; if it is simply not ready for another sale, use **Remove from sale** after releasing its owner.
+
+Refund money through your original payment process. For a replacement, update the returned unit's record as appropriate and use **Record sale** on the replacement unit.
+
+Releasing or transferring an owner keeps the unit's existing claim code. If you explicitly use **Rotate code** on an unowned unit, print a new label: the old code stops working.
+
+Update the customer's permissions in your own app whenever a unit is returned, replaced, or transferred. [Customer access](/fleet-batches/customer-access) explains how to keep the app and unit records aligned.

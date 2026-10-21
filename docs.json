@@ -69,7 +69,14 @@
           },
           {
             "group": "Fleet Batches",
-            "pages": []
+            "pages": [
+              "fleet-batches/overview",
+              "fleet-batches/prepare",
+              "fleet-batches/create-batch",
+              "fleet-batches/factory-checks",
+              "fleet-batches/sell-and-deliver",
+              "fleet-batches/customer-access"
+            ]
           },
           {
             "group": "Monetization",

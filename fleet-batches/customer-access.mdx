@@ -1,0 +1,68 @@
+---
+title: "Customer access"
+description: "Plan the app, setup experience, and support your buyers need after purchasing a device."
+---
+
+Your customers use the app or portal you provide. You manage the devices through your firmngin workspace and connect your customer experience to them.
+
+Buyers do not need a firmngin account, workspace, or subscription to use this arrangement. Their purchase, login, device access, and support relationship are with you.
+
+## Decide what the buyer receives
+
+Before selling, prepare a clear customer experience:
+
+- Where the customer downloads your app or opens your portal.
+- How they sign in and add a purchased device.
+- Which device controls and readings they can use.
+- How they connect and set up the physical device using your firmware's instructions.
+- Where they request help, a return, or a change of owner.
+
+firmngin provides integration for reading a device's state and sending device controls. Your app presents the supported controls and readings to the buyer. You build the screens, login, and rules that decide who can access each unit.
+
+The integration does not provide a ready-made customer app. Recording a sale in Fleet Batches does not create a customer login or add the unit to an app automatically.
+
+## Use the unit QR code in your app
+
+You can build a scanning step into your app to identify a purchased unit. A typical customer journey is:
+
+1. The customer signs in to your app.
+2. They scan the QR label attached to the unit or enter its printed code.
+3. Your system identifies the unit and checks whether this customer is allowed to add it.
+4. Your app shows the device and its supported controls or readings.
+
+The printed QR is an identification code. Scanning it with an ordinary phone camera does not automatically open a firmngin setup page or activate customer access. Your app must provide the scanning and permission checks.
+
+Explain this in the instructions you deliver with the product. Test the complete journey with the same app and label that the buyer will receive.
+
+## Keep customer access tied to the correct unit
+
+Your system needs to know which customer is allowed to use which device. Keep that relationship aligned with the ownership record you maintain in Fleet Batches.
+
+If a customer purchases multiple devices, let your app distinguish each one clearly. An order number can help your support team connect several unit records to one order, but it does not grant access by itself.
+
+<Note>
+  Keep your firmngin integration credentials on your own server. Customers should receive access through your app, rather than your dashboard login or integration credentials.
+</Note>
+
+## Manage returns, replacements, and transfers
+
+A change in the Fleet Batches ownership record does not automatically change the customer's permissions in your app. Update both as part of your support process.
+
+| Change | Update in Fleet Batches | Update in your app |
+| --- | --- | --- |
+| Return | Use **Release owner** on the returned unit. | Remove the previous customer's access to that unit. |
+| Replacement | Update the returned unit's record and use **Record sale** on the replacement. | Remove access to the returned unit and allow access to the replacement. |
+| New owner | Use **Transfer owner** and enter the new owner's details and a transfer reason. | Remove the previous owner's access and allow the new owner to add the device. |
+| Broken unit | Use **Mark broken** as appropriate. | Explain the support outcome and apply your access policy. |
+
+Use your sales and support process to verify a return or transfer request. The person requesting a change should not gain access simply because they know a device's name or have a photo of its label.
+
+See [Sell and deliver devices](/fleet-batches/sell-and-deliver) for the dashboard steps and what each action changes.
+
+## Maintain the product after delivery
+
+You remain responsible for your app, device setup instructions, firmware, and customer support. Manage firmware updates through your normal device update process.
+
+Recording an owner does not move the device out of your workspace. You continue to manage the unit in firmngin, including any automation, schedules, or AI features you configure as the developer. The customer app integration described here provides device controls and state readings; it does not give buyers access to your firmngin workspace or its management features.
+
+Before launch, check that a buyer can add and control only the units they are entitled to use, and that a return or transfer removes the previous buyer's access. These checks are part of delivering your customer app, alongside the unit preparation in the [Fleet Batches workflow](/fleet-batches/overview).

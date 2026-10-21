@@ -1,0 +1,62 @@
+---
+title: "Create and manage a batch"
+description: "Register devices from a template, review the result, and add more units to the same batch."
+---
+
+Create a batch after preparing a [device template and matching firmware](/fleet-batches/prepare). A batch groups device records for one production run.
+
+## Before you start
+
+Select the correct workspace and confirm that the template is available there. Your plan's remaining device allowance determines how many more devices you can register.
+
+## Create devices
+
+1. Open **Devices → Fleet Batches**.
+2. Select **New batch**. This opens **Bulk Provisioning**.
+3. Under **Device template**, select the template for your product.
+4. Enter the number of devices you want to create. Review the available allowance shown in the form.
+5. Under **Device name**, enter a base name, such as `TempMonitor`. Firmngin adds the unit number automatically.
+6. Select **Create devices** and wait for **Batch result**.
+
+For example, a base name of `TempMonitor` produces names such as `TempMonitor-001` and `TempMonitor-002`.
+
+## Review the result
+
+The result separates registered units from units that were not created:
+
+| Result | Meaning |
+| --- | --- |
+| Created | The device record was created successfully. |
+| Skipped (quota) | The device was not created because of the available plan allowance. |
+| Failed | The device was not created successfully. |
+
+Review the result before submitting another batch. If only some devices were created, those successful records already exist.
+
+Select **View fleet batch** to return to the batch list.
+
+## Follow factory setup
+
+Expand a batch to see its device records. The factory status helps you follow each unit:
+
+| Status | Meaning |
+| --- | --- |
+| Pending | Factory provisioning has not been recorded as complete. |
+| In progress | The unit is currently assigned for factory setup. |
+| Provisioned | Factory provisioning has been recorded as complete. |
+
+**Provisioning remaining** shows how many registered units still lack completed factory provisioning.
+
+These statuses describe factory setup. They do not replace checks that the physical product works correctly.
+
+## Add more devices to the same batch
+
+Review the template before adding more devices. New additions use the template's current version, which may differ from the version used for the earlier units.
+
+1. Find the batch in **Fleet Batches**.
+2. Select **Add devices**.
+3. Enter **Count**, within the remaining allowance shown.
+4. Select **Add**.
+
+The device numbering continues automatically from the batch. Use this when you need more units in the same production run.
+
+Continue to [Factory setup and unit checks](/fleet-batches/factory-checks) to prepare the physical boards.
