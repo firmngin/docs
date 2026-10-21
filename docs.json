@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "luma",
-  "name": "Firmngin AIoT Platform",
+  "name": "Firmngin",
   "redirects": [
     {
       "source": "/mcp",
@@ -186,6 +186,28 @@
   "description": "AIoT platform for your hardware business. Build, deploy, analyze, and monetize connected devices on a production-ready platform.",
   "fonts": {
     "family": "Poppins"
+  },
+  "seo": {
+    "metatags": {
+      "og:site_name": "Firmngin",
+      "og:image": "https://firmngin.dev/preview.jpg",
+      "og:image:width": "1781",
+      "og:image:height": "883",
+      "og:image:type": "image/jpeg",
+      "og:image:alt": "Firmngin IoT platform with AI built in",
+      "twitter:image": "https://firmngin.dev/preview.jpg",
+      "twitter:image:alt": "Firmngin IoT platform with AI built in"
+    },
+    "organization": {
+      "id": "https://firmngin.dev/#organization",
+      "name": "Firmngin",
+      "legalName": "PT Byte Forge Indonesia",
+      "url": "https://firmngin.dev",
+      "sameAs": [
+        "https://x.com/firmngin",
+        "https://github.com/firmngin"
+      ]
+    }
   },
   "integrations": {
     "ga4": {
