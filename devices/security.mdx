@@ -37,7 +37,14 @@ For users, this means:
 5. Click **Download File**.
 6. Place the downloaded `keys.h` file next to your Arduino sketch.
 
-[code:include keys.h in the Arduino sketch without showing real credential values]
+```cpp
+#include "keys.h"   // downloaded from the dashboard; never commit this file
+#include <firmngin.h>
+
+Firmngin fngin(DEVICE_ID, DEVICE_KEY);
+```
+
+`DEVICE_ID` and `DEVICE_KEY` come from `keys.h`, so your sketch never contains the real values. See [Installation](/libraries/arduino/installation) for the full setup.
 
 ## Important rules
 

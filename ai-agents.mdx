@@ -22,13 +22,9 @@ In the Firmngin dashboard, open **AI Agents**, then configure the agent for your
 
 Firmngin charges **flat AI credits per successful agent request**, not per token.
 
-| What happens | Credit charge |
-| --- | --- |
-| First successful model turn for a user message | Flat credits for the selected model |
-| Tool-loop / continuation turns for the same request | `0` additional credits |
-| Failed request before a successful charge | No credit deducted for that charge attempt |
-
-Token counts may still be recorded for analytics and usage history. Customer billing for AI Agents uses the flat credit amount only.
+- Each message you send to the agent costs a flat number of credits, based on the model you choose.
+- Follow-up steps the agent takes to answer that same message are free.
+- If a request fails, no credits are deducted.
 
 ## Credit cost by model
 
@@ -68,4 +64,4 @@ To continue:
 
 - [Plans](/plans) — included AI credits and concurrent AI task limits
 - [Messaging channels](/channels) — connect Telegram or Discord to your workspace agent
-- [Connect AI clients](/mcp) — use Firmngin tools from external MCP clients
+- [Connect AI clients](/mcp-setup) — use Firmngin tools from external MCP clients
