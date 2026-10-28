@@ -39,7 +39,7 @@ All billable devices renew on the **1st of every month at 00:00 UTC**. This is t
 | WIB (UTC+7) | 1st, 07:00 |
 | PDT (UTC-7) | Last day of the previous month, 17:00 |
 
-Each device is charged the full monthly price, rounded to whole cents. The billing job runs every 6 hours, so the deduction appears in your wallet history within about 6 hours after 00:00 UTC on the 1st.
+Each device is charged the full monthly price, exactly as configured. The billing job runs every 6 hours, so the deduction appears in your wallet history within about 6 hours after 00:00 UTC on the 1st.
 
 ## First-month proration
 
@@ -52,12 +52,12 @@ prorated_amount = price × remaining_days / days_in_month
 
 - All dates use **UTC**. A device created on Oct 28 at 06:00 WIB is created on Oct 27 UTC.
 - `remaining_days` **includes the creation day**. Creating on Oct 28 in a 31-day month gives 4 days (28, 29, 30, 31).
-- The amount is rounded to the nearest cent, with halves rounded up. For example, $0.125 becomes $0.13.
+- The amount is kept to at most **4 decimal places** and is always **rounded up** at the 4th decimal. For example, $0.064516… becomes $0.0646. An amount that already fits in 4 decimals is not changed: $0.125 stays $0.125.
 - The price used is the price configured at the moment of the charge. Each wallet entry records the unit price, the days charged, and the amount.
 - From the next 1st onward, the device is charged the full monthly price.
 
 <Note>
-  Because amounts are rounded to whole cents, a very short first month can round up slightly. For example, 1 day of a $0.50 device in a 31-day month is $0.0161, charged as $0.02.
+  Because amounts are rounded up at the 4th decimal, you never pay more than $0.0001 above the exact prorated value. For example, 1 day of a $0.50 device in a 31-day month is $0.016129…, charged as $0.0162.
 </Note>
 
 ## Balance required to create a device
@@ -71,7 +71,7 @@ Devices inside your free allowance never need a balance.
 
 ### Preview the cost
 
-Before you create a device, you can preview the cost: how much you pay now, how many days that covers, and when and how much the next charge is. For example: "$0.06 now (4 days), next charge Nov 1, $0.50".
+Before you create a device, you can preview the cost: how much you pay now, how many days that covers, and when and how much the next charge is. For example: "$0.0646 now (4 days), next charge Nov 1, $0.50".
 
 The preview is available from the API:
 
@@ -82,7 +82,7 @@ GET /api/v1/users/usage/device-rent-quote
 ```json
 {
   "data": {
-    "charge_now": "0.06",
+    "charge_now": "0.0646",
     "remaining_days": 4,
     "days_in_month": 31,
     "full_price": "0.5",
@@ -113,7 +113,7 @@ The response to creating a device (`POST /api/v1/devices`) includes a `billing` 
 
 ```json
 "billing": {
-  "charge_now": "0.06",
+  "charge_now": "0.0646",
   "prorated": true,
   "remaining_days": 4,
   "days_in_month": 31,
@@ -152,13 +152,13 @@ If your wallet cannot cover the monthly rent:
     The rent for that device is not deducted. Your account enters a **7-day grace period**. Your devices keep working during grace, and you get the grace notice email.
   </Step>
   <Step title="You top up">
-    A top-up ends the grace period. The billing job retries unpaid devices automatically on its next run, within about 6 hours. You do not need to do anything else.
+    A top-up ends the grace period. As soon as the top-up is confirmed, firmngin charges the unpaid rent from your new balance. If that fails for any reason, the billing job retries on its next run, within about 6 hours. You do not need to do anything else.
   </Step>
   <Step title="Grace ends without a top-up">
-    Workspaces and devices above your free allowance become **read-only**. Those devices stop connecting and cannot send or receive data, and you cannot edit them or add new devices. Nothing is deleted. You get the read-only notice email.
+    Workspaces and devices above your free allowance become **read-only**. Read-only devices cannot be used at all: their authentication and authorization are rejected, so they cannot connect, publish or subscribe, call the device HTTP API (it returns `402 Payment Required`), or receive commands from the dashboard or the API. A device that is already connected is refused on its next publish or subscribe and cannot reconnect. You also cannot edit them or add new devices. Nothing is deleted. You get the read-only notice email.
   </Step>
   <Step title="Restore access">
-    Top up your wallet. On its next run, within about 6 hours, the billing job charges the unpaid rent and switches your devices and workspaces back on automatically. Devices that an administrator disabled for other reasons stay disabled.
+    Top up your wallet. Once the top-up is confirmed and the unpaid rent is charged, your devices and workspaces switch back on automatically, and their authentication and authorization work again right away. If the charge cannot run immediately, the billing job retries within about 6 hours. Devices that an administrator disabled for other reasons stay disabled.
   </Step>
 </Steps>
 
@@ -171,7 +171,7 @@ firmngin sends billing emails to the account owner only when real charges are ac
 | Upcoming charge reminder | About 3 days before the 1st (from the 3rd-to-last day of the month, UTC), only when your balance is lower than next month's device rent. | Charge date (1st, 00:00 UTC), number of billable devices, amount due, current balance, shortfall, and a top-up link. |
 | Grace period notice | Once, when a monthly charge fails because the balance is too low. | Amount due, current balance, shortfall, number of affected devices, grace end date (UTC and local), what happens after grace, and a top-up link. |
 | Grace reminder | Once, about 48 hours before grace ends, if the rent is still unpaid. | The same details as the grace notice, with the time left. |
-| Read-only notice | Once, after grace ends and resources have actually been switched to read-only. | Amount due, balance, shortfall, what is restricted, and how to restore access: top up, then billing retries and restores automatically within about 6 hours. |
+| Read-only notice | Once, after grace ends and resources have actually been switched to read-only. | Amount due, balance, shortfall, what is restricted, and how to restore access: top up, and once the rent is paid, access is restored automatically. |
 
 Every email includes a top-up link, and times are shown in UTC and WIB. If you top up before an email is due, that email is not sent. If an email fails to send, it is retried on the next billing run, and the charge itself is never affected.
 
@@ -192,18 +192,18 @@ All simulations use an **example price of $0.50/device/month** and the default a
 | Created on (UTC) | Days in month | Remaining days | Exact amount | Charged now | Next charge |
 | --- | --- | --- | --- | --- | --- |
 | Oct 1, 2026 | 31 | 31 | $0.50 | **$0.50** | Nov 1, $0.50 |
-| Oct 28, 2026 | 31 | 4 | $0.0645… | **$0.06** | Nov 1, $0.50 |
-| Oct 31, 2026 | 31 | 1 | $0.0161… | **$0.02** | Nov 1, $0.50 |
+| Oct 28, 2026 | 31 | 4 | $0.064516… | **$0.0646** | Nov 1, $0.50 |
+| Oct 31, 2026 | 31 | 1 | $0.016129… | **$0.0162** | Nov 1, $0.50 |
 | Nov 10, 2026 | 30 | 21 | $0.35 | **$0.35** | Dec 1, $0.50 |
 | Feb 15, 2027 (not a leap year) | 28 | 14 | $0.25 | **$0.25** | Mar 1, $0.50 |
-| Feb 15, 2028 (leap year) | 29 | 15 | $0.2586… | **$0.26** | Mar 1, $0.50 |
-| Feb 22, 2027 | 28 | 7 | $0.125 | **$0.13** (half rounds up) | Mar 1, $0.50 |
+| Feb 15, 2028 (leap year) | 29 | 15 | $0.258620… | **$0.2587** | Mar 1, $0.50 |
+| Feb 22, 2027 | 28 | 7 | $0.125 | **$0.125** (already 4 decimals, not rounded) | Mar 1, $0.50 |
 
 <AccordionGroup>
   <Accordion title="Create a device on Oct 28">
     1. October has 31 days. Remaining days: 31 − 28 + 1 = **4**.
-    2. Amount: $0.50 × 4 / 31 = $0.0645…, rounded to **$0.06**.
-    3. You need at least $0.06 in your wallet. With $2.00, the device is created and your balance becomes $1.94.
+    2. Amount: $0.50 × 4 / 31 = $0.064516…, rounded up to **$0.0646**.
+    3. You need at least $0.0646 in your wallet. With $2.00, the device is created and your balance becomes $1.9354.
     4. On Nov 1 at 00:00 UTC (07:00 WIB), the device is charged the full **$0.50**.
   </Accordion>
   <Accordion title="Create a device on Oct 1">
@@ -211,7 +211,7 @@ All simulations use an **example price of $0.50/device/month** and the default a
   </Accordion>
   <Accordion title="Create a device on Feb 15 (leap and non-leap years)">
     - 2027 (28 days): 28 − 15 + 1 = 14 days. $0.50 × 14 / 28 = **$0.25**.
-    - 2028 (29 days): 29 − 15 + 1 = 15 days. $0.50 × 15 / 29 = $0.2586…, rounded to **$0.26**.
+    - 2028 (29 days): 29 − 15 + 1 = 15 days. $0.50 × 15 / 29 = $0.258620…, rounded up to **$0.2587**.
   </Accordion>
 </AccordionGroup>
 
@@ -221,7 +221,7 @@ You already have 5 devices, all free. You add device 6 on **Oct 28** and device 
 
 | Month | Device 6 | Device 7 | Total for the month |
 | --- | --- | --- | --- |
-| October | $0.06 (Oct 28, 4/31 days) | — | **$0.06** |
+| October | $0.0646 (Oct 28, 4/31 days) | — | **$0.0646** |
 | November | $0.50 (Nov 1) | $0.35 (Nov 10, 21/30 days) | **$0.85** |
 | December | $0.50 (Dec 1) | $0.50 (Dec 1) | **$1.00** |
 | Every month after | $0.50 | $0.50 | **$1.00** |
@@ -234,22 +234,22 @@ Your wallet holds **$0.10**. You have 5 free devices and create device 6 on **Oc
 
 <Steps>
   <Step title="Oct 28: device created">
-    The prorated amount is $0.06. Your balance of $0.10 covers it, so the device is created. Balance: **$0.04**.
+    The prorated amount is $0.0646. Your balance of $0.10 covers it, so the device is created. Balance: **$0.0354**.
   </Step>
   <Step title="Oct 29: upcoming charge reminder">
-    October has 31 days, so reminders start on Oct 29 (UTC). Next month's rent is 1 × $0.50 = $0.50. Your balance of $0.04 is short by **$0.46**, so you get one reminder email.
+    October has 31 days, so reminders start on Oct 29 (UTC). Next month's rent is 1 × $0.50 = $0.50. Your balance of $0.0354 is short by **$0.4646**, so you get one reminder email.
   </Step>
   <Step title="Nov 1, 00:00 UTC (07:00 WIB): charge fails">
-    The $0.50 charge cannot be paid. Grace starts and you get the grace notice: amount due $0.50, balance $0.04, shortfall $0.46, 1 device affected, grace ends around Nov 8, 00:00 UTC (07:00 WIB).
+    The $0.50 charge cannot be paid. Grace starts and you get the grace notice: amount due $0.50, balance $0.0354, shortfall $0.4646, 1 device affected, grace ends around Nov 8, 00:00 UTC (07:00 WIB).
   </Step>
   <Step title="About Nov 6: grace reminder">
     About 48 hours before grace ends, you get one reminder if the rent is still unpaid.
   </Step>
   <Step title="Top up">
-    You top up $5.00 on Nov 7. Grace ends, and the next billing run (within about 6 hours) deducts the $0.50. Balance: **$4.54**. No read-only notice is sent.
+    You top up $5.00 on Nov 7. Grace ends, and the $0.50 is deducted right after the top-up is confirmed. Balance: **$4.5354**. No read-only notice is sent.
   </Step>
   <Step title="If you do not top up">
-    Around Nov 8, device 6 becomes read-only and you get the read-only notice. When you top up later, for example $5.00 on Nov 10, the next billing run deducts the $0.50 (balance **$4.54**) and switches device 6 back on automatically, within about 6 hours.
+    Around Nov 8, device 6 becomes read-only and you get the read-only notice. When you top up later, for example $5.00 on Nov 10, the $0.50 is deducted right after the top-up is confirmed (balance **$4.5354**) and device 6 switches back on automatically. From then on the device can authenticate and send or receive data again.
   </Step>
 </Steps>
 
@@ -286,11 +286,11 @@ Proration also uses the UTC date. If you are in San Francisco and create a devic
   <Accordion title="What happens if the price changes?">
     The new price applies from the next charge. Past charges stay as they are.
   </Accordion>
-  <Accordion title="Why was I charged $0.02 for one day?">
-    Prorated amounts are rounded to whole cents, with halves rounded up. One day of a $0.50 device in a 31-day month is $0.0161, which rounds to $0.02.
+  <Accordion title="Why was I charged $0.0162 for one day?">
+    Prorated amounts keep at most 4 decimal places and are always rounded up at the 4th decimal. One day of a $0.50 device in a 31-day month is $0.016129…, which rounds up to $0.0162.
   </Accordion>
   <Accordion title="My devices are read-only. How do I get them back?">
-    Top up your wallet. The billing job charges the unpaid rent and switches your devices back on automatically, within about 6 hours. You do not need to contact support.
+    Top up your wallet. Once the top-up is confirmed and the unpaid rent is paid, your devices switch back on automatically and can authenticate, connect, and send or receive data again. While read-only, they cannot authenticate or be authorized for anything. You do not need to contact support.
   </Accordion>
   <Accordion title="Why did I get an email before the 1st?">
     From 3 days before the 1st, firmngin checks whether your balance covers next month's rent. If it does not, you get one reminder with the shortfall and a top-up link. If your balance is enough, no email is sent.
