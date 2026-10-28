@@ -1,0 +1,90 @@
+---
+title: "Device ownership"
+description: "Link sold devices to your customers"
+---
+
+Scope: `devices:inventory`
+
+Use these endpoints from your own app when a customer claims a device you sold. A device must be marked **for sale** in the dashboard before it can be bound.
+
+## Find a device by claim code
+
+Your customer scans the QR code or types the claim code printed on the unit.
+
+```
+GET /api/v1/workspaces/{workspace_id}/device-inventory/by-code/{claim_code}
+```
+
+```json
+{
+  "data": {
+    "device_id": "8f0c...",
+    "name": "Unit-042",
+    "claim_code": "K7Q2-9XMA",
+    "sale_state": "in_stock",
+    "bound": false
+  }
+}
+```
+
+`sale_state` is `unlisted`, `in_stock`, `bound`, or `scrapped`.
+
+## Bind a device to an owner
+
+```
+POST /api/v1/devices/{device_id}/hardware-bind
+Content-Type: application/json
+
+{
+  "name": "Budi Santoso",
+  "email": "budi@example.com",
+  "phone": "+628123456789",
+  "ref": "customer-1029",
+  "note": "Online order #5521"
+}
+```
+
+All fields are optional. Use `ref` for your own customer ID.
+
+```json
+{
+  "message": "Device bound to owner",
+  "device": { "id": "8f0c...", "sale_state": "in_stock", "bound": true },
+  "binding": {
+    "id": "b51e...",
+    "bound_name": "Budi Santoso",
+    "bound_ref": "customer-1029",
+    "bound_at": "2026-10-28T03:15:00Z",
+    "status": "active"
+  }
+}
+```
+
+## Transfer to a new owner
+
+```
+POST /api/v1/devices/{device_id}/hardware-transfer
+```
+
+Same body as bind, plus an optional `reason`. Closes the current owner and binds the new one in one step.
+
+## Unbind a device
+
+```
+POST /api/v1/devices/{device_id}/hardware-unbind
+Content-Type: application/json
+
+{ "reason": "Refund" }
+```
+
+The device returns to stock.
+
+## Errors
+
+| Status | Error | When |
+| --- | --- | --- |
+| `404` | `RESOURCE_NOT_FOUND` | Device not found in this workspace. |
+| `409` | `DEVICE_NOT_IN_STOCK` | The device is not for sale. |
+| `409` | `DEVICE_ALREADY_BOUND` | Bind called on a device that already has an owner. |
+| `409` | `DEVICE_NOT_BOUND` | Unbind or transfer called on a device with no owner. |
+| `409` | `DEVICE_UNAVAILABLE` | The device is disabled or archived. |

@@ -143,10 +143,40 @@
         "tab": "API reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Getting started",
             "pages": [
               "api-reference/introduction",
+              "api-reference/authentication"
+            ]
+          },
+          {
+            "group": "Devices",
+            "pages": [
+              "api-reference/devices/commands",
+              "api-reference/devices/history",
+              "api-reference/devices/alarms",
+              "api-reference/devices/ownership",
+              "api-reference/devices/provisioning"
+            ]
+          },
+          {
+            "group": "Firmware",
+            "pages": [
+              "api-reference/firmware/upload",
+              "api-reference/firmware/lookup",
               "api-reference/firmware-pipeline-runs"
+            ]
+          },
+          {
+            "group": "Device Billing",
+            "pages": [
+              "api-reference/device-billing/sdk"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api-reference/webhooks"
             ]
           }
         ]

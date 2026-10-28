@@ -1,10 +1,54 @@
 ---
-title: "API Reference"
-description: "firmngin API reference is coming soon"
+title: "API reference"
+description: "Connect your own apps, factory tools, and pipelines to firmngin"
 ---
 
-# Coming Soon
+The firmngin API lets your own software work with the devices in your workspace: send commands, read history, provision new units, publish firmware, and receive events.
 
-The firmngin API reference is being prepared.
+## Base URL
 
-This page will include authentication, standard error responses, endpoint groups, request examples, and integration notes after the public API documentation is ready for review.
+```
+https://api.firmngin.dev
+```
+
+All requests use HTTPS. Request and response bodies are JSON unless a page says otherwise.
+
+## Credentials
+
+| Credential | Where to get it | Used for |
+| --- | --- | --- |
+| **Workspace API token** | **Dashboard → Integrations → Generate Token** | Server-to-server calls: devices, provisioning, firmware |
+| **Publishable SDK key** + **SDK merchantId** | **Dashboard → Integrations → Browser SDK access** | Browser checkout for a Device Billing merchant |
+| **Webhook signing secret** | **Dashboard → Webhooks** | Verifying events firmngin sends to you |
+
+See [Authentication](/api-reference/authentication) for headers and scopes.
+
+## Errors
+
+Failed requests return an HTTP status code and a JSON body with a stable code and a readable message:
+
+```json
+{
+  "error": "INVALID_TOKEN",
+  "message": "Token does not have devices:control scope"
+}
+```
+
+| Status | Meaning |
+| --- | --- |
+| `400` | The request is missing a field or has an invalid value. |
+| `401` | The token is missing, invalid, revoked, or lacks the required scope. |
+| `402` | The workspace needs a top-up before this action can run. |
+| `403` | The token is not allowed to act on this resource. |
+| `404` | The resource does not exist or belongs to another workspace. |
+| `409` | The resource is in a state that does not allow this action. |
+| `429` | Too many requests. Wait and retry. |
+| `503` | The device is offline or the service is temporarily unavailable. |
+
+## Pagination
+
+List endpoints accept `page` (starting at `1`) and `limit`, and return the totals alongside the results.
+
+## Dates
+
+Send dates in ISO 8601 format, for example `2026-10-01T00:00:00Z`. Responses use UTC.

@@ -1,0 +1,51 @@
+---
+title: "Authentication"
+description: "Workspace API tokens, scopes, and SDK keys"
+---
+
+## Workspace API tokens
+
+Generate a token in **Dashboard → Integrations → Generate Token**. Pick a name and the scopes the token needs. The full token is shown **once**, so copy it right away.
+
+Send the token in the `Authorization` header:
+
+```bash
+curl https://api.firmngin.dev/api/saas/v1/devices/{device_id}/locations/latest \
+  -H "Authorization: Bearer <YOUR_API_TOKEN>"
+```
+
+The `X-API-Key: <YOUR_API_TOKEN>` header is also accepted.
+
+A token belongs to one workspace and can only reach devices in that workspace. Revoking a token in **Integrations** stops it immediately.
+
+<Warning>
+  Keep API tokens on your server or in CI secrets. Never put them in browser code, mobile apps, or firmware.
+</Warning>
+
+### Scopes
+
+| Scope | Dashboard label | Allows |
+| --- | --- | --- |
+| `devices:control` | Device control | [Send device commands](/api-reference/devices/commands) |
+| `entities:read` | Entity history | [Entity state history](/api-reference/devices/history#entity-state-history) |
+| `locations:read` | Device location | [Location history](/api-reference/devices/history#location-history) |
+| `ota:read` | Firmware update history | [Firmware update history](/api-reference/devices/history#firmware-update-history) |
+| `alarms:read` | Alarms | [Alarm rules and events](/api-reference/devices/alarms) |
+| `devices:inventory` | Device inventory | [Device ownership](/api-reference/devices/ownership) |
+| `devices:provision` | Device provisioning | [Provisioning](/api-reference/devices/provisioning) and [firmware lookup](/api-reference/firmware/lookup) |
+| `firmware:deploy` | Firmware OTA | [Firmware upload](/api-reference/firmware/upload) |
+
+Give each token only the scopes it needs. A token can also be limited to specific device templates.
+
+## Publishable SDK key
+
+The [Device Billing SDK](/api-reference/device-billing/sdk) runs in the browser, so it uses a separate **publishable** key that can only read the menu and create checkouts for one merchant.
+
+Find it in **Dashboard → Integrations → Browser SDK access**, together with the **SDK merchantId** and the list of **Allowed origins**. Send both values on every request:
+
+```
+X-API-Key: <PUBLISHABLE_SDK_KEY>
+X-Merchant-ID: <SDK_MERCHANT_ID>
+```
+
+Requests are accepted only from the browser origins you add to **Allowed origins**.
