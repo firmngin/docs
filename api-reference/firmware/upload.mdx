@@ -1,0 +1,59 @@
+---
+title: "Firmware upload"
+description: "Publish firmware from your CI pipeline"
+---
+
+Scope: `firmware:deploy`
+
+Use this endpoint from CI to publish a new firmware version. For ready-made setups, see [Firmware CI/CD](/firmware-ci-cd).
+
+```
+POST /api/v1/firmware-ci-cd/upload
+Content-Type: multipart/form-data
+```
+
+```bash
+curl -X POST https://api.firmngin.dev/api/v1/firmware-ci-cd/upload \
+  -H "Authorization: Bearer $FIRMNGIN_API_TOKEN" \
+  -F "firmware=@build/firmware.bin" \
+  -F "version=1.4.0" \
+  -F "device_template_id=$FIRMNGIN_DEVICE_TEMPLATE_ID" \
+  -F "release_notes=Fix sensor calibration"
+```
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `firmware` | Yes | Firmware binary, up to 10 MB. |
+| `version` | Yes | Version label, for example `1.4.0`. |
+| `device_template_id` | One target | Publish for every device on this template. Your OTA policy decides when devices update. |
+| `device_secret_id` | One target | Publish and immediately start an update for this one device. |
+| `target_board`, `target_model` | One target | Use when you set neither a template nor a device. |
+| `signature` | If required | Signature file, when firmware signing is enabled for your workspace. |
+| `release_notes` | No | Shown in the dashboard. |
+
+Send either `device_template_id` or `device_secret_id`, not both. If the token is limited to more than one template, `device_template_id` is required.
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "f1a9...",
+    "version": "1.4.0",
+    "unique_code": "kata-harimau-01234",
+    "sha256": "3b7e..."
+  },
+  "source": "ci_cd"
+}
+```
+
+When you target a single device, the response also includes `workflow_run` with the update run that was started. Track it with [Firmware pipeline runs](/api-reference/firmware-pipeline-runs).
+
+### Common errors
+
+| Status | When |
+| --- | --- |
+| `400` | Missing file or version, file too large, invalid or missing signature. |
+| `401` | Token is invalid or lacks `firmware:deploy`. |
+| `402` | Storage quota exceeded. |
+| `403` | Token is not allowed to deploy to this template. |

@@ -1,0 +1,66 @@
+---
+title: "Alarms"
+description: "Read alarm rules and alarm events"
+---
+
+Scope: `alarms:read`
+
+To be notified the moment an alarm changes state, use [webhooks](/api-reference/webhooks) instead of polling.
+
+## List alarm rules
+
+```
+GET /api/saas/v1/alarm-rules?device_id={device_id}
+```
+
+`device_id` is required. Supports `page` and `limit` (default `10`, max `100`).
+
+```json
+{
+  "data": [
+    {
+      "id": "c2d1...",
+      "name": "Tank temperature high",
+      "rule_type": "THRESHOLD",
+      "severity": "WARNING",
+      "status": "ACTIVE",
+      "current_state": "NORMAL"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 10, "total": 1, "total_pages": 1 }
+}
+```
+
+## List alarm events
+
+```
+GET /api/saas/v1/devices/{device_id}/alarm-events?device_id={device_id}
+```
+
+<Note>
+  Pass the device ID as the `device_id` query parameter as well as in the path.
+</Note>
+
+| Parameter | Description |
+| --- | --- |
+| `state` | `TRIGGERED`, `RESOLVED`, or `ACKNOWLEDGED`. |
+| `page`, `limit` | Default `10`, max `100`. |
+
+```json
+{
+  "data": [
+    {
+      "id": "9e7a...",
+      "rule_id": "c2d1...",
+      "state": "TRIGGERED",
+      "severity": "WARNING",
+      "value": "81.2",
+      "message": "Tank temperature above 80",
+      "created_at": "2026-10-28T03:15:00Z"
+    }
+  ],
+  "pagination": { "page": 1, "limit": 10, "total": 1, "total_pages": 1 }
+}
+```
+
+Severity is `INFO`, `WARNING`, or `CRITICAL`.

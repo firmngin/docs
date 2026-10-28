@@ -1,0 +1,80 @@
+---
+title: "Webhooks"
+description: "Receive alarm events on your own server"
+---
+
+Webhooks send an HTTPS `POST` to your server when something happens in your workspace, for example an alarm is triggered. Create and test endpoints in **Dashboard → Webhooks**. Each endpoint has its own **signing secret**, shown when you create it.
+
+Endpoints must use `https://`.
+
+## Request format
+
+```
+POST https://your-server.example.com/firmngin
+Content-Type: application/json
+X-Firmngin-Event: sink.alarm
+X-Firmngin-Delivery: 7c2d...
+X-Firmngin-Workspace: 3f1b...
+X-Firmngin-Timestamp: 1793158200
+X-Firmngin-Signature: sha256=5d41...
+Idempotency-Key: 7c2d...
+```
+
+```json
+{
+  "event": "sink.alarm",
+  "data": {
+    "event_id": "a81e...",
+    "rule_id": "c03f...",
+    "rule_name": "Freezer too warm",
+    "rule_type": "THRESHOLD",
+    "state": "TRIGGERED",
+    "severity": "CRITICAL",
+    "value": -2.5,
+    "operator": "GT",
+    "threshold_min": -5,
+    "message": "Temperature above limit",
+    "device_id": "8f0c...",
+    "device_entity_id": "temp",
+    "workspace_id": "3f1b...",
+    "occurred_at": "2026-10-28T03:10:00Z"
+  }
+}
+```
+
+## Events
+
+| Event | Sent when |
+| --- | --- |
+| `sink.alarm` | An alarm changes state: `TRIGGERED`, `RESOLVED`, or `ACKNOWLEDGED`. |
+| `sink.test` | You press **Test Connection** in the dashboard. |
+
+## Verify the signature
+
+The signature is an HMAC-SHA256 of `<X-Firmngin-Timestamp>.<raw request body>`, keyed with your signing secret, in hex. Always check it against the raw body before trusting a request, and reject old timestamps.
+
+```js
+import crypto from "node:crypto";
+
+function isValidWebhook(rawBody, headers, secret) {
+  const timestamp = headers["x-firmngin-timestamp"];
+  const expected =
+    "sha256=" +
+    crypto.createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
+  const received = headers["x-firmngin-signature"] || "";
+  const fresh = Math.abs(Date.now() / 1000 - Number(timestamp)) < 300;
+  return (
+    fresh &&
+    received.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(received), Buffer.from(expected))
+  );
+}
+```
+
+## Responding and retries
+
+- Reply with any `2xx` status within a few seconds. Do slow work after replying.
+- Failed deliveries are retried with increasing delays. After several failures in a row, deliveries to that endpoint pause for a short cool-down and then resume on their own. A passing **Test Connection** resumes them right away.
+- The same event can arrive more than once. Use `Idempotency-Key` to skip duplicates.
+
+See [Alarms](/api-reference/devices/alarms) to read alarm rules and events on demand.
