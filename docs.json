@@ -85,14 +85,19 @@
             ]
           },
           {
-            "group": "Monetization",
+            "group": "Device Billing",
             "pages": [
               "monetization",
               "monetization/merchant-setup",
-              "monetization/business-modes",
-              "monetization/service-mode",
-              "monetization/vending-mode",
-              "monetization/terminal-mode",
+              {
+                "group": "Business modes",
+                "root": "monetization/business-modes",
+                "pages": [
+                  "monetization/service-mode",
+                  "monetization/vending-mode",
+                  "monetization/terminal-mode"
+                ]
+              },
               "monetization/prepaid",
               "monetization/postpaid",
               "monetization/payouts",
