@@ -8,8 +8,8 @@ This guide walks you through creating an account, registering your first device,
 <Info>
   **Prerequisites**
 
-  - An ESP32 board
-  - Arduino IDE or PlatformIO installed
+  - A supported device board (see [Libraries](/libraries/arduino))
+  - Your firmware toolchain installed
   - A firmngin.dev account ([sign up here](https://firmngin.dev/register))
 </Info>
 
@@ -32,7 +32,7 @@ This guide walks you through creating an account, registering your first device,
 <AccordionGroup>
   <Accordion title="Add a device to your workspace" icon="microchip">
     1. In the dashboard, navigate to **Devices** and click **Add Device**.
-    2. Select your board type (ESP32, etc.).
+    2. Select your board type.
     3. Provide a device name and optional description.
     4. Once created, you will receive:
        - **Secret ID** — your device identifier
@@ -56,13 +56,55 @@ This guide walks you through creating an account, registering your first device,
   </Accordion>
 
   <Accordion title="PlatformIO" icon="code">
-    [code:PlatformIO dependency entry for the Firmngin Arduino library]
+    Add the library to `platformio.ini`:
+
+    ```ini
+    lib_deps =
+      firmngin/Firmngin-Arduino
+    ```
   </Accordion>
 </AccordionGroup>
 
 ## Step 4: Connect your device
 
-[code:minimal Arduino firmware sketch that connects Wi-Fi, authenticates with firmngin credentials, and publishes a temperature entity]
+```cpp
+#include "keys.h"
+#include <firmngin.h>
+
+#include <WiFi.h>
+
+const char *ssid = "YOUR_SSID";
+const char *password = "YOUR_PASSWORD";
+
+Firmngin fngin(DEVICE_ID, DEVICE_KEY);
+Entity temperature("temperature");
+
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi connected");
+
+  fngin.begin();
+}
+
+void loop() {
+  fngin.loop();
+
+  // Push the temperature every 10 seconds
+  static unsigned long lastPush = 0;
+  if (millis() - lastPush > 10000) {
+    lastPush = millis();
+    fngin.pushEntity(temperature, "25.5");
+  }
+}
+```
+
+Place the downloaded `keys.h` next to your sketch. It provides `DEVICE_ID` and `DEVICE_KEY`, so you never paste credentials into the code. See the [Arduino library](/libraries/arduino) for the full lifecycle.
 
 <AccordionGroup>
   <Accordion title="Upload and verify" icon="check">
@@ -92,10 +134,6 @@ This guide walks you through creating an account, registering your first device,
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Architecture" icon="network" href="/architecture">
-    See how devices, the dashboard, payments, and automations fit together.
-  </Card>
-
   <Card title="Devices" icon="microchip" href="/devices">
     Learn how device identity, availability, entities, and public visibility work.
   </Card>

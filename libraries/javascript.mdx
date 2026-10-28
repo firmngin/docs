@@ -9,7 +9,7 @@ Use the JavaScript library for Node.js tools, simulators, gateways, and service 
 
 - Device simulators.
 - Gateway processes that bridge non-MQTT devices.
-- Internal tools that read device state.
+- Your own tools that read device state.
 - Automation helpers that need API access.
 
 ## Security note
@@ -18,10 +18,8 @@ Do not ship backend API tokens to browser code. Browser UI should call the firmn
 
 ## Basic client setup
 
-[code:create JavaScript client with base URL and token, then list devices]
+Create an API token in **Dashboard → Integrations** and keep it in server-side code or environment configuration only. The public API reference is being prepared; see [API Reference](/api-reference/introduction) for updates.
 
 ## Standard errors
-
-[code:handle standard API error fields error and message]
 
 Always prefer the standard `error` and `message` fields when displaying API errors.
