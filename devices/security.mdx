@@ -13,6 +13,11 @@ Firmngin devices use a `keys.h` file so firmware can connect as the correct devi
 
 You do not need to edit the file manually. Download it from the dashboard, place it in the firmware project, then use it when uploading firmware to the matching device.
 
+## Secure connection
+
+All communication between your devices, the dashboard, and Firmngin is encrypted with TLS (the same protection used by HTTPS websites). This keeps device data and commands private while they travel over the internet, and you do not need to set anything up.
+
+{/* Hidden for now:
 ## End-to-end encryption (E2EE)
 
 Firmngin can use E2EE to protect device messages beyond the normal secure connection layer. When E2EE is active for a device, the firmware and platform use device-specific keys so supported device messages are protected while they travel between the device and Firmngin services.
@@ -27,6 +32,7 @@ For users, this means:
 <Note>
   E2EE is handled by the platform and supported firmware library. You only need to keep the correct `keys.h` with the correct firmware project.
 </Note>
+*/}
 
 ## How to download keys.h
 
@@ -68,7 +74,7 @@ You usually need `keys.h` when:
 - Rebuilding firmware after changing the sketch.
 - Preparing a production device before installation.
 
-You do not need to share `keys.h` with dashboard users who only monitor devices, view logs, manage automations, or review monetization activity.
+You do not need to share `keys.h` with dashboard users who only monitor devices, view logs, manage automations, or review Device Billing activity.
 
 ## Good practice
 

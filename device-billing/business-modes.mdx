@@ -22,22 +22,22 @@ Business mode is different from prepaid and postpaid. Prepaid and postpaid descr
 | Examples | Laundry, massage chair, EV charging, locker storage | Snack machine, drink dispenser, capsule vendor | Counter payment device, cashier QRIS display, pay-at-device stand |
 
 <CardGroup cols={3}>
-  <Card title="Service Mode" icon="timer" href="/monetization/service-mode">
+  <Card title="Service Mode" icon="timer" href="/device-billing/service-mode">
     Session-based use of the device after payment.
   </Card>
 
-  <Card title="Vending Mode" icon="box" href="/monetization/vending-mode">
+  <Card title="Vending Mode" icon="box" href="/device-billing/vending-mode">
     Instant dispense after payment, with a multi-item cart and per-device stock.
   </Card>
 
-  <Card title="Terminal Mode" icon="qr-code" href="/monetization/terminal-mode">
+  <Card title="Terminal Mode" icon="qr-code" href="/device-billing/terminal-mode">
     Enter an amount on the device and let the customer pay by scanning a QRIS code, with no catalog or session.
   </Card>
 </CardGroup>
 
 ## Set the business mode
 
-1. Open **Monetization** in the dashboard and select your merchant.
+1. Open **Device Billing** in the dashboard and select your merchant.
 2. Go to **Linked Devices**.
 3. Open the setup drawer for the device you want to configure.
 4. Find the **Business Mode** card.
@@ -66,7 +66,7 @@ Switching a device to **Service** or **Terminal** also turns **Kiosk mode** off,
 
 Switching a device to **Terminal** disables its public store page. Visitors who open the page see that the store page is disabled, and orders cannot be placed from it. Map Entity, Flow, and verification settings are hidden while the device is in Terminal mode.
 
-Switching a device out of **Terminal** cancels any pending Terminal transaction on that device first, so its QR code can no longer be paid and the device clears it. If a customer already paid the transaction, or the cancellation cannot be confirmed yet, the switch is refused and the device stays in Terminal mode. Let the paid transaction settle, or try again in a moment. See [Terminal Mode](/monetization/terminal-mode#switching-modes).
+Switching a device out of **Terminal** cancels any pending Terminal transaction on that device first, so its QR code can no longer be paid and the device clears it. If a customer already paid the transaction, or the cancellation cannot be confirmed yet, the switch is refused and the device stays in Terminal mode. Let the paid transaction settle, or try again in a moment. See [Terminal Mode](/device-billing/terminal-mode#switching-modes).
 
 ## Choose the right mode
 

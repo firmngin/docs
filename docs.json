@@ -85,17 +85,22 @@
             ]
           },
           {
-            "group": "Monetization",
+            "group": "Device Billing",
             "pages": [
-              "monetization",
-              "monetization/merchant-setup",
-              "monetization/business-modes",
-              "monetization/service-mode",
-              "monetization/vending-mode",
-              "monetization/terminal-mode",
-              "monetization/prepaid",
-              "monetization/postpaid",
-              "monetization/payouts",
+              "device-billing",
+              "device-billing/merchant-setup",
+              {
+                "group": "Business modes",
+                "root": "device-billing/business-modes",
+                "pages": [
+                  "device-billing/service-mode",
+                  "device-billing/vending-mode",
+                  "device-billing/terminal-mode"
+                ]
+              },
+              "device-billing/prepaid",
+              "device-billing/postpaid",
+              "device-billing/payouts",
               "payment-channels",
               "live-merchant-verification"
             ]
@@ -109,7 +114,7 @@
                 "pages": [
                   "libraries/arduino/installation",
                   "libraries/arduino/entities",
-                  "libraries/arduino/monetization",
+                  "libraries/arduino/device-billing",
                   "libraries/arduino/ota-media-location",
                   "libraries/arduino/examples"
                 ]
@@ -195,6 +200,16 @@
   "integrations": {
     "ga4": {
       "measurementId": "G-NSL04D6QEV"
+    }
+  },
+  "seo": {
+    "metatags": {
+      "og:image": "https://firmngin.dev/preview.jpg",
+      "og:image:width": "1781",
+      "og:image:height": "883",
+      "og:image:alt": "Firmngin IoT platform with AI built in",
+      "twitter:card": "summary_large_image",
+      "twitter:image": "https://firmngin.dev/preview.jpg"
     }
   }
 }

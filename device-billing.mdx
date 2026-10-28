@@ -1,14 +1,14 @@
 ---
-title: "Hardware Monetization Overview"
-description: "Device monetization, public pages, orders, payments, and sessions"
+title: "Device Billing Overview"
+description: "Charge customers for device use: public pages, orders, payments, and sessions"
 ---
 
-Monetization turns connected devices into paid services. A merchant can publish a public page, sell prepaid services, meter postpaid usage, accept invoice or QR payments, withdraw settled balance through payouts, and review orders, sessions, revenue, and device-level logs.
+Device Billing turns connected devices into paid services. A merchant can publish a public page, sell prepaid services, meter postpaid usage, accept invoice or QR payments, withdraw settled balance through payouts, and review orders, sessions, revenue, and device-level logs.
 
-\[image:monetization dashboard with revenue, orders, sessions, and merchant public page status\]
+\[image:Device Billing dashboard with revenue, orders, sessions, and merchant public page status\]
 
 <Note>
-  Monetization is currently available for Indonesia-focused payment flows. Available payment methods depend on the channels enabled for your merchant.
+  Device Billing is currently available for Indonesia-focused payment flows. Available payment methods depend on the channels enabled for your merchant.
 </Note>
 
 ## Business modes
@@ -41,11 +41,11 @@ sequenceDiagram
 ```
 
 <CardGroup cols={2}>
-  <Card title="Business Modes" icon="shuffle" href="/monetization/business-modes">
+  <Card title="Business Modes" icon="shuffle" href="/device-billing/business-modes">
     Compare Service, Vending, and Terminal, and set the mode for a linked device.
   </Card>
 
-  <Card title="Vending and kiosk" icon="box" href="/monetization/vending-mode">
+  <Card title="Vending and kiosk" icon="box" href="/device-billing/vending-mode">
     Multi-item carts, per-device stock, and kiosk checkout on the device screen.
   </Card>
 </CardGroup>
@@ -66,15 +66,15 @@ The main difference is when the final amount becomes known and when the customer
 Choose **Prepaid** when every customer should see and pay the final amount before the service begins. Choose **Postpaid** when the final bill depends on what happens during the session.
 
 <CardGroup cols={3}>
-  <Card title="Prepaid" icon="credit-card" href="/monetization/prepaid">
+  <Card title="Prepaid" icon="credit-card" href="/device-billing/prepaid">
     Charge a fixed amount before the customer starts using the service.
   </Card>
 
-  <Card title="Postpaid" icon="gauge" href="/monetization/postpaid">
+  <Card title="Postpaid" icon="gauge" href="/device-billing/postpaid">
     Calculate the final amount from usage or duration and collect payment after the session.
   </Card>
 
-  <Card title="Payouts" icon="landmark" href="/monetization/payouts">
+  <Card title="Payouts" icon="landmark" href="/device-billing/payouts">
     Withdraw available settled merchant balance to a supported payout destination.
   </Card>
 </CardGroup>
@@ -83,7 +83,7 @@ Choose **Prepaid** when every customer should see and pay the final amount befor
 
 Customer payments move through their payment and settlement lifecycle before becoming available merchant balance. When balance is settled, use **Payout** to withdraw it to a supported bank account or e-wallet.
 
-The current dashboard requires a minimum payout of IDR 20,000 and prevents withdrawal above the available settled balance. See [Payouts](/monetization/payouts) for the direct payout and payout link flows.
+The current dashboard requires a minimum payout of IDR 20,000 and prevents withdrawal above the available settled balance. See [Payouts](/device-billing/payouts) for the direct payout and payout link flows.
 
 ## Prepaid flow
 
@@ -129,7 +129,7 @@ Upgrade your plan to restore merchant availability and continue accepting orders
 
 | Object | Meaning |
 | --- | --- |
-| Merchant | Workspace-owned monetization profile and public page settings. |
+| Merchant | Workspace-owned Device Billing profile and public page settings. |
 | Item | Sellable product or service attached to one or more devices. |
 | Order | Customer purchase intent and payment lifecycle. |
 | Session | Time-bound or usage-bound access to a device or service. |
