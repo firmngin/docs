@@ -30,40 +30,45 @@
             ]
           },
           {
-            "group": "Core concepts",
+            "group": "Devices",
             "pages": [
+              "devices",
+              "devices/security",
+              "device-templates"
+            ]
+          },
+          {
+            "group": "Firmware",
+            "pages": [
+              "firmware",
+              "ota-updates",
+              "firmware-master-fleet",
+              "firmware-fleet-rollout",
+              "firmware-ota-policy",
+              "firmware-workflow-control",
               {
-                "group": "Devices",
-                "root": "devices",
+                "group": "CI/CD",
                 "pages": [
-                  "devices/security",
-                  "device-templates"
+                  "firmware-ci-cd",
+                  "firmware-ci-cd-github-actions",
+                  "firmware-ci-cd-platformio",
+                  "firmware-ci-cd-arduino-cli"
                 ]
-              },
-              {
-                "group": "Firmware",
-                "root": "firmware",
-                "pages": [
-                  "ota-updates",
-                  "firmware-master-fleet",
-                  "firmware-fleet-rollout",
-                  "firmware-ota-policy",
-                  "firmware-workflow-control",
-                  {
-                    "group": "CI/CD",
-                    "pages": [
-                      "firmware-ci-cd",
-                      "firmware-ci-cd-github-actions",
-                      "firmware-ci-cd-platformio",
-                      "firmware-ci-cd-arduino-cli"
-                    ]
-                  }
-                ]
-              },
-              "automations",
-              "mcp-setup",
-              "channels",
+              }
+            ]
+          },
+          {
+            "group": "AI & automation",
+            "pages": [
               "ai-agents",
+              "mcp-setup",
+              "automations",
+              "channels"
+            ]
+          },
+          {
+            "group": "Billing",
+            "pages": [
               "device-rent"
             ]
           },
@@ -158,15 +163,15 @@
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
