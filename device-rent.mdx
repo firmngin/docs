@@ -1,84 +1,34 @@
 ---
-title: "Device rent & proration"
-description: "What you pay each month for devices beyond your free allowance, how the first month is prorated, and what happens when your balance runs low"
+title: "Device rent"
+description: "What you pay each month for devices beyond your free allowance"
 ---
 
-firmngin charges a small monthly rent for every device beyond your free allowance. The rent is taken from your **usage credit wallet**, not from a card. In your first month you only pay for the days left in that month.
+Each device beyond your free allowance costs a small monthly rent, paid from your credit balance.
 
 <Note>
-  This page is about what **you** pay firmngin to run your devices. It is not the **Device Billing** feature, which lets you charge your own customers. For that, see [Hardware Monetization](/monetization).
+  Not to be confused with **Device Billing**, which lets you charge your own customers. See [Hardware Monetization](/monetization).
 </Note>
 
 ## Pricing
 
-The current price per device per month is always listed on the [firmngin Pricing page](https://firmngin.dev/pricing), and your dashboard shows it too.
+See the current price per device on the [Pricing page](https://firmngin.dev/pricing). Prices may change, and a new price applies from the next charge.
 
-- **The price can change.** A new price applies from the next charge: either a new device or the next 1st. Charges already made are **never** re-charged, refunded, or adjusted.
-- **$0.50 is only an example.** The examples on this page use an example price of $0.50 per device per month so the math is easy to follow. Your actual price is the one on the [Pricing page](https://firmngin.dev/pricing).
+## How it works
 
-## Key rules at a glance
+- Your first **5 devices** are free.
+- Rent is charged on the **1st of every month** (07:00 WIB / 00:00 UTC).
+- In the first month, you only pay for the days left in that month.
+- Delete or archive a device to stop its rent from the next month.
 
-| Rule | What it means for you |
-| --- | --- |
-| Free devices | Your first **5 devices** are free. The free ones are always your oldest devices. |
-| Renewal date | Rent renews on the **1st of every month at 00:00 UTC** (07:00 WIB). It is the same date for every account. |
-| First month | A new paid device only costs the days left in the current month, including the day you create it. |
-| How you pay | Rent comes out of your usage credit wallet. Your card is never charged automatically. |
-| Creating a device | You can create a paid device as long as your balance covers its first-month cost. |
-| No double charges | A device is never charged twice in the same month. |
-| Disabled devices | **Still charged.** Only deleting or archiving a device stops the rent, from the next month. |
-| Price changes | A new price applies from the next charge. Past charges never change. |
+## Example
 
-## Your first month is prorated
+With an example price of $0.50 per month, a device created on Nov 16 costs **$0.25** for the rest of November (15 of 30 days), then **$0.50** every month from Dec 1.
 
-When you create a device beyond your free allowance, you only pay for the rest of the current month:
+## If your balance runs low
 
-> **First-month cost = monthly price × days left in the month ÷ days in the month**
-
-Days left includes the day you create the device, and dates follow UTC. From the next 1st onward, the device costs the full monthly price.
-
-| Created on (UTC) | Days left | You pay now | Next charge |
-| --- | --- | --- | --- |
-| Oct 1, 2026 | 31 of 31 | **$0.50** | Nov 1, $0.50 |
-| Oct 28, 2026 | 4 of 31 | **$0.0646** | Nov 1, $0.50 |
-| Nov 10, 2026 | 21 of 30 | **$0.35** | Dec 1, $0.50 |
-
-## When your balance is too low
-
-If your wallet cannot cover the monthly rent on the 1st:
-
-<Steps>
-  <Step title="Grace period">
-    Your account gets a **7-day grace period**. Your devices keep working as normal.
-  </Step>
-  <Step title="Read-only">
-    If you have not topped up when grace ends, your devices above the free allowance become **read-only**: they cannot connect or be controlled. Nothing is deleted.
-  </Step>
-  <Step title="Top up to restore">
-    Top up your wallet at any time. Once the unpaid rent is paid, everything works again automatically.
-  </Step>
-</Steps>
-
-## Emails
-
-We email you when your balance is too low for the upcoming monthly charge, when a grace period starts, shortly before it ends, and if your devices become read-only. Every email includes a top-up link.
-
-## FAQ
-
-<AccordionGroup>
-  <Accordion title="Will I be charged again every month?">
-    Yes. Every device beyond your free allowance is charged the full monthly price on the 1st of each month (UTC), until you delete or archive it.
-  </Accordion>
-  <Accordion title="Do I get a refund if I delete a device mid-month?">
-    No. Rent is paid in advance for the month and is not refunded. The device stops costing anything from the next month.
-  </Accordion>
-  <Accordion title="My devices are read-only. How do I get them back?">
-    Top up your wallet. Once the unpaid rent is paid, your devices come back automatically. You do not need to contact support.
-  </Accordion>
-</AccordionGroup>
+You get **7 days** to top up. After that, devices beyond your free allowance stop working until you top up, and then they come back automatically. We email you along the way.
 
 ## Related
 
 - [Devices](/devices)
-- [Hardware Monetization](/monetization)
 - [Pricing](https://firmngin.dev/pricing)

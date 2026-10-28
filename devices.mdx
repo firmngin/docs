@@ -19,7 +19,7 @@ Devices are the primary runtime unit in firmngin. A device has credentials, prot
 
 | Field | Use |
 | --- | --- |
-| Device ID | Stable backend identifier for API and dashboard references. |
+| Device ID | Permanent identifier used in the API and dashboard. |
 | Secret ID | Device-facing identifier when the firmware protocol uses a separate public credential handle. |
 | Secret key | Private credential for device authentication. Never expose it in docs, screenshots, or browser logs. |
 | Display name | Human-readable name shown in dashboards and public pages when allowed. |
@@ -45,5 +45,5 @@ Availability shows the latest reliable connection status for a device.
 | `offline` | The device is currently disconnected. |
 
 <Warning>
-  Do not mark a device online just because it exists in the database or has old telemetry.
+  A device shows as online only while it is actually connected, not just because it was registered or sent data earlier.
 </Warning>
