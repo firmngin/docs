@@ -87,20 +87,20 @@
           {
             "group": "Device Billing",
             "pages": [
-              "monetization",
-              "monetization/merchant-setup",
+              "device-billing",
+              "device-billing/merchant-setup",
               {
                 "group": "Business modes",
-                "root": "monetization/business-modes",
+                "root": "device-billing/business-modes",
                 "pages": [
-                  "monetization/service-mode",
-                  "monetization/vending-mode",
-                  "monetization/terminal-mode"
+                  "device-billing/service-mode",
+                  "device-billing/vending-mode",
+                  "device-billing/terminal-mode"
                 ]
               },
-              "monetization/prepaid",
-              "monetization/postpaid",
-              "monetization/payouts",
+              "device-billing/prepaid",
+              "device-billing/postpaid",
+              "device-billing/payouts",
               "payment-channels",
               "live-merchant-verification"
             ]
@@ -114,7 +114,7 @@
                 "pages": [
                   "libraries/arduino/installation",
                   "libraries/arduino/entities",
-                  "libraries/arduino/monetization",
+                  "libraries/arduino/device-billing",
                   "libraries/arduino/ota-media-location",
                   "libraries/arduino/examples"
                 ]
