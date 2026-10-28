@@ -201,5 +201,15 @@
     "ga4": {
       "measurementId": "G-NSL04D6QEV"
     }
+  },
+  "seo": {
+    "metatags": {
+      "og:image": "https://firmngin.dev/preview.jpg",
+      "og:image:width": "1781",
+      "og:image:height": "883",
+      "og:image:alt": "Firmngin IoT platform with AI built in",
+      "twitter:card": "summary_large_image",
+      "twitter:image": "https://firmngin.dev/preview.jpg"
+    }
   }
 }
