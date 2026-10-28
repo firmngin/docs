@@ -98,8 +98,13 @@
                   "device-billing/terminal-mode"
                 ]
               },
-              "device-billing/prepaid",
-              "device-billing/postpaid",
+              {
+                "group": "Payment types",
+                "pages": [
+                  "device-billing/prepaid",
+                  "device-billing/postpaid"
+                ]
+              },
               "device-billing/payouts",
               "payment-channels",
               "live-merchant-verification"
