@@ -1,0 +1,252 @@
+---
+title: "Device rent & proration"
+description: "What you pay each month for devices beyond your free allowance, how the first month is prorated, and what happens when your balance runs low"
+---
+
+firmngin charges a small monthly rent for every device beyond your free allowance. The rent is taken from your **usage credit wallet**, not from a card. In your first month you only pay for the days left in that month.
+
+<Note>
+  This page is about what **you** pay firmngin to run your devices. It is not the **Device Billing** feature, which lets you charge your own customers. For that, see [Hardware Monetization](/monetization).
+</Note>
+
+## Pricing
+
+The current price per device per month is always listed on the [firmngin Pricing page](https://firmngin.dev/pricing), and your dashboard shows it too.
+
+- **The price can change.** A new price applies from the next charge: either a new device or the next 1st. Charges already made are **never** re-charged, refunded, or adjusted.
+- **$0.50 is only an example.** The examples on this page use an example price of $0.50 per device per month so the math is easy to follow. Your actual price is the one on the [Pricing page](https://firmngin.dev/pricing).
+- Your wallet history shows the price, days, and amount for every charge, so it stays clear even after a price change.
+
+## Key rules at a glance
+
+| Rule | What it means for you |
+| --- | --- |
+| Free devices | Your first **5 devices** are free. The free ones are always your oldest devices. |
+| Renewal date | Rent renews on the **1st of every month at 00:00 UTC** (07:00 WIB). It is the same date for every account. |
+| First month | A new paid device only costs the days left in the current month, including the day you create it. |
+| How you pay | Rent comes out of your usage credit wallet. Your card is never charged automatically. |
+| Creating a device | You can create a paid device as long as your balance covers its first-month cost. |
+| No double charges | A device is never charged twice in the same month. |
+| Price changes | A new price applies from the next charge. Past charges never change. |
+
+## Free devices
+
+Every account gets **5 free devices**. Your dashboard shows the allowance for your account.
+
+- The free slots always go to your **oldest devices**, in the order you created them.
+- You only pay for devices beyond the free allowance. If you have 7 devices and 5 are free, you pay for 2.
+- Devices in deleted or archived workspaces do not count.
+
+## Monthly renewal on the 1st
+
+Rent for every paid device renews on the **1st of every month at 00:00 UTC**. This is the same moment for everyone, wherever you are:
+
+| Your time zone | Local time of the monthly charge |
+| --- | --- |
+| UTC | 1st, 00:00 |
+| WIB (UTC+7) | 1st, 07:00 |
+| PDT (UTC-7) | Last day of the previous month, 17:00 |
+
+Each paid device is charged the full monthly price. The charge usually shows up in your wallet history within a few hours after the 1st begins.
+
+## Your first month is prorated
+
+When you create a device beyond your free allowance, you only pay for the rest of the current month:
+
+> **First-month cost = monthly price × days left in the month ÷ days in the month**
+
+- **Days left includes the day you create the device.** Creating a device on Oct 28 covers Oct 28, 29, 30, and 31, which is 4 days.
+- Dates follow **UTC**. For example, 06:00 WIB on Oct 28 is still Oct 27 in UTC, so that device counts as created on Oct 27.
+- From the next 1st onward, the device costs the full monthly price.
+
+### How amounts are rounded
+
+Amounts are shown with up to **4 decimal places**, and we round up to the nearest $0.0001. So you never pay more than $0.0001 above the exact amount.
+
+For example, 1 day of a $0.50 device in a 31-day month is exactly $0.016129…, so you pay **$0.0162**. An amount like $0.125 already fits, so it stays $0.125.
+
+## Creating a device
+
+When a new device is beyond your free allowance, firmngin checks your wallet first:
+
+- If your balance **covers the first-month cost**, the device is created and that amount is taken from your wallet right away.
+- If your balance is too low, the device is not created. Top up your wallet and try again.
+
+Devices inside your free allowance never need a balance.
+
+### See the cost before you create
+
+The dashboard shows what a new device will cost before you create it: how much is taken now, how many days that covers, and when the next full charge is due. For example: "$0.0646 now (4 days), next charge Nov 1, $0.50". If the device is inside your free allowance, no charge is shown.
+
+## Never charged twice
+
+A device is charged at most once per month. Once a device's rent is paid for a month, you will not be charged for it again that month.
+
+## What keeps or stops the rent
+
+| Device state | Rent |
+| --- | --- |
+| Active | Charged every month while it is beyond the free allowance. |
+| Disabled | **Still charged.** Disabling a device does not free its slot. |
+| Deleted | Stops from the next month. **No refund** for the current month. |
+| Archived, or in an archived workspace | Stops from the next month. **No refund** for the current month. |
+
+<Warning>
+  If you delete a device and create a new one in the same month, the new device is charged separately. Rent belongs to each device, not to a reusable slot.
+</Warning>
+
+## When your balance is too low
+
+If your wallet cannot cover the monthly rent on the 1st:
+
+<Steps>
+  <Step title="Grace period starts">
+    The rent is not taken, and your account gets a **7-day grace period**. Your devices keep working as normal during grace. We send you an email.
+  </Step>
+  <Step title="Top up during grace">
+    Top up your wallet. The unpaid rent is taken from your new balance as soon as your top-up is confirmed, and the grace period ends. You do not need to do anything else.
+  </Step>
+  <Step title="Grace ends without a top-up">
+    Your devices above the free allowance and their workspaces become **read-only**. Connected devices are disconnected, and they cannot connect again or be controlled from the dashboard or any app. You also cannot edit them or add new devices. Nothing is deleted. We send you an email.
+  </Step>
+  <Step title="Get your devices back">
+    Top up your wallet. Once your top-up is confirmed and the unpaid rent is paid, your devices and workspaces come back automatically and can connect and be controlled again. Devices that an administrator disabled for other reasons stay disabled.
+  </Step>
+</Steps>
+
+## Reminder emails
+
+We email the account owner so a low balance never catches you by surprise. Each email is sent once for the situation it describes.
+
+| Email | When you get it | What it tells you |
+| --- | --- | --- |
+| Upcoming charge reminder | About 3 days before the 1st, only if your balance is lower than next month's rent. | When the charge happens, how many devices are paid, the amount due, your balance, how much you are short, and a top-up link. |
+| Grace period notice | When the monthly charge fails because your balance is too low. | The amount due, your balance, how much you are short, how many devices are affected, when grace ends, what happens next, and a top-up link. |
+| Grace reminder | About 48 hours before grace ends, if the rent is still unpaid. | The same details as the grace notice, plus the time left. |
+| Read-only notice | When grace ends and your devices become read-only. | The amount due, what is restricted, and how to get access back: top up, and your devices come back automatically once the rent is paid. |
+
+Every email includes a top-up link and shows times in UTC and WIB. If you top up before an email is due, you will not get it.
+
+## Examples
+
+All examples use an **example price of $0.50 per device per month** and 5 free devices. Your actual price may differ; see [Pricing](https://firmngin.dev/pricing).
+
+### First-month cost
+
+| Created on (UTC) | Days in month | Days left | Exact amount | You pay now | Next charge |
+| --- | --- | --- | --- | --- | --- |
+| Oct 1, 2026 | 31 | 31 | $0.50 | **$0.50** | Nov 1, $0.50 |
+| Oct 28, 2026 | 31 | 4 | $0.064516… | **$0.0646** | Nov 1, $0.50 |
+| Oct 31, 2026 | 31 | 1 | $0.016129… | **$0.0162** | Nov 1, $0.50 |
+| Nov 10, 2026 | 30 | 21 | $0.35 | **$0.35** | Dec 1, $0.50 |
+| Feb 15, 2027 (not a leap year) | 28 | 14 | $0.25 | **$0.25** | Mar 1, $0.50 |
+| Feb 15, 2028 (leap year) | 29 | 15 | $0.258620… | **$0.2587** | Mar 1, $0.50 |
+| Feb 22, 2027 | 28 | 7 | $0.125 | **$0.125** (already fits, no rounding) | Mar 1, $0.50 |
+
+<AccordionGroup>
+  <Accordion title="Create a device on Oct 28">
+    1. October has 31 days. Days left: 31 − 28 + 1 = **4**.
+    2. Cost: $0.50 × 4 ÷ 31 = $0.064516…, rounded up to **$0.0646**.
+    3. You need at least $0.0646 in your wallet. With $2.00, the device is created and your balance becomes $1.9354.
+    4. On Nov 1 at 00:00 UTC (07:00 WIB), the device is charged the full **$0.50**.
+  </Accordion>
+  <Accordion title="Create a device on Oct 1">
+    Days left: 31 − 1 + 1 = 31, so the device pays the full **$0.50** for October. The next charge is $0.50 on Nov 1.
+  </Accordion>
+  <Accordion title="Create a device on Feb 15 (leap and non-leap years)">
+    - 2027 (28 days): 28 − 15 + 1 = 14 days. $0.50 × 14 ÷ 28 = **$0.25**.
+    - 2028 (29 days): 29 − 15 + 1 = 15 days. $0.50 × 15 ÷ 29 = $0.258620…, rounded up to **$0.2587**.
+  </Accordion>
+</AccordionGroup>
+
+### An account with 7 devices and 5 free
+
+You already have 5 devices, all free. You add device 6 on **Oct 28** and device 7 on **Nov 10**.
+
+| Month | Device 6 | Device 7 | Total for the month |
+| --- | --- | --- | --- |
+| October | $0.0646 (Oct 28, 4 of 31 days) | — | **$0.0646** |
+| November | $0.50 (Nov 1) | $0.35 (Nov 10, 21 of 30 days) | **$0.85** |
+| December | $0.50 (Dec 1) | $0.50 (Dec 1) | **$1.00** |
+| Every month after | $0.50 | $0.50 | **$1.00** |
+
+If you delete device 2 in December, device 6 becomes free from the next charge, because the free slots always go to your oldest devices. From January you pay for 1 device: **$0.50**.
+
+### Low balance, grace, and top-up
+
+Your wallet holds **$0.10**. You have 5 free devices and create device 6 on **Oct 28**.
+
+<Steps>
+  <Step title="Oct 28: device created">
+    The first-month cost is $0.0646. Your $0.10 covers it, so the device is created. Balance: **$0.0354**.
+  </Step>
+  <Step title="Oct 29: upcoming charge reminder">
+    Next month's rent is 1 × $0.50 = $0.50. Your balance of $0.0354 is short by **$0.4646**, so you get one reminder email.
+  </Step>
+  <Step title="Nov 1, 00:00 UTC (07:00 WIB): charge fails">
+    The $0.50 cannot be paid, so grace starts. Your grace notice shows: amount due $0.50, balance $0.0354, short by $0.4646, 1 device affected, grace ends around Nov 8, 00:00 UTC (07:00 WIB).
+  </Step>
+  <Step title="About Nov 6: grace reminder">
+    About 48 hours before grace ends, you get one reminder if the rent is still unpaid.
+  </Step>
+  <Step title="Top up">
+    You top up $5.00 on Nov 7. The $0.50 is taken right after your top-up is confirmed, and grace ends. Balance: **$4.5354**. No read-only notice is sent.
+  </Step>
+  <Step title="If you do not top up">
+    Around Nov 8, device 6 becomes read-only and you get the read-only notice. If you top up $5.00 later, for example on Nov 10, the $0.50 is taken right after your top-up is confirmed (balance **$4.5354**) and device 6 comes back automatically. It can connect and be controlled again.
+  </Step>
+</Steps>
+
+### Time zones
+
+The monthly charge happens at the same moment for everyone: the 1st at 00:00 UTC.
+
+| Location | When the Nov 1 charge happens locally |
+| --- | --- |
+| Jakarta (WIB, UTC+7) | Nov 1, 07:00 |
+| London (GMT, UTC+0) | Nov 1, 00:00 |
+| San Francisco (PDT, UTC-7) | **Oct 31, 17:00** |
+
+The first-month cost also follows the UTC date. If you are in San Francisco and create a device on Oct 31 at 18:00 PDT, it is already Nov 1 in UTC. So it counts as a November device: $0.50 × 30 ÷ 30 = **$0.50**, and the next charge is Dec 1.
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="Will I be charged again every month?">
+    Yes. Every device beyond your free allowance is charged the full monthly price on the 1st of each month (UTC), until you delete or archive it.
+  </Accordion>
+  <Accordion title="Is my card charged automatically?">
+    No. Rent comes out of your usage credit wallet. Top up your wallet to keep enough balance.
+  </Accordion>
+  <Accordion title="Do I get a refund if I delete a device mid-month?">
+    No. Rent is paid in advance for the month and is not refunded. The device stops costing anything from the next month.
+  </Accordion>
+  <Accordion title="Do disabled devices still cost rent?">
+    Yes. Only deleted or archived devices stop the rent.
+  </Accordion>
+  <Accordion title="Can I be charged twice for the same device in one month?">
+    No. Each device is charged at most once per month.
+  </Accordion>
+  <Accordion title="What happens if the price changes?">
+    The new price applies from the next charge. Past charges stay as they are.
+  </Accordion>
+  <Accordion title="Why was I charged $0.0162 for one day?">
+    Amounts are shown with up to 4 decimal places, and we round up to the nearest $0.0001. One day of a $0.50 device in a 31-day month is $0.016129…, which rounds up to $0.0162.
+  </Accordion>
+  <Accordion title="My devices are read-only. How do I get them back?">
+    Top up your wallet. Once your top-up is confirmed and the unpaid rent is paid, your devices come back automatically and can connect and be controlled again. You do not need to contact support.
+  </Accordion>
+  <Accordion title="Why did I get an email before the 1st?">
+    About 3 days before the 1st, we check whether your balance covers next month's rent. If it does not, you get one reminder with how much you are short and a top-up link. If your balance is enough, you get no email.
+  </Accordion>
+  <Accordion title="Which devices are free?">
+    Your oldest devices, in the order you created them, up to your free allowance (5 by default).
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+- [Plans](/plans)
+- [Devices](/devices)
+- [Hardware Monetization](/monetization)
+- [Pricing](https://firmngin.dev/pricing)

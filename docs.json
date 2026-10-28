@@ -64,7 +64,8 @@
               "mcp-setup",
               "channels",
               "ai-agents",
-              "plans"
+              "plans",
+              "device-rent"
             ]
           },
           {
