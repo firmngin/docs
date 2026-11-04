@@ -54,6 +54,15 @@
                   "firmware-ci-cd-platformio",
                   "firmware-ci-cd-arduino-cli"
                 ]
+              },
+              {
+                "group": "Flash via Third-Party",
+                "pages": [
+                  "local-flash/overview",
+                  "local-flash/client-patterns",
+                  "local-flash/api",
+                  "local-flash/security"
+                ]
               }
             ]
           },
@@ -70,15 +79,6 @@
             "group": "Billing",
             "pages": [
               "device-rent"
-            ]
-          },
-          {
-            "group": "Local flash",
-            "pages": [
-              "local-flash/overview",
-              "local-flash/client-patterns",
-              "local-flash/api",
-              "local-flash/security"
             ]
           },
           {
@@ -179,7 +179,8 @@
               "api-reference/firmware/upload",
               "api-reference/firmware/lookup",
               "api-reference/firmware-pipeline-runs",
-              "api-reference/firmware/latest-artifacts"
+              "api-reference/firmware/latest-artifacts",
+              "api-reference/local-flash"
             ]
           },
           {
@@ -244,39 +245,17 @@
   },
   "seo": {
     "metatags": {
-      "og:site_name": "Firmngin",
-      "og:image": "https://firmngin.dev/preview.jpg",
-      "og:image:width": "1781",
-      "og:image:height": "883",
-      "og:image:type": "image/jpeg",
-      "og:image:alt": "Firmngin IoT platform with AI built in",
-      "twitter:image": "https://firmngin.dev/preview.jpg",
-      "twitter:image:alt": "Firmngin IoT platform with AI built in"
-    },
-    "organization": {
-      "id": "https://firmngin.dev/#organization",
-      "name": "Firmngin",
-      "legalName": "PT Byte Forge Indonesia",
-      "url": "https://firmngin.dev",
-      "sameAs": [
-        "https://x.com/firmngin",
-        "https://github.com/firmngin"
-      ]
-    }
-  },
-  "integrations": {
-    "ga4": {
-      "measurementId": "G-NSL04D6QEV"
-    }
-  },
-  "seo": {
-    "metatags": {
       "og:image": "https://firmngin.dev/preview.jpg",
       "og:image:width": "1781",
       "og:image:height": "883",
       "og:image:alt": "Firmngin IoT platform with AI built in",
       "twitter:card": "summary_large_image",
       "twitter:image": "https://firmngin.dev/preview.jpg"
+    }
+  },
+  "integrations": {
+    "ga4": {
+      "measurementId": "G-NSL04D6QEV"
     }
   }
 }
