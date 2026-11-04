@@ -1,0 +1,115 @@
+---
+title: "Client patterns"
+description: "Use the local flash API from a desktop app, a web backend, or a local agent"
+---
+
+The local flash API is HTTP-only and client-agnostic. The same endpoints work from a native desktop app, a web backend, or a local agent. The difference is **where the API key lives** and **which process has USB or serial access**.
+
+## At a glance
+
+| Pattern | API key lives in | Can download | Can flash | Recommended for |
+| --- | --- | --- | --- | --- |
+| Desktop app | OS keychain | Yes | Yes, USB or serial | Native installer, Tauri, Electron |
+| Web app + backend (BFF) | Server secret manager | Yes, server-side | No, hand off to a desktop agent | SaaS dashboard |
+| Web app + local agent | Agent OS keychain | Yes, agent | Yes, agent | Browser UI with local hardware |
+| Browser only | Browser memory | Yes, if CORS allows | Limited (Chromium Web Serial) | Prototypes only |
+
+<Warning>
+  Never put a workspace API key in browser JavaScript, `localStorage`, or a public bundle. Use a backend or a local agent.
+</Warning>
+
+## Desktop app
+
+```mermaid actions={false}
+sequenceDiagram
+  participant App as Desktop app
+  participant API as Firmngin API
+  participant Device
+
+  App->>API: POST /flash/downloads with API key
+  API-->>App: ticket + session + manifest
+  App->>API: GET /flash/downloads/{ticket}
+  API-->>App: firmware.bin + hash + signature
+  App->>Device: Flash over USB or serial
+```
+
+- Store the API key in the OS keychain.
+- Download and verify in the app.
+- Flash from memory, or from a verified file descriptor.
+- Send the advisory report after the flash.
+
+## Web app with a backend
+
+```mermaid actions={false}
+sequenceDiagram
+  participant Browser
+  participant BFF as Web backend
+  participant API as Firmngin API
+  participant Agent as Desktop agent
+
+  Browser->>BFF: Request firmware
+  BFF->>API: POST /flash/downloads with server-held key
+  API-->>BFF: ticket + session + manifest
+  BFF->>API: GET /flash/downloads/{ticket}
+  API-->>BFF: firmware.bin
+  BFF-->>Browser: Download link or stream
+  Browser->>Agent: Hand off the file or session
+  Agent->>Agent: Verify and flash
+```
+
+- The browser never sees the API key.
+- The backend uses a server-side API key.
+- Flashing needs a desktop agent or companion with USB access.
+- Protect the backend with session auth, CSRF checks, and an origin allowlist.
+
+## Web app with a local agent
+
+```mermaid actions={false}
+sequenceDiagram
+  participant Browser
+  participant Agent as Local agent
+  participant API as Firmngin API
+  participant Device
+
+  Browser->>Agent: Start flash on localhost
+  Agent->>API: POST /flash/downloads with agent-held key
+  API-->>Agent: ticket + session + manifest
+  Agent->>API: GET /flash/downloads/{ticket}
+  API-->>Agent: firmware.bin + hash + signature
+  Agent->>Device: Flash over USB or serial
+  Agent-->>Browser: Progress and result
+```
+
+- The agent runs on the user's machine and stores the key in the OS keychain.
+- The browser talks to `127.0.0.1` over a local API.
+- Bind the local API to loopback, check the origin, and never expose it on the LAN.
+
+## Browser only
+
+A browser-only app can call the API when CORS allows it, but:
+
+- Web Serial works in Chromium desktop, not Safari, Firefox, or Android browsers.
+- Mobile browsers cannot reliably flash a device over USB.
+- The API key must not be embedded in the page.
+- Treat browser-only as a download or preview client, not as a flasher.
+
+## Same API, different key location
+
+The endpoints do not change. Only the key location and the flashing process change.
+
+| Step | Desktop | Web + backend | Web + agent |
+| --- | --- | --- | --- |
+| Create ticket | App | Backend | Agent |
+| Download | App | Backend | Agent |
+| Verify | App | Backend or browser | Agent |
+| Flash | App | Agent | Agent |
+| Report | App | Backend | Agent |
+
+## Security checklist
+
+- [ ] The API key is not in browser JavaScript or `localStorage`.
+- [ ] Desktop and agent keys live in the OS keychain.
+- [ ] Backend keys live in a secret manager, not in the repository.
+- [ ] The local agent binds to `127.0.0.1` and checks the caller origin.
+- [ ] The browser cannot call Firmngin directly with a long-lived key.
+- [ ] The flashing process verifies SHA-256 and signature before writing.

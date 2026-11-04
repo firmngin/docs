@@ -1,0 +1,257 @@
+---
+title: "Local flash API"
+description: "Endpoints for downloading signed firmware and recording a local flash session"
+---
+
+Base path: `https://api.firmngin.dev/api/saas/v1/flash`
+
+## Authentication
+
+Most endpoints use a workspace API key:
+
+```http
+Authorization: Bearer fng_pat_...
+```
+
+The ticket download endpoint uses the ticket from `POST /downloads` as its credential:
+
+```http
+GET /api/saas/v1/flash/downloads/fng_dl_...
+```
+
+Dashboard session tokens can also call the workspace-scoped endpoints when you pass `workspace_id`:
+
+```http
+GET /api/saas/v1/flash/firmwares?workspace_id={uuid}
+Authorization: Bearer <dashboard-session-token>
+```
+
+## Endpoints
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| `GET` | `/firmwares` | API key | List signed firmware families in the workspace. |
+| `GET` | `/firmwares/{artifact_code}` | API key | Latest signed manifest for one artifact code. |
+| `POST` | `/downloads` | API key | Create a single-use download ticket and a flash session. |
+| `GET` | `/downloads/{ticket}` | Ticket | Stream the firmware binary. |
+| `GET` | `/devices` | API key | List devices in the workspace. |
+| `GET` | `/devices/{device_secret_id}` | API key | Resolve one device by its serial-facing ID. |
+| `GET` | `/sessions/{id}` | API key | Read the advisory session status. |
+| `POST` | `/sessions/{id}/report` | API key | Record the advisory flash outcome. |
+
+## List firmware
+
+```http
+GET /api/saas/v1/flash/firmwares?target_board=esp32dev&target_model=ESP32-DevKitC
+Authorization: Bearer fng_pat_...
+```
+
+```json
+{
+  "data": [
+    {
+      "firmware_id": "8f2c...",
+      "artifact_code": "fng-thermo",
+      "version": "1.4.2",
+      "revision": 7,
+      "target_board": "esp32dev",
+      "target_model": "ESP32-DevKitC",
+      "file_size": 1048576,
+      "sha256": "…",
+      "signed": true,
+      "download_method": "POST",
+      "download_path": "/api/saas/v1/flash/downloads"
+    }
+  ],
+  "total": 1,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+Only signed artifacts are returned.
+
+## Get one manifest
+
+```http
+GET /api/saas/v1/flash/firmwares/fng-thermo
+Authorization: Bearer fng_pat_...
+```
+
+Returns `404` when the artifact does not exist or is outside the key's artifact-code binding. Returns `409` when the latest artifact is unsigned.
+
+## Create a download
+
+```http
+POST /api/saas/v1/flash/downloads
+Authorization: Bearer fng_pat_...
+Content-Type: application/json
+```
+
+```json
+{
+  "artifact_code": "fng-thermo",
+  "device_secret_id": "optional-device-id"
+}
+```
+
+`device_secret_id` is optional. When present, Firmngin checks that the firmware target matches the device board and model.
+
+```json
+{
+  "data": {
+    "ticket": "fng_dl_...",
+    "session_id": "f0e1...",
+    "nonce": "…",
+    "expires_at": "2026-11-04T10:05:00Z",
+    "manifest": {
+      "firmware_id": "8f2c...",
+      "artifact_code": "fng-thermo",
+      "version": "1.4.2",
+      "revision": 7,
+      "target_board": "esp32dev",
+      "target_model": "ESP32-DevKitC",
+      "file_size": 1048576,
+      "sha256": "…",
+      "signed": true
+    }
+  }
+}
+```
+
+The ticket and nonce are returned **once**. Store them only for the current flash session.
+
+## Download the binary
+
+```http
+GET /api/saas/v1/flash/downloads/fng_dl_...
+```
+
+The ticket is single-use and expires after five minutes. The response includes:
+
+```http
+Content-Type: application/octet-stream
+Content-Length: 1048576
+X-Firmware-Sha256: …
+X-Firmware-Signature: <base64>
+X-Flash-Session: <session-id>
+Cache-Control: private, no-store
+```
+
+Verify `X-Firmware-Sha256` and `X-Firmware-Signature` before flashing. A second request with the same ticket returns `410`.
+
+## List devices
+
+```http
+GET /api/saas/v1/flash/devices?q=thermo
+Authorization: Bearer fng_pat_...
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "…",
+      "name": "Thermostat lobby",
+      "device_secret_id": "…",
+      "board_name": "esp32dev",
+      "board_model": "ESP32-DevKitC",
+      "firmware_version_actual": "1.4.1",
+      "status": "active",
+      "created_at": "2026-10-01T08:00:00Z"
+    }
+  ],
+  "total": 1,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+## Resolve one device
+
+```http
+GET /api/saas/v1/flash/devices/{device_secret_id}
+Authorization: Bearer fng_pat_...
+```
+
+Use this to confirm the connected device's board and model before downloading.
+
+## Read a session
+
+```http
+GET /api/saas/v1/flash/sessions/{id}
+Authorization: Bearer fng_pat_...
+```
+
+```json
+{
+  "data": {
+    "id": "f0e1...",
+    "artifact_code": "fng-thermo",
+    "firmware_id": "8f2c...",
+    "status": "reported",
+    "report_result": "success",
+    "reported_version": "1.4.2",
+    "reported_at": "2026-11-04T10:02:00Z",
+    "expires_at": "2026-11-04T10:30:00Z"
+  }
+}
+```
+
+## Report the outcome
+
+```http
+POST /api/saas/v1/flash/sessions/{id}/report
+Authorization: Bearer fng_pat_...
+Content-Type: application/json
+```
+
+```json
+{
+  "result": "success",
+  "reported_version": "1.4.2",
+  "nonce": "…"
+}
+```
+
+`result` is `success` or `boot_failed`. The nonce comes from `POST /downloads`.
+
+<Warning>
+  This report is advisory. It does not change the device's authoritative `last_boot_status` or `firmware_version_actual`. Only device-origin events can do that.
+</Warning>
+
+## Artifact code binding
+
+API keys can be limited to specific artifact codes.
+
+| Binding | Behavior |
+| --- | --- |
+| Empty / not set | The key can access every signed artifact in the workspace. |
+| One or more codes | List, manifest, download, session read, and session report are limited to those codes. |
+
+Create the binding in **Dashboard → Integrations → Generate Token → Artifact codes**. Leave it empty to allow all.
+
+## Errors
+
+| Status | Meaning |
+| --- | --- |
+| `400` | Invalid request body or missing `artifact_code`. |
+| `401` | Missing, invalid, expired, or revoked API key. |
+| `403` | Invalid nonce on a session report. |
+| `404` | Firmware, device, session, or ticket not found. Also used when the artifact is outside the key's binding. |
+| `409` | Firmware is unsigned, target does not match the device, or the session already has a report. |
+| `410` | Download ticket is expired or already used. |
+| `429` | Rate limit exceeded. |
+| `503` | OTA service or rate limiter unavailable. |
+
+## Rate limits
+
+| Scope | Limit |
+| --- | --- |
+| Firmware reads | 60 requests per minute |
+| Create download | 30 requests per minute |
+| Download ticket | 30 requests per minute |
+| Device reads | 60 requests per minute |
+| Session report | 30 requests per minute |
+
+Rate limits are applied per authenticated user (the API key creator) or per IP for unauthenticated ticket downloads.

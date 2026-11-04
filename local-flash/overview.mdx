@@ -1,0 +1,90 @@
+---
+title: "Local flash"
+description: "Download signed firmware and flash devices over USB or serial from your own desktop app"
+---
+
+Local flash lets your desktop app deliver firmware to devices over USB or serial. The app requests a signed image from Firmngin, verifies it, and flashes the connected device. Your app does not need a Firmngin login: you create a scoped API key in the dashboard once, and the app uses it to request short-lived download tickets.
+
+A web app can use the same API through a backend or a local agent. The browser cannot flash a device by itself. See [Client patterns](/local-flash/client-patterns) for the supported desktop, backend, and local-agent flows.
+
+<Note>
+  Local flash is different from cloud OTA. Cloud OTA pushes an update through Firmngin and the device pulls it over MQTT. Local flash is for devices that are physically connected to the app.
+</Note>
+
+## How it works
+
+```mermaid actions={false}
+sequenceDiagram
+  participant You
+  participant App as Desktop app
+  participant API as Firmngin API
+  participant Device
+
+  You->>API: Create API key with scope ota:read
+  You->>App: Configure the API key once
+  App->>API: POST /flash/downloads with artifact_code
+  API-->>App: ticket + session_id + nonce + manifest
+  App->>API: GET /flash/downloads/{ticket}
+  API-->>App: firmware.bin + X-Firmware-Sha256 + X-Firmware-Signature
+  App->>App: Verify SHA-256 and signature
+  App->>Device: Flash over USB or serial
+  Device->>Device: Verify signature at boot
+  App->>API: POST /flash/sessions/{id}/report
+```
+
+The report is **advisory**. It records what the app observed, but it does not update the device's authoritative firmware status. Device-origin events remain the source of truth.
+
+## Artifact code binding
+
+An API key can optionally be limited to specific artifact codes.
+
+```mermaid actions={false}
+flowchart TD
+  A["Create API key"] --> B{"Artifact codes selected?"}
+  B -->|No| C["Key can request any signed firmware in the workspace"]
+  B -->|Yes| D["Key can request only the selected artifact codes"]
+  C --> E["POST /flash/downloads"]
+  D --> E
+  E --> F["Single-use ticket"]
+  F --> G["Download and verify"]
+  G --> H["Flash device"]
+```
+
+Leave **Artifact codes** empty in the dashboard to allow every artifact code in the workspace. This keeps existing integrations working without a binding.
+
+## What you need
+
+| Requirement | Details |
+| --- | --- |
+| Workspace API key | Scope **Firmware update history** (`ota:read`). Create it in **Dashboard → Integrations → Generate Token**. |
+| Signed firmware | The artifact must have a signature. Unsigned artifacts are rejected by the API. |
+| Device connection | USB or serial access from the desktop app. |
+| Signature public key | Pin the Firmngin firmware public key in the app. Never load it from the downloaded package. |
+
+## Supported endpoints
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/saas/v1/flash/firmwares` | List signed firmware families |
+| `GET` | `/api/saas/v1/flash/firmwares/{artifact_code}` | Read the latest manifest |
+| `POST` | `/api/saas/v1/flash/downloads` | Create a ticket, session, and nonce |
+| `GET` | `/api/saas/v1/flash/downloads/{ticket}` | Download the firmware binary |
+| `GET` | `/api/saas/v1/flash/devices` | List devices in the workspace |
+| `GET` | `/api/saas/v1/flash/devices/{device_secret_id}` | Resolve a device by its serial-facing ID |
+| `GET` | `/api/saas/v1/flash/sessions/{id}` | Read the advisory session status |
+| `POST` | `/api/saas/v1/flash/sessions/{id}/report` | Report the flash outcome |
+
+<Tip>
+  Building a web app? Read [Client patterns](/local-flash/client-patterns) before putting an API key anywhere near the browser.
+</Tip>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="API reference" icon="code" href="/local-flash/api">
+    Endpoints, request bodies, responses, and error codes.
+  </Card>
+  <Card title="Security model" icon="shield-check" href="/local-flash/security">
+    Tickets, signature verification, temp files, and advisory reports.
+  </Card>
+</CardGroup>
