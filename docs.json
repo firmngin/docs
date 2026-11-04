@@ -30,50 +30,55 @@
             ]
           },
           {
-            "group": "Core concepts",
+            "group": "Devices",
             "pages": [
+              "devices",
+              "devices/security",
+              "device-templates"
+            ]
+          },
+          {
+            "group": "Firmware",
+            "pages": [
+              "firmware",
+              "ota-updates",
+              "firmware-master-fleet",
+              "firmware-fleet-rollout",
+              "firmware-ota-policy",
+              "firmware-workflow-control",
               {
-                "group": "Devices",
-                "root": "devices",
+                "group": "CI/CD",
                 "pages": [
-                  "devices/security",
-                  "device-templates"
+                  "firmware-ci-cd",
+                  "firmware-ci-cd-github-actions",
+                  "firmware-ci-cd-platformio",
+                  "firmware-ci-cd-arduino-cli"
                 ]
               },
               {
-                "group": "Firmware",
-                "root": "firmware",
+                "group": "Flash via Third-Party",
                 "pages": [
-                  "ota-updates",
-                  "firmware-master-fleet",
-                  "firmware-fleet-rollout",
-                  "firmware-ota-policy",
-                  "firmware-workflow-control",
-                  {
-                    "group": "CI/CD",
-                    "pages": [
-                      "firmware-ci-cd",
-                      "firmware-ci-cd-github-actions",
-                      "firmware-ci-cd-platformio",
-                      "firmware-ci-cd-arduino-cli"
-                    ]
-                  },
-                  {
-                    "group": "Flash via Third-Party",
-                    "pages": [
-                      "local-flash/overview",
-                      "local-flash/client-patterns",
-                      "local-flash/api",
-                      "local-flash/security"
-                    ]
-                  }
+                  "local-flash/overview",
+                  "local-flash/client-patterns",
+                  "local-flash/api",
+                  "local-flash/security"
                 ]
-              },
-              "automations",
-              "mcp-setup",
-              "channels",
+              }
+            ]
+          },
+          {
+            "group": "AI & automation",
+            "pages": [
               "ai-agents",
-              "plans"
+              "mcp-setup",
+              "automations",
+              "channels"
+            ]
+          },
+          {
+            "group": "Billing",
+            "pages": [
+              "device-rent"
             ]
           },
           {
@@ -89,17 +94,27 @@
             ]
           },
           {
-            "group": "Monetization",
+            "group": "Device Billing",
             "pages": [
-              "monetization",
-              "monetization/merchant-setup",
-              "monetization/business-modes",
-              "monetization/service-mode",
-              "monetization/vending-mode",
-              "monetization/terminal-mode",
-              "monetization/prepaid",
-              "monetization/postpaid",
-              "monetization/payouts",
+              "device-billing",
+              "device-billing/merchant-setup",
+              {
+                "group": "Business modes",
+                "root": "device-billing/business-modes",
+                "pages": [
+                  "device-billing/service-mode",
+                  "device-billing/vending-mode",
+                  "device-billing/terminal-mode"
+                ]
+              },
+              {
+                "group": "Payment types",
+                "pages": [
+                  "device-billing/prepaid",
+                  "device-billing/postpaid"
+                ]
+              },
+              "device-billing/payouts",
               "payment-channels",
               "live-merchant-verification"
             ]
@@ -113,7 +128,7 @@
                 "pages": [
                   "libraries/arduino/installation",
                   "libraries/arduino/entities",
-                  "libraries/arduino/monetization",
+                  "libraries/arduino/device-billing",
                   "libraries/arduino/ota-media-location",
                   "libraries/arduino/examples"
                 ]
@@ -142,11 +157,42 @@
         "tab": "API reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Getting started",
             "pages": [
               "api-reference/introduction",
+              "api-reference/authentication"
+            ]
+          },
+          {
+            "group": "Devices",
+            "pages": [
+              "api-reference/devices/commands",
+              "api-reference/devices/history",
+              "api-reference/devices/alarms",
+              "api-reference/devices/ownership",
+              "api-reference/devices/provisioning"
+            ]
+          },
+          {
+            "group": "Firmware",
+            "pages": [
+              "api-reference/firmware/upload",
+              "api-reference/firmware/lookup",
               "api-reference/firmware-pipeline-runs",
+              "api-reference/firmware/latest-artifacts",
               "api-reference/local-flash"
+            ]
+          },
+          {
+            "group": "Device Billing",
+            "pages": [
+              "api-reference/device-billing/sdk"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "api-reference/webhooks"
             ]
           }
         ]
@@ -168,15 +214,15 @@
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {
@@ -199,24 +245,12 @@
   },
   "seo": {
     "metatags": {
-      "og:site_name": "Firmngin",
       "og:image": "https://firmngin.dev/preview.jpg",
       "og:image:width": "1781",
       "og:image:height": "883",
-      "og:image:type": "image/jpeg",
       "og:image:alt": "Firmngin IoT platform with AI built in",
-      "twitter:image": "https://firmngin.dev/preview.jpg",
-      "twitter:image:alt": "Firmngin IoT platform with AI built in"
-    },
-    "organization": {
-      "id": "https://firmngin.dev/#organization",
-      "name": "Firmngin",
-      "legalName": "PT Byte Forge Indonesia",
-      "url": "https://firmngin.dev",
-      "sameAs": [
-        "https://x.com/firmngin",
-        "https://github.com/firmngin"
-      ]
+      "twitter:card": "summary_large_image",
+      "twitter:image": "https://firmngin.dev/preview.jpg"
     }
   },
   "integrations": {

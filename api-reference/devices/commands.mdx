@@ -1,0 +1,57 @@
+---
+title: "Device commands"
+description: "Control an output entity on a device"
+---
+
+Scope: `devices:control`
+
+## Send a command
+
+```
+POST /api/saas/v1/devices/{device_id}/commands
+Content-Type: application/json
+```
+
+Identify the entity by its virtual pin or its key, and send the new value.
+
+```json
+{
+  "entity_key": "relay_main",
+  "value": "1"
+}
+```
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `entity_key` | One of `entity_key` or `vpin` | Entity key from the device template. |
+| `vpin` | One of `entity_key` or `vpin` | Virtual pin number of the entity. |
+| `value` | Yes | Value to apply, for example `"1"` / `"0"` or a number for analog outputs. |
+
+Only output entities (digital or analog) can be controlled.
+
+### Response
+
+```json
+{
+  "data": {
+    "device_id": "8f0c...",
+    "entity_id": "41b2...",
+    "entity_key": "relay_main",
+    "value": "1",
+    "accepted": true
+  }
+}
+```
+
+`accepted: true` means firmngin sent the command to the device.
+
+### Common errors
+
+| Status | Error | When |
+| --- | --- | --- |
+| `400` | `INVALID_INPUT` | Missing `value`, or the entity is not an output. |
+| `402` | `DEVICE_BILLING_READ_ONLY` | The workspace balance needs a top-up. |
+| `403` | `DEVICE_DISABLED` | The device is disabled or archived. |
+| `404` | `RESOURCE_NOT_FOUND` | Device or entity not found. |
+| `429` | `QUOTA_EXCEEDED` | Command quota reached. |
+| `503` | `DEVICE_OFFLINE` | The device is not connected. |

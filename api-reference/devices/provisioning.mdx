@@ -1,0 +1,76 @@
+---
+title: "Provisioning"
+description: "Create devices in bulk and prepare them on the factory line"
+---
+
+Scope: `devices:provision`
+
+These endpoints are used by factory tools to create devices and write their credentials before shipping. See [Fleet batches](/fleet-batches/overview) for the full workflow.
+
+<Note>
+  Every device you create counts toward your workspace device rent. See [Device rent](/device-rent).
+</Note>
+
+## Create devices in bulk
+
+```
+POST /api/v1/device-provisioning/bulk
+Content-Type: application/json
+```
+
+Create a number of devices with generated names:
+
+```json
+{
+  "device_template_id": "{template_id}",
+  "mode": "count",
+  "count": 100,
+  "name_prefix": "Unit"
+}
+```
+
+Or create devices from a list of names:
+
+```json
+{
+  "device_template_id": "{template_id}",
+  "mode": "list",
+  "devices": [{ "name": "Kiosk Jakarta 01" }, { "name": "Kiosk Jakarta 02" }]
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `device_template_id` | Required. The template the devices use. |
+| `mode` | `count` (default) or `list`. |
+| `count`, `name_prefix` | For `count` mode. Names become `Unit-001`, `Unit-002`, … |
+| `devices` | For `list` mode. Each entry needs a unique `name`. |
+| `limit_to_plan_max` | Default `true`: create only as many devices as your plan allows and skip the rest. |
+
+Returns `201` with the batch summary and one result per device, including its `device_id` and `device_secret_id`. Returns `402` if the balance does not cover the batch.
+
+## Get a provisioning bundle
+
+```
+GET /api/v1/device-provisioning/bundle/{device_secret_id}
+```
+
+Returns the credentials file to flash onto one device. Add `?format=json` to receive `keys_json` instead of the default `keys_h` file.
+
+<Warning>
+  The bundle contains the device's secret credentials. Write it to the device and do not store it in logs or shared folders.
+</Warning>
+
+## Factory line
+
+When several stations work on the same batch, each station claims a device first so two operators never flash the same unit. A claim lasts 5 minutes.
+
+| Endpoint | Body | Purpose |
+| --- | --- | --- |
+| `POST /api/v1/device-provisioning/factory-line/{device_secret_id}/claim` | `{ "owner": "station-3" }` (optional) | Claim the device. Returns a `factory_line_claim_token`. |
+| `POST /api/v1/device-provisioning/factory-line/{device_secret_id}/renew` | `{ "claim_token": "..." }` | Extend the claim while flashing takes longer. |
+| `POST /api/v1/device-provisioning/factory-line/{device_secret_id}` | `{ "claim_token": "..." }` | Mark the device as provisioned. |
+| `POST /api/v1/device-provisioning/factory-line/{device_secret_id}/release` | `{ "claim_token": "..." }` | Give the device back without finishing. |
+| `GET /api/v1/device-provisioning/factory-line/{device_secret_id}/status` | — | Check whether the freshly flashed device is online. |
+
+A claim by another station returns `409`. A stale or wrong `claim_token` also returns `409`.

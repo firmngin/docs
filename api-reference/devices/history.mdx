@@ -1,0 +1,103 @@
+---
+title: "Device history"
+description: "Read entity values, locations, and firmware updates"
+---
+
+History is kept for your plan's data retention period. All list endpoints accept `page` and `limit`.
+
+## Entity state history
+
+Scope: `entities:read`
+
+```
+GET /api/saas/v1/devices/{device_id}/entity-states?device_id={device_id}
+```
+
+<Note>
+  Pass the device ID as the `device_id` query parameter as well as in the path.
+</Note>
+
+| Parameter | Description |
+| --- | --- |
+| `device_entity_id` | Only this entity. Use `device_entity_ids` for a comma-separated list. |
+| `start_date`, `end_date` | Time range (ISO 8601). |
+| `date_range` | Preset instead of dates: `1h`, `1d`, `today`, `yesterday`, `7d`, `30d`. |
+| `trigger_by` | Who changed the value: `device`, `command`, `automation`, `user`, `system`. |
+| `sort_dir` | `DESC` (default) or `ASC`. |
+| `limit` | Up to `200`. Default `50`. |
+
+```json
+{
+  "data": [
+    {
+      "device_entity_id": "41b2...",
+      "old_value": "24.8",
+      "new_value": "25.1",
+      "trigger_by": "device",
+      "timestamp": "2026-10-28T03:15:00Z"
+    }
+  ],
+  "meta": { "page": 1, "limit": 50, "total": 1, "total_pages": 1 }
+}
+```
+
+## Location history
+
+Scope: `locations:read`
+
+```
+GET /api/saas/v1/devices/{device_id}/locations?start_date=...&end_date=...
+```
+
+```json
+{
+  "data": [
+    {
+      "latitude": -6.2,
+      "longitude": 106.8,
+      "accuracy": 12.5,
+      "timestamp": "2026-10-28T03:15:00Z"
+    }
+  ],
+  "meta": { "page": 1, "limit": 50, "total": 1 }
+}
+```
+
+## Latest location
+
+Scope: `locations:read`
+
+```
+GET /api/saas/v1/devices/{device_id}/locations/latest
+```
+
+Returns the most recent location in `data`, or `404` if the device has not reported one.
+
+## Firmware update history
+
+Scope: `ota:read`
+
+```
+GET /api/saas/v1/devices/{device_id}/firmware-updates
+```
+
+| Parameter | Description |
+| --- | --- |
+| `status` | `pending`, `triggered`, `running`, `success`, `failed`, or `skipped`. |
+| `start_date`, `end_date` | Time range (ISO 8601). |
+| `limit` | Default `20`. |
+
+```json
+{
+  "data": [
+    {
+      "run_code": "RUN-1042",
+      "firmware_version": "1.4.0",
+      "status": "success",
+      "progress": 100,
+      "timestamp": "2026-10-28T03:15:00Z"
+    }
+  ],
+  "meta": { "page": 1, "limit": 20, "total": 1, "total_pages": 1 }
+}
+```

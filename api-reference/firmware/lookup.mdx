@@ -1,0 +1,55 @@
+---
+title: "Firmware lookup"
+description: "Find and download firmware by its unique code"
+---
+
+Scope: `devices:provision`
+
+Factory tools use these endpoints to fetch the exact firmware build to flash. Every firmware has a **unique code**, shown in **Dashboard → Firmware → Artifacts**.
+
+## Search firmware
+
+```
+GET /api/v1/device-provisioning/firmwares?unique_code={code}
+```
+
+| Parameter | Description |
+| --- | --- |
+| `unique_code` | Firmware unique code. |
+| `target_board`, `target_model` | Filter by hardware target. |
+| `is_active` | `true` for active builds only. |
+| `master_fleet` | `true` for master fleet builds only. |
+| `page`, `limit` | Pagination. |
+
+```json
+{
+  "data": [
+    {
+      "id": "f1a9...",
+      "version": "1.4.0",
+      "unique_code": "kata-harimau-01234",
+      "file_size": 1048576,
+      "sha256": "3b7e..."
+    }
+  ],
+  "total": 1,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+## Get firmware by code
+
+```
+GET /api/v1/device-provisioning/firmwares/by-code/{code}
+```
+
+Returns one firmware in `data`, or `404` if no firmware in your workspace has this code.
+
+## Download firmware
+
+```
+GET /api/v1/device-provisioning/firmwares/by-code/{code}/download
+```
+
+Returns the firmware binary. Compare it with the `sha256` value before flashing.
