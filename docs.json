@@ -59,7 +59,7 @@
                     ]
                   },
                   {
-                    "group": "Flash via 3rd Party",
+                    "group": "Flash via Third-Party",
                     "pages": [
                       "local-flash/overview",
                       "local-flash/client-patterns",
