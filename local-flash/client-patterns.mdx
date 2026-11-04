@@ -1,16 +1,16 @@
 ---
 title: "Client patterns"
-description: "Use the local flash API from a desktop app, a web backend, or a local agent"
+description: "Use the local flash API from a native app, a web backend, or a local agent"
 ---
 
-The local flash API is HTTP-only and client-agnostic. The same endpoints work from a native desktop app, a web backend, or a local agent. The difference is **where the API key lives** and **which process has USB or serial access**.
+The local flash API is HTTP-only and client-agnostic. The same endpoints work from a native app, a web backend, or a local agent. The difference is **where the API key lives** and **which process has USB or serial access**.
 
 ## At a glance
 
 | Pattern | API key lives in | Can download | Can flash | Recommended for |
 | --- | --- | --- | --- | --- |
-| Desktop app | OS keychain | Yes | Yes, USB or serial | Native installer, Tauri, Electron |
-| Web app + backend (BFF) | Server secret manager | Yes, server-side | No, hand off to a desktop agent | SaaS dashboard |
+| Native app (example: desktop) | OS keychain | Yes | Yes, USB or serial | Native installer, Tauri, Electron, CLI |
+| Web app + backend (BFF) | Server secret manager | Yes, server-side | No, hand off to a local agent | SaaS dashboard |
 | Web app + local agent | Agent OS keychain | Yes, agent | Yes, agent | Browser UI with local hardware |
 | Browser only | Browser memory | Yes, if CORS allows | Limited (Chromium Web Serial) | Prototypes only |
 
@@ -18,7 +18,7 @@ The local flash API is HTTP-only and client-agnostic. The same endpoints work fr
   Never put a workspace API key in browser JavaScript, `localStorage`, or a public bundle. Use a backend or a local agent.
 </Warning>
 
-## Desktop app
+## Example: desktop app
 
 ```mermaid actions={false}
 sequenceDiagram
@@ -33,6 +33,8 @@ sequenceDiagram
   App->>Device: Flash over USB or serial
 ```
 
+The desktop app is one example. A CLI or another native client uses the same flow.
+
 - Store the API key in the OS keychain.
 - Download and verify in the app.
 - Flash from memory, or from a verified file descriptor.
@@ -45,7 +47,7 @@ sequenceDiagram
   participant Browser
   participant BFF as Web backend
   participant API as Firmngin API
-  participant Agent as Desktop agent
+  participant Agent as Local agent
 
   Browser->>BFF: Request firmware
   BFF->>API: POST /flash/downloads with server-held key
@@ -59,7 +61,7 @@ sequenceDiagram
 
 - The browser never sees the API key.
 - The backend uses a server-side API key.
-- Flashing needs a desktop agent or companion with USB access.
+- Flashing needs a local agent or companion with USB access.
 - Protect the backend with session auth, CSRF checks, and an origin allowlist.
 
 ## Web app with a local agent
@@ -97,7 +99,7 @@ A browser-only app can call the API when CORS allows it, but:
 
 The endpoints do not change. Only the key location and the flashing process change.
 
-| Step | Desktop | Web + backend | Web + agent |
+| Step | Native app | Web + backend | Web + agent |
 | --- | --- | --- | --- |
 | Create ticket | App | Backend | Agent |
 | Download | App | Backend | Agent |
@@ -108,7 +110,7 @@ The endpoints do not change. Only the key location and the flashing process chan
 ## Security checklist
 
 - [ ] The API key is not in browser JavaScript or `localStorage`.
-- [ ] Desktop and agent keys live in the OS keychain.
+- [ ] Native app and agent keys live in the OS keychain.
 - [ ] Backend keys live in a secret manager, not in the repository.
 - [ ] The local agent binds to `127.0.0.1` and checks the caller origin.
 - [ ] The browser cannot call Firmngin directly with a long-lived key.
