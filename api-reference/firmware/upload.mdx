@@ -7,7 +7,7 @@ Scope: `firmware:deploy`
 
 Use this endpoint from CI to publish a new firmware version. For ready-made setups, see [Firmware CI/CD](/firmware-ci-cd).
 
-```
+```text
 POST /api/v1/firmware-ci-cd/upload
 Content-Type: multipart/form-data
 ```
@@ -28,6 +28,7 @@ curl -X POST https://api.firmngin.dev/api/v1/firmware-ci-cd/upload \
 | `device_template_id` | One target | Publish for every device on this template. Your OTA policy decides when devices update. |
 | `device_secret_id` | One target | Publish and immediately start an update for this one device. |
 | `target_board`, `target_model` | One target | Use when you set neither a template nor a device. |
+| `artifact_code` | No | Upload as the next revision of an existing family. Omit to start a new family. See [Latest firmware artifacts](/api-reference/firmware/latest-artifacts). |
 | `signature` | If required | Signature file, when firmware signing is enabled for your workspace. |
 | `release_notes` | No | Shown in the dashboard. |
 

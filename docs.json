@@ -169,7 +169,8 @@
             "pages": [
               "api-reference/firmware/upload",
               "api-reference/firmware/lookup",
-              "api-reference/firmware-pipeline-runs"
+              "api-reference/firmware-pipeline-runs",
+              "api-reference/firmware/latest-artifacts"
             ]
           },
           {

@@ -1,0 +1,101 @@
+---
+title: "Latest firmware artifacts"
+description: "Read the newest active revision of each firmware artifact"
+---
+
+Scope: `ota:read`
+
+Every upload belongs to an **artifact family** identified by `artifact_code`. Each upload adds a revision, and its `unique_code` is `<artifact_code>-<revision>` (for example `kata-harimau-003`).
+
+These endpoints return the **latest active revision** of each family in your workspace — the build to offer next. Master fleet builds are excluded, and an inactive newest revision is skipped, so the previous active revision is returned instead.
+
+Create a token with the `ota:read` scope ([Authentication](/api-reference/authentication)). `X-API-Key` works in place of `Authorization: Bearer`.
+
+## List every artifact family
+
+```text
+GET /api/saas/v1/firmwares/latest-artifacts
+```
+
+| Parameter | Description |
+| --- | --- |
+| `target_board` | Only families whose latest revision lists this board. |
+| `target_model` | Only families whose latest revision lists this model. |
+| `page`, `limit` | Pagination. `limit` defaults to 20 and is capped at 100. |
+
+```bash
+curl "https://api.firmngin.dev/api/saas/v1/firmwares/latest-artifacts?limit=50&target_board=esp32" \
+  -H "Authorization: Bearer $FIRMNGIN_API_TOKEN"
+```
+
+```json
+{
+  "data": [
+    {
+      "firmware_id": "1f0c0e2a-...",
+      "version": "1.4.0",
+      "artifact_code": "kata-harimau",
+      "revision": 3,
+      "unique_code": "kata-harimau-003",
+      "target_board": "esp32",
+      "target_model": "devkit",
+      "file_size": 1048576,
+      "sha256": "3b7e...",
+      "download_url": "/api/v1/firmware-artifacts/1f0c0e2a-.../download",
+      "signature_url": "https://cdn.example/kata-harimau-003.bin.sig",
+      "signed": true,
+      "release_notes": "Fix sensor calibration",
+      "release_date": "2026-10-28T00:00:00Z",
+      "tags": ["stable"],
+      "created_at": "2026-10-28T09:12:03Z"
+    }
+  ],
+  "total": 1,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+`total` counts artifact families, not revisions. Target filters match the latest revision only.
+
+## Get one artifact family
+
+```text
+GET /api/saas/v1/firmwares/latest-artifacts/{artifact_code}
+```
+
+```bash
+curl "https://api.firmngin.dev/api/saas/v1/firmwares/latest-artifacts/kata-harimau" \
+  -H "Authorization: Bearer $FIRMNGIN_API_TOKEN"
+```
+
+Returns one object in `data`, or `404` when the family has no active revision in your workspace. `artifact_code` is exact and case-sensitive; surrounding whitespace is ignored.
+
+## Response fields
+
+| Field | Description |
+| --- | --- |
+| `firmware_id` | Artifact id used by the download endpoint. |
+| `artifact_code` | Stable family code, shared by every revision. |
+| `revision` | Incrementing number inside the family. |
+| `unique_code` | Per-upload code, `<artifact_code>-<revision>`. |
+| `signed` | `true` when the artifact has a signature. Unsigned builds cannot be deployed over OTA. |
+| `download_url` | Token-authenticated path for the binary. |
+
+## Download the binary
+
+```text
+GET /api/v1/firmware-artifacts/{firmware_id}/download
+```
+
+Use the same token. Compare `sha256` with the downloaded bytes before flashing. A successful stream counts toward your plan's OTA download usage.
+
+## Common errors
+
+| Status | When |
+| --- | --- |
+| `400` | `artifact_code` is blank or the workspace cannot be resolved from the token. |
+| `401` | Token is invalid, revoked, or lacks `ota:read`. |
+| `404` | No active revision for that `artifact_code` in your workspace. |
+| `429` | More than 60 requests per minute on these endpoints. |
+| `503` | OTA service is temporarily unavailable. |
