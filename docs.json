@@ -68,6 +68,15 @@
             ]
           },
           {
+            "group": "Local flash",
+            "pages": [
+              "local-flash/overview",
+              "local-flash/client-patterns",
+              "local-flash/api",
+              "local-flash/security"
+            ]
+          },
+          {
             "group": "Fleet Batches",
             "pages": [
               "fleet-batches/overview",
