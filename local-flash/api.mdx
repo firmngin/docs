@@ -21,12 +21,7 @@ The ticket download endpoint uses the ticket from `POST /downloads` as its crede
 GET /api/saas/v1/flash/downloads/fng_dl_...
 ```
 
-Dashboard session tokens can also call the workspace-scoped endpoints when you pass `workspace_id`:
-
-```http
-GET /api/saas/v1/flash/firmwares?workspace_id={uuid}
-Authorization: Bearer <dashboard-session-token>
-```
+The workspace comes from the API key. Do not send `workspace_id` in the query string: a token is bound to exactly one workspace.
 
 ## Endpoints
 
