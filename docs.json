@@ -59,6 +59,7 @@
                 "group": "Flash via Third-Party",
                 "pages": [
                   "local-flash/overview",
+                  "local-flash/enrollment",
                   "local-flash/client-patterns",
                   "local-flash/api",
                   "local-flash/security"
@@ -180,7 +181,8 @@
               "api-reference/firmware/lookup",
               "api-reference/firmware-pipeline-runs",
               "api-reference/firmware/latest-artifacts",
-              "api-reference/local-flash"
+              "api-reference/local-flash",
+              "api-reference/flash-enrollment"
             ]
           },
           {
