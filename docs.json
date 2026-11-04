@@ -145,7 +145,8 @@
             "group": "API documentation",
             "pages": [
               "api-reference/introduction",
-              "api-reference/firmware-pipeline-runs"
+              "api-reference/firmware-pipeline-runs",
+              "api-reference/local-flash"
             ]
           }
         ]
