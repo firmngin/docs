@@ -13,6 +13,17 @@ Web apps can use the same API through a backend or a local agent. A browser cann
   Local flash is different from cloud OTA. Cloud OTA pushes an update through Firmngin and the device pulls it over MQTT. Local flash is for devices that are physically connected to the app.
 </Note>
 
+## Authentication modes
+
+Both modes start with a workspace API key. Choose one for the data endpoints.
+
+| Mode | Small description | Use when |
+| --- | --- | --- |
+| **API key** | Send the workspace API key on each request. | Simple integration, trusted internal tool, or one key per workspace. |
+| **Enrollment + DPoP** | Use the key once to enroll an installation, then send short-lived DPoP tokens. | The app is distributed to users or machines, the key could leak, or you need per-installation revocation. |
+
+The flow below shows API key mode. Enrollment mode keeps the same download flow and replaces the API key with a DPoP access token.
+
 ## How it works
 
 ```mermaid actions={false}
@@ -82,7 +93,7 @@ Leave **Artifact codes** empty in the dashboard to allow every artifact code in 
 </Tip>
 
 <Tip>
-  Need a per-installation identity? [Enrollment](/local-flash/enrollment) adds ES256 keys and short-lived DPoP tokens on top of the API key.
+  Need per-installation identity? Use [Enrollment](/local-flash/enrollment): the API key enrolls the client once, then data requests use short-lived DPoP tokens.
 </Tip>
 
 ## Next steps

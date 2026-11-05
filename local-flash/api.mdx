@@ -9,13 +9,27 @@ The examples below use a desktop app as the client. Any HTTP client can call the
 
 ## Authentication
 
-Most endpoints use a workspace API key:
+The API has two authentication modes. Both start with a workspace API key; choose one for the data endpoints.
+
+| Mode | Small description | Use when |
+| --- | --- | --- |
+| **API key** | Send the workspace API key on each request. Firmngin derives the workspace and artifact binding from the key. | Simple integration, trusted internal tool, or one key per workspace. |
+| **Enrollment + DPoP** | Use the API key once to enroll an installation, then send a 15-minute access token plus a DPoP proof signed by an ES256 key in the OS keystore. | The app is distributed to users or machines, the key could leak, or you need to revoke one installation without revoking the key. |
+
+**API key mode**
 
 ```http
 Authorization: Bearer fng_pat_...
 ```
 
-For a per-installation identity, see [Enrollment](/local-flash/enrollment). Enrolled clients use `Authorization: DPoP <access-token>` plus a `DPoP` proof header.
+**Enrollment mode**
+
+```http
+Authorization: DPoP <access-token>
+DPoP: <proof-jwt>
+```
+
+The workspace is derived from the API key in API key mode, and from the enrolled token in enrollment mode. Either way, the credential is bound to exactly one workspace. See [Enrollment](/local-flash/enrollment) for the full flow.
 
 The ticket download endpoint uses the ticket from `POST /downloads` as its credential:
 
@@ -23,20 +37,18 @@ The ticket download endpoint uses the ticket from `POST /downloads` as its crede
 GET /api/saas/v1/flash/downloads/fng_dl_...
 ```
 
-The workspace is derived from the API key. A token is bound to exactly one workspace.
-
 ## Endpoints
 
 | Method | Path | Auth | Description |
 | --- | --- | --- | --- |
-| `GET` | `/firmwares` | API key | List signed firmware families in the workspace. |
-| `GET` | `/firmwares/{artifact_code}` | API key | Latest signed manifest for one artifact code. |
-| `POST` | `/downloads` | API key | Create a single-use download ticket and a flash session. |
+| `GET` | `/firmwares` | API key or DPoP | List signed firmware families in the workspace. |
+| `GET` | `/firmwares/{artifact_code}` | API key or DPoP | Latest signed manifest for one artifact code. |
+| `POST` | `/downloads` | API key or DPoP | Create a single-use download ticket and a flash session. |
 | `GET` | `/downloads/{ticket}` | Ticket | Stream the firmware binary. |
-| `GET` | `/devices` | API key | List devices in the workspace. |
-| `GET` | `/devices/{device_secret_id}` | API key | Resolve one device by its serial-facing ID. |
-| `GET` | `/sessions/{id}` | API key | Read the advisory session status. |
-| `POST` | `/sessions/{id}/report` | API key | Record the advisory flash outcome. |
+| `GET` | `/devices` | API key or DPoP | List devices in the workspace. |
+| `GET` | `/devices/{device_secret_id}` | API key or DPoP | Resolve one device by its serial-facing ID. |
+| `GET` | `/sessions/{id}` | API key or DPoP | Read the advisory session status. |
+| `POST` | `/sessions/{id}/report` | API key or DPoP | Record the advisory flash outcome. |
 
 ## List firmware
 

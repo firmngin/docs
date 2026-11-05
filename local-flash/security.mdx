@@ -18,7 +18,7 @@ flowchart LR
 | Layer | Protects | Notes |
 | --- | --- | --- |
 | API key | Who may request firmware | Scoped to `ota:read`; optional artifact-code binding. |
-| Installation key (optional) | Per-client identity | ES256 P-256 key in the OS keystore; access token bound to its thumbprint (DPoP). |
+| Installation key (enrollment mode) | Per-client identity | ES256 P-256 key in the OS keystore; access token bound to its thumbprint (DPoP). |
 | Ticket | One download, short window | 32-byte random, SHA-256 at rest, five-minute expiry, single use. |
 | Firmware signature | What the app may flash | RSA/SHA-256 over the image; verify with the pinned public key. |
 | Device verification | What the device may run | Signature check at boot, plus anti-rollback where provisioned. |
@@ -28,7 +28,7 @@ flowchart LR
 | Client | Where the API key lives |
 | --- | --- |
 | Native app (example: desktop) | OS keychain |
-| Enrolled installation (optional) | Installation key in the OS keychain; API key only for enrollment |
+| Enrolled installation (enrollment mode) | Installation key in the OS keychain; API key only for enrollment |
 | Web app with a backend | Server secret manager |
 | Web app with a local agent | Agent OS keychain |
 | Browser only | Not supported; never in `localStorage` or page JavaScript |
