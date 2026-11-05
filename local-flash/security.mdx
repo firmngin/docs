@@ -1,6 +1,6 @@
 ---
 title: "Local flash security"
-description: "How tickets, signatures, temp files, and advisory reports protect a local flash"
+description: "How tickets, signatures, and advisory reports protect a local flash"
 ---
 
 Local flash has four trust boundaries. Keep them separate.
@@ -54,19 +54,6 @@ The binding is enforced on the firmware list, manifest, download creation, sessi
 
 If any check fails, do not flash. Do not ship a build with a "skip verification" switch.
 
-## Temp files
-
-If the app writes the binary to a temp folder:
-
-- Use a private folder with owner-only permissions (`0700` on Linux and macOS).
-- Create the file with owner-only permissions (`0600`) and a random name.
-- Open with `O_NOFOLLOW` on platforms that support it.
-- Hash while writing, then verify the final size and digest.
-- Keep the verified bytes in memory, or keep the same file descriptor open and verify again immediately before flashing.
-- Delete the file after the flash.
-
-A path-based flasher can still race with another process. Prefer flashing from memory or from the verified file descriptor.
-
 ## Advisory reports
 
 `POST /flash/sessions/{id}/report` records what the app observed:
@@ -91,6 +78,5 @@ It does **not** update the device's authoritative firmware state. Device-origin 
 - [ ] Firmware public key is pinned in the app.
 - [ ] The app rejects unsigned artifacts.
 - [ ] The app verifies SHA-256 and signature before flashing.
-- [ ] Temp files use private permissions and random names.
 - [ ] The device verifies the signature at boot.
 - [ ] The app treats reports as advisory, not as device truth.
