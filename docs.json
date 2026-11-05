@@ -59,8 +59,8 @@
                 "group": "Flash via Third-Party",
                 "pages": [
                   "local-flash/overview",
-                  "local-flash/enrollment",
                   "local-flash/client-patterns",
+                  "local-flash/enrollment",
                   "local-flash/api",
                   "local-flash/security"
                 ]
