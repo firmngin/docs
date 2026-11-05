@@ -5,7 +5,9 @@ description: "Enroll a client installation and use DPoP-bound access tokens"
 
 Base URL: `https://api.firmngin.dev/api/saas/v1/flash`
 
-Enrollment is optional. It binds a client installation to an ES256 key so data requests can use short-lived DPoP tokens instead of sending the API key on every request.
+Enrollment is the second authentication mode. It binds a client installation to an ES256 key so data requests use short-lived DPoP tokens instead of sending the API key on every request.
+
+Use enrollment when the app is distributed to user machines, when a leaked API key should not be enough to act as an existing installation, or when you need per-installation revocation. For a simple internal tool, the API key mode is usually enough.
 
 ## Endpoints
 

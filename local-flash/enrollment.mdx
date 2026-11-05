@@ -1,16 +1,18 @@
 ---
-title: "Enrollment (optional)"
+title: "Enrollment (DPoP)"
 description: "Bind a client installation to an ES256 key and use short-lived DPoP access tokens"
 ---
 
-The flash API works with a workspace API key alone. Enrollment adds a **per-installation identity** on top of it:
+The flash API has two authentication modes. This page covers **enrollment + DPoP**; for the API key mode, see [API authentication](/local-flash/api).
+
+Enrollment gives the client a **per-installation identity**:
 
 - The API key is used once to enroll the installation.
 - The client generates an **ES256 (P-256)** key pair and keeps the private key in the OS keystore.
 - The client receives a 15-minute access token and a 30-day refresh token.
 - Every data request presents `Authorization: DPoP <access-token>` plus a `DPoP` proof header.
 
-Use enrollment when the API key is shared across machines, when a leaked key should not be enough to act as an existing installation, or when you need to revoke one machine without revoking the whole key.
+Choose enrollment when the app is distributed across user machines, when a leaked API key should not be enough to act as an existing installation, or when you need to revoke one machine without revoking the whole key. For a simple internal tool, the API key mode is usually enough.
 
 <Note>
   One API key can have at most **3 active installations**. Revoke an old installation before enrolling a replacement.
@@ -151,4 +153,4 @@ Revoking an installation invalidates its access tokens (checked on the next requ
 - The client must use the same public URL for `htu` that the API sees. Set `URL_BACKEND` on the server when it runs behind a proxy.
 - Store the private key in the OS keystore; never send it to the API.
 - Access tokens live 15 minutes. Refresh tokens live 30 days and rotate.
-- Enrollment is optional. The API key path stays available as a fallback.
+- This mode uses the API key only for enrollment. Data requests use DPoP.
