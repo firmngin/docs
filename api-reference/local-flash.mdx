@@ -23,6 +23,10 @@ GET /api/saas/v1/flash/downloads/fng_dl_...
 
 The workspace is derived from the API key. The key needs the **Firmware update history** (`ota:read`) scope. Optionally limit it to specific artifact codes in **Dashboard → Integrations → Generate Token → Artifact codes**.
 
+<Note>
+  Enrollment is optional. To use short-lived DPoP tokens instead of sending the API key on every request, see [Flash enrollment API](/api-reference/flash-enrollment).
+</Note>
+
 ## Endpoints
 
 | Method | Path | Auth | Description |

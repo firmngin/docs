@@ -1,0 +1,154 @@
+---
+title: "Enrollment (optional)"
+description: "Bind a client installation to an ES256 key and use short-lived DPoP access tokens"
+---
+
+The flash API works with a workspace API key alone. Enrollment adds a **per-installation identity** on top of it:
+
+- The API key is used once to enroll the installation.
+- The client generates an **ES256 (P-256)** key pair and keeps the private key in the OS keystore.
+- The client receives a 15-minute access token and a 30-day refresh token.
+- Every data request presents `Authorization: DPoP <access-token>` plus a `DPoP` proof header.
+
+Use enrollment when the API key is shared across machines, when a leaked key should not be enough to act as an existing installation, or when you need to revoke one machine without revoking the whole key.
+
+<Note>
+  One API key can have at most **3 active installations**. Revoke an old installation before enrolling a replacement.
+</Note>
+
+## Flow
+
+```mermaid actions={false}
+sequenceDiagram
+  participant App as Client app
+  participant API as Firmngin API
+  participant KS as OS keystore
+
+  App->>KS: Generate ES256 key pair
+  App->>API: POST /flash/enroll/challenge (API key)
+  API-->>App: challenge + expires_at
+  App->>App: Sign challenge with private key
+  App->>API: POST /flash/enroll (API key + public JWK + signature)
+  API-->>App: installation_id + access token + refresh token
+  App->>API: GET /flash/firmwares (DPoP + access token)
+  API-->>App: firmware list
+  App->>API: POST /flash/token (refresh + DPoP)
+  API-->>App: rotated access + refresh tokens
+```
+
+## 1. Request a challenge
+
+```http
+POST /api/saas/v1/flash/enroll/challenge
+Authorization: Bearer fng_pat_...
+```
+
+```json
+{
+  "data": {
+    "challenge": "…",
+    "expires_at": "2026-11-04T10:10:00Z"
+  }
+}
+```
+
+The challenge is single-use and expires after five minutes.
+
+## 2. Enroll the installation
+
+Sign the challenge string with the installation private key, then send the public JWK and signature.
+
+```http
+POST /api/saas/v1/flash/enroll
+Authorization: Bearer fng_pat_...
+Content-Type: application/json
+```
+
+```json
+{
+  "challenge": "…",
+  "public_key_jwk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "…",
+    "y": "…"
+  },
+  "signature": "…",
+  "app_name": "flash-tool",
+  "app_version": "1.0.0",
+  "build_hash": "…",
+  "os": "windows",
+  "machine_hash": "…"
+}
+```
+
+`signature` is the ES256 signature over the challenge bytes, base64url or standard base64. `public_key_jwk` must be an EC P-256 key.
+
+```json
+{
+  "data": {
+    "installation_id": "…",
+    "status": "active",
+    "access_token": "…",
+    "token_type": "DPoP",
+    "expires_in": 900,
+    "refresh_token": "…"
+  }
+}
+```
+
+The refresh token is returned once. Store it in the OS keychain.
+
+## 3. Call data endpoints
+
+```http
+GET /api/saas/v1/flash/firmwares
+Authorization: DPoP <access-token>
+DPoP: <proof-jwt>
+```
+
+The proof is an ES256 JWT with:
+
+| Claim | Value |
+| --- | --- |
+| `htm` | HTTP method, for example `GET` |
+| `htu` | Full public URL without query, for example `https://api.firmngin.dev/api/saas/v1/flash/firmwares` |
+| `iat` | Current Unix time; accepted within 60 seconds |
+| `jti` | Unique proof id |
+| `ath` | Base64url SHA-256 of the access token |
+
+The proof header must include `typ: "dpop+jwt"` and the installation public key in `jwk`.
+
+## 4. Refresh
+
+```http
+POST /api/saas/v1/flash/token
+Content-Type: application/json
+DPoP: <proof-jwt>
+
+{ "refresh_token": "…" }
+```
+
+The refresh request uses a DPoP proof without `ath`. Refresh tokens rotate on every use; reusing an old token revokes the whole family.
+
+## 5. Manage installations
+
+```http
+GET /api/saas/v1/flash/installations
+Authorization: Bearer fng_pat_...
+```
+
+```http
+POST /api/saas/v1/flash/installations/{id}/revoke
+Authorization: Bearer fng_pat_...
+```
+
+Revoking an installation invalidates its access tokens (checked on the next request) and its refresh tokens.
+
+## Notes
+
+- Only **ES256 / P-256** is supported.
+- The client must use the same public URL for `htu` that the API sees. Set `URL_BACKEND` on the server when it runs behind a proxy.
+- Store the private key in the OS keystore; never send it to the API.
+- Access tokens live 15 minutes. Refresh tokens live 30 days and rotate.
+- Enrollment is optional. The API key path stays available as a fallback.

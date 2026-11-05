@@ -1,0 +1,112 @@
+---
+title: "Flash enrollment API"
+description: "Enroll a client installation and use DPoP-bound access tokens"
+---
+
+Base URL: `https://api.firmngin.dev/api/saas/v1/flash`
+
+Enrollment is optional. It binds a client installation to an ES256 key so data requests can use short-lived DPoP tokens instead of sending the API key on every request.
+
+## Endpoints
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| `POST` | `/enroll/challenge` | API key | Create a single-use enrollment challenge. |
+| `POST` | `/enroll` | API key | Register the installation public key and issue tokens. |
+| `POST` | `/token` | Refresh + DPoP | Rotate the refresh token and issue a new access token. |
+| `GET` | `/me` | DPoP | Read the current installation. |
+| `GET` | `/installations` | API key | List installations created by the key. |
+| `POST` | `/installations/{id}/revoke` | API key | Revoke one installation and its refresh tokens. |
+
+## Challenge
+
+```http
+POST /api/saas/v1/flash/enroll/challenge
+Authorization: Bearer fng_pat_...
+```
+
+```json
+{
+  "data": {
+    "challenge": "…",
+    "expires_at": "2026-11-04T10:10:00Z"
+  }
+}
+```
+
+## Enroll
+
+```http
+POST /api/saas/v1/flash/enroll
+Authorization: Bearer fng_pat_...
+Content-Type: application/json
+```
+
+```json
+{
+  "challenge": "…",
+  "public_key_jwk": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "…",
+    "y": "…"
+  },
+  "signature": "…",
+  "app_name": "flash-tool",
+  "app_version": "1.0.0",
+  "build_hash": "…",
+  "os": "windows",
+  "machine_hash": "…"
+}
+```
+
+```json
+{
+  "data": {
+    "installation_id": "…",
+    "status": "active",
+    "access_token": "…",
+    "token_type": "DPoP",
+    "expires_in": 900,
+    "refresh_token": "…"
+  }
+}
+```
+
+`signature` is the ES256 signature over the challenge bytes. The public key must be P-256. One API key can have at most three active installations.
+
+## DPoP request
+
+```http
+GET /api/saas/v1/flash/firmwares
+Authorization: DPoP <access-token>
+DPoP: <proof-jwt>
+```
+
+Proof claims: `htm`, `htu`, `iat`, `jti`, and `ath`. Proof header: `typ: "dpop+jwt"` and `jwk`.
+
+## Refresh
+
+```http
+POST /api/saas/v1/flash/token
+Content-Type: application/json
+DPoP: <proof-jwt>
+
+{ "refresh_token": "…" }
+```
+
+The refresh proof omits `ath`. Refresh tokens rotate; reuse revokes the family.
+
+## Installations
+
+```http
+GET /api/saas/v1/flash/installations
+Authorization: Bearer fng_pat_...
+```
+
+```http
+POST /api/saas/v1/flash/installations/{id}/revoke
+Authorization: Bearer fng_pat_...
+```
+
+Revocation invalidates the installation's access tokens on the next request and revokes its refresh tokens.
