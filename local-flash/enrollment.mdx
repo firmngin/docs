@@ -147,6 +147,48 @@ Authorization: Bearer fng_pat_...
 
 Revoking an installation invalidates its access tokens (checked on the next request) and its refresh tokens.
 
+## Key storage per OS
+
+The API only receives the public JWK; the private key never leaves the client. Use the strongest store the OS provides.
+
+| OS | Hardware-backed | OS-protected fallback | Notes |
+| --- | --- | --- | --- |
+| Windows | TPM 2.0 via CNG Platform Crypto Provider | Microsoft Software KSP, DPAPI, Credential Manager | Use a persisted CNG key with export policy none. |
+| Linux | TPM 2.0 via `tpm2-tss` (optional) | libsecret (GNOME Keyring), KWallet | TPM is not universal; sandbox may block D-Bus or TPM. |
+| macOS | Secure Enclave (P-256) | Keychain | Secure Enclave does not support Ed25519. |
+
+<Warning>
+  An “OS keychain” protects the key at rest. Only TPM or Secure Enclave can make it non-exportable. If your threat model needs that, use the hardware-backed provider and fail closed when it is unavailable.
+</Warning>
+
+### Windows
+
+Use CNG with `CngKey.Create` and `CngExportPolicies.None`. Prefer the TPM provider; fall back to the software provider only when the TPM is unavailable.
+
+```csharp
+var parameters = new CngKeyCreationParameters {
+    Provider = CngProvider.MicrosoftPlatformCryptoProvider,
+    ExportPolicy = CngExportPolicies.None,
+    KeyUsage = CngKeyUsages.Signing,
+};
+using var key = CngKey.Create(CngAlgorithm.ECDsaP256, "firmngin-flash", parameters);
+using var ecdsa = new ECDsaCng(key);
+var signature = ecdsa.SignHash(SHA256.HashData(Encoding.UTF8.GetBytes(challenge)));
+```
+
+### Linux
+
+There is no single OS-wide keychain. Options, strongest first:
+
+1. **TPM 2.0** via `tpm2-tss` or `tpm2-pkcs11`: non-exportable, but not available on every machine and may need device permissions.
+2. **libsecret / KWallet** over D-Bus: store the PKCS#8 key encrypted at rest; the app reads it to sign.
+3. **`0600` file** in the user data directory, encrypted with a key from the OS keyring. This is a fallback, not hardware-backed.
+
+```bash
+# libsecret example: store a PKCS#8 key
+secret-tool store --label="firmngin flash key" service firmngin type installation < key.pk8
+```
+
 ## Notes
 
 - Only **ES256 / P-256** is supported.
