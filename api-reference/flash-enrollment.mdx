@@ -75,7 +75,7 @@ Content-Type: application/json
 }
 ```
 
-`signature` is the ES256 signature over the challenge bytes. The public key must be P-256. One API key can have at most three active installations.
+`signature` is the ES256 signature over **SHA-256(challenge)**. The public key must be P-256. One API key can have at most three active installations.
 
 ## DPoP request
 
