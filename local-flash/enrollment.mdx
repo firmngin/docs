@@ -119,7 +119,7 @@ The proof is an ES256 JWT with:
 | `jti` | Unique proof id |
 | `ath` | Base64url SHA-256 of the access token |
 
-The proof header must include `typ: "dpop+jwt"` and the installation public key in `jwk`.
+The proof header must include `typ: "dpop+jwt"` and the installation public key in `jwk`. The `htu` must match the public URL the API sees; when the API runs behind a proxy, set `URL_BACKEND` so the expected URL matches. The private key never leaves the client; only the public JWK is sent.
 
 ## 4. Refresh
 
@@ -146,11 +146,3 @@ Authorization: Bearer fng_pat_...
 ```
 
 Revoking an installation invalidates its access tokens (checked on the next request) and its refresh tokens.
-
-## Notes
-
-- Only **ES256 / P-256** is supported.
-- The client must use the same public URL for `htu` that the API sees. Set `URL_BACKEND` on the server when it runs behind a proxy.
-- The private key never leaves the client; never send it to the API.
-- Access tokens live 15 minutes. Refresh tokens live 30 days and rotate.
-- This mode uses the API key only for enrollment. Data requests use DPoP.
