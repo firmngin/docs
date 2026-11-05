@@ -79,7 +79,7 @@ Content-Type: application/json
   "app_name": "flash-tool",
   "app_version": "1.0.0",
   "build_hash": "…",
-  "os": "windows",
+  "os": "your-os",
   "machine_hash": "…"
 }
 ```
@@ -147,55 +147,10 @@ Authorization: Bearer fng_pat_...
 
 Revoking an installation invalidates its access tokens (checked on the next request) and its refresh tokens.
 
-## Key storage
-
-The API only receives the public JWK; the private key never leaves the client. Use any secure store that protects the key and can sign. The table below is a set of examples, not a requirement. A web app should keep the key on its backend or in a local agent, never in browser storage.
-
-| OS | Hardware-backed | OS-protected fallback | Notes |
-| --- | --- | --- | --- |
-| Windows | TPM 2.0 via CNG Platform Crypto Provider | Microsoft Software KSP, DPAPI, Credential Manager | Use a persisted CNG key with export policy none. |
-| Linux | TPM 2.0 via `tpm2-tss` (optional) | libsecret (GNOME Keyring), KWallet | TPM is not universal; sandbox may block D-Bus or TPM. |
-| macOS | Secure Enclave (P-256) | Keychain | Secure Enclave does not support Ed25519. |
-| Android | Android Keystore (TEE/StrongBox) | Keystore | StrongBox is not available on every device. |
-
-Hardware-backed stores are stronger because the private key cannot be exported. Software stores protect the key at rest, but the app can read it to sign.
-
-<Warning>
-  A software key store protects the key at rest. Only a hardware-backed store (TPM, Secure Enclave, Android Keystore, or equivalent) can make it non-exportable. If your threat model needs that, use the hardware-backed provider and fail closed when it is unavailable.
-</Warning>
-
-### Windows
-
-Use CNG with `CngKey.Create` and `CngExportPolicies.None`. Prefer the TPM provider; fall back to the software provider only when the TPM is unavailable.
-
-```csharp
-var parameters = new CngKeyCreationParameters {
-    Provider = CngProvider.MicrosoftPlatformCryptoProvider,
-    ExportPolicy = CngExportPolicies.None,
-    KeyUsage = CngKeyUsages.Signing,
-};
-using var key = CngKey.Create(CngAlgorithm.ECDsaP256, "firmngin-flash", parameters);
-using var ecdsa = new ECDsaCng(key);
-var signature = ecdsa.SignHash(SHA256.HashData(Encoding.UTF8.GetBytes(challenge)));
-```
-
-### Linux
-
-There is no single cross-platform secure store. Options, strongest first:
-
-1. **TPM 2.0** via `tpm2-tss` or `tpm2-pkcs11`: non-exportable, but not available on every machine and may need device permissions.
-2. **libsecret / KWallet** over D-Bus: store the PKCS#8 key encrypted at rest; the app reads it to sign.
-3. **`0600` file** in the user data directory, encrypted with a key from the platform keyring. This is a fallback, not hardware-backed.
-
-```bash
-# libsecret example: store a PKCS#8 key
-secret-tool store --label="firmngin flash key" service firmngin type installation < key.pk8
-```
-
 ## Notes
 
 - Only **ES256 / P-256** is supported.
 - The client must use the same public URL for `htu` that the API sees. Set `URL_BACKEND` on the server when it runs behind a proxy.
-- Store the private key in a platform secure store; never send it to the API.
+- The private key never leaves the client; never send it to the API.
 - Access tokens live 15 minutes. Refresh tokens live 30 days and rotate.
 - This mode uses the API key only for enrollment. Data requests use DPoP.
