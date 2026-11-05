@@ -23,18 +23,6 @@ flowchart LR
 | Firmware signature | What the app may flash | RSA/SHA-256 over the image; verify with the pinned public key. |
 | Device verification | What the device may run | Signature check at boot, plus anti-rollback where provisioned. |
 
-## Key storage by client
-
-| Client | Where the API key lives |
-| --- | --- |
-| Native app (example: desktop) | Platform secure store |
-| Enrolled installation (enrollment mode) | Installation key in a platform secure store; API key only for enrollment |
-| Web app with a backend | Server secret manager |
-| Web app with a local agent | Agent platform secure store |
-| Browser only | Not supported; never in `localStorage` or page JavaScript |
-
-Read [Client patterns](/local-flash/client-patterns) for the matching flows.
-
 ## Tickets
 
 - The raw ticket is returned once by `POST /flash/downloads`.

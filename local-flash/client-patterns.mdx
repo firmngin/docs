@@ -7,12 +7,12 @@ The local flash API is HTTP-only and client-agnostic. The same endpoints work fr
 
 ## At a glance
 
-| Pattern | API key lives in | Can download | Can flash | Recommended for |
-| --- | --- | --- | --- | --- |
-| Native app (example: desktop) | Platform secure store | Yes | Yes, USB or serial | Native installer, Tauri, Electron, CLI |
-| Web app + backend (BFF) | Server secret manager | Yes, server-side | No, hand off to a local agent | SaaS dashboard |
-| Web app + local agent | Agent platform secure store | Yes, agent | Yes, agent | Browser UI with local hardware |
-| Browser only | Browser memory | Yes, if CORS allows | Limited (Chromium Web Serial) | Prototypes only |
+| Pattern | Can download | Can flash | Recommended for |
+| --- | --- | --- | --- |
+| Native app (example: desktop) | Yes | Yes, USB or serial | Native installer, Tauri, Electron, CLI |
+| Web app + backend (BFF) | Yes, server-side | No, hand off to a local agent | SaaS dashboard |
+| Web app + local agent | Yes, agent | Yes, agent | Browser UI with local hardware |
+| Browser only | Yes, if CORS allows | Limited (Chromium Web Serial) | Prototypes only |
 
 <Warning>
   Never put a workspace API key in browser JavaScript, `localStorage`, or a public bundle. Use a backend or a local agent.
@@ -35,7 +35,6 @@ sequenceDiagram
 
 The desktop app is one example. A CLI or another native client uses the same flow.
 
-- Store the API key in a platform secure store.
 - Download and verify in the app.
 - Flash from memory, or from a verified file descriptor.
 - Send the advisory report after the flash.
@@ -82,7 +81,7 @@ sequenceDiagram
   Agent-->>Browser: Progress and result
 ```
 
-- The agent runs on the user's machine and stores the key in a platform secure store.
+- The agent runs on the user's machine and performs the Firmngin calls.
 - The browser talks to `127.0.0.1` over a local API.
 - Bind the local API to loopback, check the origin, and never expose it on the LAN.
 
@@ -95,9 +94,11 @@ A browser-only app can call the API when CORS allows it, but:
 - The API key must not be embedded in the page.
 - Treat browser-only as a download or preview client, not as a flasher.
 
-## Same API, different key location
+<span id="same-api-different-key-location"></span>
 
-The endpoints do not change. Only the key location and the flashing process change.
+## Same API, different client
+
+The endpoints do not change. Only the process that calls them and the process that flashes change.
 
 | Step | Native app | Web + backend | Web + agent |
 | --- | --- | --- | --- |
@@ -110,8 +111,8 @@ The endpoints do not change. Only the key location and the flashing process chan
 ## Security checklist
 
 - [ ] The API key is not in browser JavaScript or `localStorage`.
-- [ ] Native app and agent keys live in a platform secure store.
-- [ ] Backend keys live in a secret manager, not in the repository.
+- [ ] The installation private key lives in a platform secure store.
+- [ ] Backend credentials are not committed to the repository.
 - [ ] The local agent binds to `127.0.0.1` and checks the caller origin.
 - [ ] The browser cannot call Firmngin directly with a long-lived key.
 - [ ] The flashing process verifies SHA-256 and signature before writing.
