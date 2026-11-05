@@ -7,12 +7,12 @@ The local flash API is HTTP-only and client-agnostic. The same endpoints work fr
 
 ## At a glance
 
-| Pattern | API key lives in | Can download | Can flash | Recommended for |
-| --- | --- | --- | --- | --- |
-| Native app (example: desktop) | Platform secure store | Yes | Yes, USB or serial | Native installer, Tauri, Electron, CLI |
-| Web app + backend (BFF) | Server secret manager | Yes, server-side | No, hand off to a local agent | SaaS dashboard |
-| Web app + local agent | Agent platform secure store | Yes, agent | Yes, agent | Browser UI with local hardware |
-| Browser only | Browser memory | Yes, if CORS allows | Limited (Chromium Web Serial) | Prototypes only |
+| Pattern | Can download | Can flash | Recommended for |
+| --- | --- | --- | --- |
+| Native app (example: desktop) | Yes | Yes, USB or serial | Native installer, Tauri, Electron, CLI |
+| Web app + backend (BFF) | Yes, server-side | No, hand off to a local agent | SaaS dashboard |
+| Web app + local agent | Yes, agent | Yes, agent | Browser UI with local hardware |
+| Browser only | Yes, if CORS allows | Limited (Chromium Web Serial) | Prototypes only |
 
 <Warning>
   Never put a workspace API key in browser JavaScript, `localStorage`, or a public bundle. Use a backend or a local agent.
