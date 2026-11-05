@@ -8,7 +8,7 @@ The flash API has two authentication modes. This page covers **enrollment + DPoP
 Enrollment gives the client a **per-installation identity**:
 
 - The API key is used once to enroll the installation.
-- The client generates an **ES256 (P-256)** key pair and keeps the private key in a platform secure store.
+- The client creates an **ES256 (P-256)** key pair inside a platform secure store. The private key stays there; the app only gets the public JWK and a signing handle.
 - The client receives a 15-minute access token and a 30-day refresh token.
 - Every data request presents `Authorization: DPoP <access-token>` plus a `DPoP` proof header.
 
@@ -26,10 +26,13 @@ sequenceDiagram
   participant API as Firmngin API
   participant KS as Secure key store
 
-  App->>KS: Generate ES256 key pair
+  App->>KS: Create ES256 key pair
+  KS-->>App: Public JWK + signing handle
+  Note over KS: Private key never leaves the store
   App->>API: POST /flash/enroll/challenge (API key)
   API-->>App: challenge + expires_at
-  App->>App: Sign challenge with private key
+  App->>KS: Sign SHA-256(challenge)
+  KS-->>App: signature
   App->>API: POST /flash/enroll (API key + public JWK + signature)
   API-->>App: installation_id + access token + refresh token
   App->>API: GET /flash/firmwares (DPoP + access token)
@@ -58,7 +61,7 @@ The challenge is single-use and expires after five minutes.
 
 ## 2. Enroll the installation
 
-Sign the challenge string with the installation private key, then send the public JWK and signature.
+Sign **SHA-256(challenge)** with the installation private key inside the secure store, then send the public JWK and signature.
 
 ```http
 POST /api/saas/v1/flash/enroll
@@ -84,7 +87,7 @@ Content-Type: application/json
 }
 ```
 
-`signature` is the ES256 signature over the challenge bytes, base64url or standard base64. `public_key_jwk` must be an EC P-256 key.
+`signature` is the ES256 signature over **SHA-256(challenge)**, base64url or standard base64. `public_key_jwk` must be an EC P-256 key.
 
 ```json
 {
