@@ -9,9 +9,9 @@ The local flash API is HTTP-only and client-agnostic. The same endpoints work fr
 
 | Pattern | API key lives in | Can download | Can flash | Recommended for |
 | --- | --- | --- | --- | --- |
-| Native app (example: desktop) | OS keychain | Yes | Yes, USB or serial | Native installer, Tauri, Electron, CLI |
+| Native app (example: desktop) | Platform secure store | Yes | Yes, USB or serial | Native installer, Tauri, Electron, CLI |
 | Web app + backend (BFF) | Server secret manager | Yes, server-side | No, hand off to a local agent | SaaS dashboard |
-| Web app + local agent | Agent OS keychain | Yes, agent | Yes, agent | Browser UI with local hardware |
+| Web app + local agent | Agent platform secure store | Yes, agent | Yes, agent | Browser UI with local hardware |
 | Browser only | Browser memory | Yes, if CORS allows | Limited (Chromium Web Serial) | Prototypes only |
 
 <Warning>
@@ -35,7 +35,7 @@ sequenceDiagram
 
 The desktop app is one example. A CLI or another native client uses the same flow.
 
-- Store the API key in the OS keychain.
+- Store the API key in a platform secure store.
 - Download and verify in the app.
 - Flash from memory, or from a verified file descriptor.
 - Send the advisory report after the flash.
@@ -82,7 +82,7 @@ sequenceDiagram
   Agent-->>Browser: Progress and result
 ```
 
-- The agent runs on the user's machine and stores the key in the OS keychain.
+- The agent runs on the user's machine and stores the key in a platform secure store.
 - The browser talks to `127.0.0.1` over a local API.
 - Bind the local API to loopback, check the origin, and never expose it on the LAN.
 
@@ -110,7 +110,7 @@ The endpoints do not change. Only the key location and the flashing process chan
 ## Security checklist
 
 - [ ] The API key is not in browser JavaScript or `localStorage`.
-- [ ] Native app and agent keys live in the OS keychain.
+- [ ] Native app and agent keys live in a platform secure store.
 - [ ] Backend keys live in a secret manager, not in the repository.
 - [ ] The local agent binds to `127.0.0.1` and checks the caller origin.
 - [ ] The browser cannot call Firmngin directly with a long-lived key.

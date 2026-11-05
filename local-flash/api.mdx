@@ -14,7 +14,7 @@ The API has two authentication modes. Both start with a workspace API key; choos
 | Mode | Small description | Use when |
 | --- | --- | --- |
 | **API key** | Send the workspace API key on each request. Firmngin derives the workspace and artifact binding from the key. | Simple integration, trusted internal tool, or one key per workspace. |
-| **Enrollment + DPoP** | Use the API key once to enroll an installation, then send a 15-minute access token plus a DPoP proof signed by an ES256 key in the OS keystore. | The app is distributed to users or machines, the key could leak, or you need to revoke one installation without revoking the key. |
+| **Enrollment + DPoP** | Use the API key once to enroll an installation, then send a 15-minute access token plus a DPoP proof signed by an ES256 key in a platform secure store. | The app is distributed to users or machines, the key could leak, or you need to revoke one installation without revoking the key. |
 
 **API key mode**
 
