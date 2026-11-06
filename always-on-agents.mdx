@@ -15,7 +15,7 @@ Always-On agents handle recurring prompts without you opening a chat each time. 
 A **Cloudflare Worker** starts the agent on a schedule from your Cloudflare account. Firmngin keeps the conversation and results, even when your browser is closed.
 
 <Note>
-Always-On agents currently produce text responses. They do not fetch live device data, control devices, send emails, or perform other actions. Include the information the agent needs in its instructions.
+This guide covers scheduled text responses. Agents in this flow do not fetch live device data, control devices, send emails, or perform other actions. Direct chat, interrupt, pause/resume of individual tasks, and action approvals are not available in this flow. Include the information the agent needs in the task instructions.
 </Note>
 
 ## Preparation
@@ -42,17 +42,18 @@ This guide uses Wrangler, Cloudflare's deployment tool. You will create two file
     | --- | --- |
     | **Name** | `Project review` |
     | **Model** | Choose a model from the available list. |
-    | **How it should behave** | `You are a concise planning assistant. Use only the project context provided. Do not invent progress or current events.` |
     | **What to ask on every run** | `Review this project and suggest the three most useful next steps. Context: we are preparing a product launch. Checklist: finish the user guide, review the pricing page, and prepare announcement material. Do not mark work complete unless the conversation confirms it.` |
 
-    Click **Create agent**. You can update the instructions and project context later through **Configure**.
+    Firmngin manages the system instructions and safety rules. Describe your task and provide its context in **What to ask on every run**; there is no editable system prompt.
+
+    Click **Create agent**. You can update the task instructions and project context later through **Configure**. You can create multiple agents with different names, models, and tasks.
   </Step>
   <Step title="Test before scheduling">
     Close the form and click the play button on the agent card (**Run now**).
 
     Open **History**, click **Refresh** if needed, and select the run. **Succeeded** and an **Output** show that the response is complete. Use **Copy output** to copy it.
 
-    If the status is **Queued** or **Running**, wait and refresh the history. You can also use **Run now** while the agent is paused.
+    If the status is **Queued** or **Running**, keep History open. Active runs and their details update automatically for up to 10 minutes; use **Refresh** if needed. You can also use **Run now** while scheduled triggers are disabled for the agent.
   </Step>
   <Step title="Create an access token">
     Open **Configure → Access tokens**. Enter a **New token name**, such as `cloudflare-cron`, and click **Create token**.
@@ -208,10 +209,11 @@ Schedule changes can take up to 15 minutes to propagate. Do not rely on executio
 
 ## Everyday use
 
-- **Change the task:** update **Configure**. Instruction and model changes apply to the next run without redeploying the Worker.
-- **Pause:** disable the agent in Firmngin to reject scheduled runs. The Cloudflare schedule still exists; remove it too if you want to stop the trigger. **Run now** remains available for testing a paused agent.
+- **Change the task:** update **Configure**. Task and model changes apply to newly accepted runs without redeploying the Worker. A run that was already accepted keeps its original task and model.
+- **Disable scheduled runs:** disable the agent in Firmngin to reject new scheduled requests. This does not cancel a task that is already running. The Cloudflare schedule still exists; remove it too if you want to stop the trigger. **Run now** remains available for manual testing.
 - **Replace a token:** create a new token, run `npx wrangler secret put FIRMNGIN_AGENT_TOKEN` again, and revoke the old token after the new connection works.
-- **Keep context current:** each agent has its own conversation. Update the instructions when your project information changes.
+- **Keep context current:** each agent uses its own conversation across runs. Update the task instructions when your project information changes.
+- **Check scheduling separately:** an enabled agent can accept scheduled requests, but that label does not confirm that your Worker is deployed or that its schedule is healthy. Verify a completed run with the source **Schedule**.
 
 ## Troubleshooting
 
@@ -220,11 +222,12 @@ Schedule changes can take up to 15 minutes to propagate. Do not rely on executio
 | No **Schedule** run | Check the Worker deployment, cron expression, UTC time, and agent's enabled status. Allow time for schedule changes to propagate. |
 | HTTP `401` | Check the agent ID and token secret. Create a replacement if the token was lost or revoked. |
 | HTTP `403` | Enable the agent in Firmngin. |
-| HTTP `409` or no new run | A previous run may still be active. Check History and leave enough time between runs. |
+| HTTP `409` or no new run | A previous run may still be active, or a repeated request may conflict after task changes. A request rejected as busy is not queued for later. Check History and leave enough time between scheduled runs. |
 | HTTP `429` | Reduce the schedule frequency and wait before trying again. |
-| **Queued** or **Running** | The run has not finished. Wait and refresh History instead of triggering another run immediately. |
+| **Queued** or **Running** | The run has not finished. Keep History open for automatic updates, or use **Refresh**. Avoid starting another run immediately. |
 | **QUOTA_EXCEEDED** | Check and replenish your AI budget. |
-| **HITL_PENDING** | Change the prompt to a text-only task that does not require an action or approval. |
+| **HITL_PENDING** | The task needs approval that scheduled runs cannot provide. Change the task instructions to request a text-only result. |
+| **TIMEOUT** | Firmngin could not confirm completion within the time limit. This does not confirm that execution stopped. Check History before starting another run. |
 | **Failed** | Open the run details for an explanation. You can also inspect Worker logs in Cloudflare or run `npx wrangler tail`. |
 
 <Tip>
