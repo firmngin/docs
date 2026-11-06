@@ -1,0 +1,235 @@
+---
+title: "Run scheduled agents with Cloudflare"
+sidebarTitle: "Always-On agents"
+description: "Set up an Always-On agent, deploy a Cloudflare Worker, choose a schedule, and check results so routine tasks continue without reopening a chat."
+keywords:
+  - "always-on"
+  - "agents"
+  - "Cloudflare Workers"
+  - "schedule"
+  - "summaries"
+---
+
+Always-On agents handle recurring prompts without you opening a chat each time. For example, an agent can review project notes you provide and suggest priorities for the next day.
+
+A **Cloudflare Worker** starts the agent on a schedule from your Cloudflare account. Firmngin keeps the conversation and results, even when your browser is closed.
+
+<Note>
+This guide covers scheduled text responses. Agents in this flow do not fetch live device data, control devices, send emails, or perform other actions. Direct chat, interrupt, pause/resume of individual tasks, and action approvals are not available in this flow. Include the information the agent needs in the task instructions.
+</Note>
+
+## Preparation
+
+You need:
+
+- A Firmngin account and the workspace you want to use.
+- An available AI model and enough AI budget. Manual tests and scheduled runs use AI budget like a normal chat turn.
+- A Cloudflare account with permission to create Workers.
+- A computer with a terminal, a text editor, and a version of Node.js and npm [supported by Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/).
+
+This guide uses Wrangler, Cloudflare's deployment tool. You will create two files and run the commands from the same folder.
+
+## 1. Create and test your agent
+
+<Steps>
+  <Step title="Open Always-On Agent">
+    Select your workspace in Firmngin, open **AI Agents → Always-On Agent**, and click **Create agents**.
+  </Step>
+  <Step title="Describe the task">
+    Complete these fields:
+
+    | Field | Example |
+    | --- | --- |
+    | **Name** | `Project review` |
+    | **Model** | Choose a model from the available list. |
+    | **What to ask on every run** | `Review this project and suggest the three most useful next steps. Context: we are preparing a product launch. Checklist: finish the user guide, review the pricing page, and prepare announcement material. Do not mark work complete unless the conversation confirms it.` |
+
+    Firmngin manages the system instructions and safety rules. Describe your task and provide its context in **What to ask on every run**; there is no editable system prompt.
+
+    Click **Create agent**. You can update the task instructions and project context later through **Configure**. You can create multiple agents with different names, models, and tasks.
+  </Step>
+  <Step title="Test before scheduling">
+    Close the form and click the play button on the agent card (**Run now**).
+
+    Open **History**, click **Refresh** if needed, and select the run. **Succeeded** and an **Output** show that the response is complete. Use **Copy output** to copy it.
+
+    If the status is **Queued** or **Running**, keep History open. Active runs and their details update automatically for up to 10 minutes; use **Refresh** if needed. You can also use **Run now** while scheduled triggers are disabled for the agent.
+  </Step>
+  <Step title="Create an access token">
+    Open **Configure → Access tokens**. Enter a **New token name**, such as `cloudflare-cron`, and click **Create token**.
+
+    Copy the token immediately and keep it somewhere secure. It is shown only once. You will save it as a Cloudflare secret, not in your code.
+  </Step>
+</Steps>
+
+## 2. Prepare the Worker
+
+<Steps>
+  <Step title="Create a working folder">
+    Run these commands in your terminal:
+
+    ```bash
+    mkdir firmngin-always-on-agent
+    cd firmngin-always-on-agent
+    npm init -y
+    npm install -D wrangler@latest
+    ```
+
+    Create both files below inside this folder. See [Wrangler installation](https://developers.cloudflare.com/workers/wrangler/install-and-update/) if you need help setting up the tool.
+  </Step>
+  <Step title="Create worker.js">
+    Copy this complete example into `worker.js`. It reads the agent token from a Cloudflare secret.
+
+    ```javascript worker.js
+    export default {
+      async scheduled(controller, env) {
+        if (!env.FIRMNGIN_API_URL || !env.AGENT_ID || !env.FIRMNGIN_AGENT_TOKEN) {
+          throw new Error("Set the API URL, agent ID, and token secret.");
+        }
+    
+        const scheduledAt = new Date(controller.scheduledTime).toISOString();
+        const endpoint = new URL(
+          `/api/v1/always-on/agents/${encodeURIComponent(env.AGENT_ID)}/run`,
+          env.FIRMNGIN_API_URL.trim().replace(/\/+$/, ""),
+        );
+    
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${env.FIRMNGIN_AGENT_TOKEN}`,
+            "Content-Type": "application/json",
+            "Idempotency-Key": `${env.AGENT_ID}:${scheduledAt.slice(0, 16)}`,
+          },
+          body: JSON.stringify({
+            source: "cloudflare_cron",
+            scheduled_at: scheduledAt,
+          }),
+          signal: AbortSignal.timeout(20_000),
+        });
+    
+        if (response.status === 409) return;
+        if (!response.ok) {
+          throw new Error(`Firmngin request rejected: HTTP ${response.status}`);
+        }
+      },
+    };
+    ```
+
+    This example runs only on a schedule. It does not expose a public address that can trigger an agent run.
+  </Step>
+  <Step title="Create wrangler.jsonc">
+    In Firmngin, expand **How the schedule runs** on the Always-On Agent page. Copy the **FIRMNGIN_API_URL** and **AGENT_ID** values for your agent.
+
+    Replace both placeholders below. The API URL must be an HTTPS address that Cloudflare can reach, not `localhost`.
+
+    ```jsonc wrangler.jsonc
+    {
+      "name": "firmngin-always-on-agent",
+      "main": "worker.js",
+      "compatibility_date": "2026-11-04",
+      "workers_dev": false,
+      "preview_urls": false,
+      "observability": { "enabled": true },
+      "vars": {
+        "FIRMNGIN_API_URL": "https://YOUR_FIRMNGIN_API_HOST",
+        "AGENT_ID": "YOUR_AGENT_ID"
+      },
+      "triggers": { "crons": [] }
+    }
+    ```
+
+    Leave `crons` empty for now so no scheduled run starts before the token is ready. Use one Worker per agent. For another agent, create a separate folder and choose a different Worker `name`.
+  </Step>
+</Steps>
+
+## 3. Deploy and save your token
+
+<Steps>
+  <Step title="Sign in to Cloudflare and deploy">
+    From your Worker folder, run:
+
+    ```bash
+    npx wrangler login
+    npx wrangler deploy
+    ```
+
+    Complete the browser sign-in and choose the correct Cloudflare account if prompted. This first deployment creates the Worker without an active schedule.
+  </Step>
+  <Step title="Add the token secret">
+    Run:
+
+    ```bash
+    npx wrangler secret put FIRMNGIN_AGENT_TOKEN
+    ```
+
+    Paste your Firmngin access token when prompted. Keep it out of `vars`, source code, screenshots, and repositories. See [Cloudflare secrets](https://developers.cloudflare.com/workers/configuration/secrets/) for more information.
+  </Step>
+  <Step title="Enable the schedule">
+    Replace the `triggers` section in `wrangler.jsonc` with:
+
+    ```jsonc
+    "triggers": {
+      "crons": ["0 1 * * *"]
+    }
+    ```
+
+    This runs **daily at 01:00 UTC**, which is **08:00 WIB (Jakarta)**. Cloudflare uses UTC, independently of your Firmngin profile timezone.
+
+    Save the file and deploy again:
+
+    ```bash
+    npx wrangler deploy
+    ```
+
+    The schedule becomes active after Cloudflare applies the change. For this guide, manage the schedule in this file and redeploy when you change it.
+  </Step>
+</Steps>
+
+<Note>
+Schedule changes can take up to 15 minutes to propagate. Do not rely on execution at an exact second. See [Cloudflare Cron Triggers](https://developers.cloudflare.com/workers/configuration/cron-triggers/).
+</Note>
+
+## 4. Verify a scheduled run
+
+<Steps>
+  <Step title="Make sure the agent is enabled">
+    Enable the agent in Firmngin. Creating an agent alone does not create a schedule: the Worker and schedule from the previous steps must also be deployed.
+  </Step>
+  <Step title="Use a temporary test schedule if needed">
+    To test sooner, **replace** the daily schedule with `*/5 * * * *` and redeploy. This runs every five minutes after the schedule takes effect.
+
+    Once the test succeeds, replace it with `0 1 * * *` and redeploy again. Do not add the test expression as a second schedule. Each run uses AI budget.
+  </Step>
+  <Step title="Check the result in Firmngin">
+    After the scheduled time, open the agent's **History** and refresh. Find a run with the source **Schedule**, then open its details.
+
+    **Succeeded** together with an **Output** confirms that the agent finished its task. A successful Worker request only confirms that the request was accepted; check the final result in Firmngin.
+  </Step>
+</Steps>
+
+## Everyday use
+
+- **Change the task:** update **Configure**. Task and model changes apply to newly accepted runs without redeploying the Worker. A run that was already accepted keeps its original task and model.
+- **Disable scheduled runs:** disable the agent in Firmngin to reject new scheduled requests. This does not cancel a task that is already running. The Cloudflare schedule still exists; remove it too if you want to stop the trigger. **Run now** remains available for manual testing.
+- **Replace a token:** create a new token, run `npx wrangler secret put FIRMNGIN_AGENT_TOKEN` again, and revoke the old token after the new connection works.
+- **Keep context current:** each agent uses its own conversation across runs. Update the task instructions when your project information changes.
+- **Check scheduling separately:** an enabled agent can accept scheduled requests, but that label does not confirm that your Worker is deployed or that its schedule is healthy. Verify a completed run with the source **Schedule**.
+
+## Troubleshooting
+
+| What you see | What to check |
+| --- | --- |
+| No **Schedule** run | Check the Worker deployment, cron expression, UTC time, and agent's enabled status. Allow time for schedule changes to propagate. |
+| HTTP `401` | Check the agent ID and token secret. Create a replacement if the token was lost or revoked. |
+| HTTP `403` | Enable the agent in Firmngin. |
+| HTTP `409` or no new run | A previous run may still be active, or a repeated request may conflict after task changes. A request rejected as busy is not queued for later. Check History and leave enough time between scheduled runs. |
+| HTTP `429` | Reduce the schedule frequency and wait before trying again. |
+| **Queued** or **Running** | The run has not finished. Keep History open for automatic updates, or use **Refresh**. Avoid starting another run immediately. |
+| **QUOTA_EXCEEDED** | Check and replenish your AI budget. |
+| **HITL_PENDING** | The task needs approval that scheduled runs cannot provide. Change the task instructions to request a text-only result. |
+| **TIMEOUT** | Firmngin could not confirm completion within the time limit. This does not confirm that execution stopped. Check History before starting another run. |
+| **Failed** | Open the run details for an explanation. You can also inspect Worker logs in Cloudflare or run `npx wrangler tail`. |
+
+<Tip>
+Start with one small task and an infrequent schedule. Make sure **Run now** produces a useful answer before relying on automatic runs.
+</Tip>

@@ -71,6 +71,7 @@
             "group": "AI & automation",
             "pages": [
               "ai-agents",
+              "always-on-agents",
               "mcp-setup",
               "automations",
               "channels"
