@@ -1,0 +1,231 @@
+---
+title: "Jalankan agent terjadwal dengan Cloudflare"
+sidebarTitle: "Always-On agents"
+description: "Siapkan Always-On agent, hubungkan Cloudflare Worker, atur jadwal, dan periksa hasilnya agar tugas rutin berjalan tanpa harus membuka chat."
+keywords:
+  - "always-on"
+  - "Cloudflare Workers"
+  - "jadwal"
+  - "agent"
+---
+
+Always-On agents membantu menjalankan permintaan rutin tanpa membuka chat setiap kali. Misalnya, agent dapat meninjau catatan proyek yang Anda berikan dan menyusun ringkasan atau daftar prioritas.
+
+**Cloudflare Worker** bertugas memulai agent sesuai jadwal dari akun Cloudflare Anda. Jawaban dan riwayat percakapannya tetap tersedia di Firmngin, termasuk saat browser ditutup.
+
+<Note>
+Saat ini agent menghasilkan jawaban teks. Agent tidak mengambil data perangkat terbaru, mengendalikan perangkat, mengirim email, atau menjalankan tindakan lain. Berikan informasi yang dibutuhkan di dalam instruksinya.
+</Note>
+
+## Persiapan
+
+Siapkan:
+
+- Akun Firmngin dan workspace yang akan digunakan.
+- Model AI yang tersedia serta anggaran AI untuk menjalankan agent. Setiap percobaan dan run terjadwal memakai anggaran AI seperti chat biasa.
+- Akun Cloudflare yang dapat membuat Workers.
+- Komputer dengan terminal, editor teks, serta Node.js dan npm yang [didukung Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/).
+
+Panduan ini memakai Wrangler, alat resmi Cloudflare untuk mengunggah Worker. Anda cukup membuat dua file dan menjalankan perintah berikut dari folder yang sama.
+
+## 1. Buat dan coba agent
+
+<Steps>
+  <Step title="Buka Always-On Agent">
+    Pilih workspace di dashboard Firmngin, buka **AI Agents → Always-On Agent**, lalu klik **Create agents**.
+  </Step>
+  <Step title="Isi tugasnya">
+    Isi kolom berikut:
+
+    | Kolom | Contoh |
+    | --- | --- |
+    | **Name** | `Review proyek` |
+    | **Model** | Pilih model dari daftar yang tersedia. |
+    | **How it should behave** | `Anda adalah asisten perencanaan yang ringkas. Gunakan hanya konteks proyek yang diberikan. Jangan mengarang progres atau kejadian terbaru.` |
+    | **What to ask on every run** | `Tinjau proyek berikut dan sarankan tiga prioritas berikutnya. Konteks: kami menyiapkan peluncuran produk. Checklist: selesaikan panduan pengguna, tinjau halaman harga, dan siapkan materi pengumuman. Jangan menyatakan pekerjaan selesai kecuali tercatat dalam percakapan.` |
+
+    Klik **Create agent**. Anda dapat memperbarui instruksi dan konteksnya nanti melalui **Configure**.
+  </Step>
+  <Step title="Coba sebelum membuat jadwal">
+    Tutup form, lalu klik tombol play pada kartu agent (**Run now**).
+
+    Buka **History**, klik **Refresh** bila perlu, lalu pilih run. Status **Succeeded** dan bagian **Output** menunjukkan jawaban sudah selesai. Gunakan **Copy output** untuk menyalinnya.
+
+    Jika masih **Queued** atau **Running**, tunggu lalu refresh riwayat. **Run now** juga dapat digunakan saat agent dijeda.
+  </Step>
+  <Step title="Buat access token">
+    Buka **Configure → Access tokens**. Isi **New token name**, misalnya `cloudflare-cron`, lalu klik **Create token**.
+
+    Salin token sekarang dan simpan sementara di tempat aman. Nilainya hanya ditampilkan sekali. Token ini akan dimasukkan sebagai secret di Cloudflare, bukan ke file kode.
+  </Step>
+</Steps>
+
+## 2. Siapkan Worker
+
+<Steps>
+  <Step title="Buat folder kerja">
+    Jalankan di terminal:
+
+    ```bash
+    mkdir firmngin-always-on-agent
+    cd firmngin-always-on-agent
+    npm init -y
+    npm install -D wrangler@latest
+    ```
+
+    Buat kedua file di bawah di dalam folder ini. Petunjuk instalasi tersedia pada [dokumentasi Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/).
+  </Step>
+  <Step title="Buat worker.js">
+    Salin seluruh kode berikut ke `worker.js`. Token dibaca dari secret Cloudflare, sehingga tidak perlu ditulis di kode.
+
+    ```javascript worker.js
+    export default {
+      async scheduled(controller, env) {
+        if (!env.FIRMNGIN_API_URL || !env.AGENT_ID || !env.FIRMNGIN_AGENT_TOKEN) {
+          throw new Error("Lengkapi URL API, ID agent, dan secret token.");
+        }
+
+        const scheduledAt = new Date(controller.scheduledTime).toISOString();
+        const endpoint = new URL(
+          `/api/v1/always-on/agents/${encodeURIComponent(env.AGENT_ID)}/run`,
+          env.FIRMNGIN_API_URL.trim().replace(/\/+$/, ""),
+        );
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${env.FIRMNGIN_AGENT_TOKEN}`,
+            "Content-Type": "application/json",
+            "Idempotency-Key": `${env.AGENT_ID}:${scheduledAt.slice(0, 16)}`,
+          },
+          body: JSON.stringify({
+            source: "cloudflare_cron",
+            scheduled_at: scheduledAt,
+          }),
+          signal: AbortSignal.timeout(20_000),
+        });
+
+        if (response.status === 409) return;
+        if (!response.ok) {
+          throw new Error(`Permintaan Firmngin ditolak: HTTP ${response.status}`);
+        }
+      },
+    };
+    ```
+
+    Contoh ini hanya berjalan melalui jadwal; tidak menyediakan tombol atau alamat publik untuk memicu run.
+  </Step>
+  <Step title="Buat wrangler.jsonc">
+    Di halaman Always-On Agent, buka **How the schedule runs** untuk melihat nilai **FIRMNGIN_API_URL** dan **AGENT_ID** milik agent Anda.
+
+    Ganti kedua placeholder pada file berikut dengan nilai tersebut. Gunakan alamat API HTTPS yang dapat diakses Cloudflare, bukan `localhost`.
+
+    ```jsonc wrangler.jsonc
+    {
+      "name": "firmngin-always-on-agent",
+      "main": "worker.js",
+      "compatibility_date": "2026-11-04",
+      "workers_dev": false,
+      "preview_urls": false,
+      "observability": { "enabled": true },
+      "vars": {
+        "FIRMNGIN_API_URL": "https://YOUR_FIRMNGIN_API_HOST",
+        "AGENT_ID": "YOUR_AGENT_ID"
+      },
+      "triggers": { "crons": [] }
+    }
+    ```
+
+    Biarkan `crons` kosong dahulu agar tidak ada run sebelum token siap. Gunakan satu Worker untuk satu agent. Untuk agent tambahan, buat folder lain dan pilih `name` Worker yang berbeda.
+  </Step>
+</Steps>
+
+## 3. Deploy dan simpan token
+
+<Steps>
+  <Step title="Masuk ke Cloudflare dan deploy">
+    Dari folder Worker, jalankan:
+
+    ```bash
+    npx wrangler login
+    npx wrangler deploy
+    ```
+
+    Selesaikan login di browser dan pilih akun Cloudflare yang benar jika diminta. Deploy pertama ini membuat Worker tanpa jadwal aktif.
+  </Step>
+  <Step title="Tambahkan secret token">
+    Jalankan:
+
+    ```bash
+    npx wrangler secret put FIRMNGIN_AGENT_TOKEN
+    ```
+
+    Saat diminta, tempel access token dari Firmngin. Jangan menaruh token di `vars`, kode, screenshot, atau repository. Lihat [cara Cloudflare menyimpan secrets](https://developers.cloudflare.com/workers/configuration/secrets/).
+  </Step>
+  <Step title="Aktifkan jadwal">
+    Ubah bagian `triggers` dalam `wrangler.jsonc` menjadi:
+
+    ```jsonc
+    "triggers": {
+      "crons": ["0 1 * * *"]
+    }
+    ```
+
+    Ini berarti **setiap hari pukul 01:00 UTC**, sama dengan **08:00 WIB**. Cloudflare memakai UTC, bukan zona waktu profil Firmngin.
+
+    Simpan file, lalu deploy kembali:
+
+    ```bash
+    npx wrangler deploy
+    ```
+
+    Jadwal sekarang aktif setelah perubahan diterapkan Cloudflare. Untuk panduan ini, ubah jadwal melalui file tersebut dan deploy ulang agar pengaturannya konsisten.
+  </Step>
+</Steps>
+
+<Note>
+Perubahan jadwal Cloudflare dapat memerlukan waktu hingga 15 menit untuk tersebar. Jadwal bukan jaminan eksekusi pada detik yang tepat. Lihat [Cron Triggers](https://developers.cloudflare.com/workers/configuration/cron-triggers/).
+</Note>
+
+## 4. Pastikan run terjadwal berhasil
+
+<Steps>
+  <Step title="Pastikan agent aktif">
+    Di Firmngin, aktifkan status agent. Menyimpan agent saja belum membuat jadwal; Worker dan jadwal pada langkah sebelumnya harus sudah terpasang.
+  </Step>
+  <Step title="Coba jadwal lebih dekat jika diperlukan">
+    Untuk percobaan, **ganti** jadwal harian dengan `*/5 * * * *` dan deploy ulang. Ini menjalankan agent setiap lima menit setelah jadwal diterapkan.
+
+    Setelah berhasil, ganti kembali dengan `0 1 * * *` dan deploy ulang. Jangan menambahkan jadwal percobaan sebagai jadwal kedua. Setiap run menggunakan anggaran AI.
+  </Step>
+  <Step title="Periksa hasil di Firmngin">
+    Setelah waktu jadwal terlewati, buka **History** pada agent dan refresh. Cari run dengan sumber **Schedule**, lalu buka detailnya.
+
+    **Succeeded** beserta **Output** adalah tanda bahwa agent sudah menyelesaikan tugas. Worker yang berhasil menerima respons belum tentu berarti jawaban AI sudah selesai; periksa hasil akhirnya di Firmngin.
+  </Step>
+</Steps>
+
+## Penggunaan sehari-hari
+
+- **Ubah tugas:** edit melalui **Configure**. Perubahan instruksi dan model berlaku pada run berikutnya tanpa deploy ulang Worker.
+- **Jeda:** nonaktifkan agent di Firmngin untuk menolak run terjadwal. Jadwal Cloudflare tetap ada; hapus jadwalnya juga bila ingin menghentikan pemicunya. **Run now** tetap dapat dipakai untuk mencoba agent yang dijeda.
+- **Ganti token:** buat token baru, jalankan kembali `npx wrangler secret put FIRMNGIN_AGENT_TOKEN`, lalu revoke token lama setelah koneksi baru berhasil.
+- **Lanjutkan konteks:** setiap agent memakai percakapannya sendiri. Perbarui konteks dalam instruksi ketika informasi proyek berubah.
+
+## Jika belum berjalan
+
+| Yang terlihat | Yang perlu diperiksa |
+| --- | --- |
+| Tidak ada run **Schedule** | Pastikan Worker sudah dideploy, jadwal terisi, waktu dihitung dalam UTC, dan agent aktif. Tunggu propagasi perubahan jadwal. |
+| HTTP `401` | Periksa ID agent dan secret token. Buat token baru jika token hilang atau sudah direvoke. |
+| HTTP `403` | Aktifkan kembali agent di Firmngin. |
+| HTTP `409` atau belum ada run baru | Run sebelumnya mungkin masih berjalan. Periksa History dan beri jarak jadwal yang cukup. |
+| HTTP `429` | Kurangi frekuensi jadwal dan coba lagi setelah beberapa waktu. |
+| **Queued** atau **Running** | Run belum selesai. Tunggu lalu refresh History; tidak perlu langsung memicunya lagi. |
+| **QUOTA_EXCEEDED** | Periksa dan isi kembali anggaran AI. |
+| **HITL_PENDING** | Ubah tugas menjadi permintaan jawaban teks tanpa tindakan yang memerlukan persetujuan. |
+| **Failed** | Buka detail run untuk melihat penjelasannya. Anda juga dapat memeriksa log Worker di Cloudflare atau menjalankan `npx wrangler tail`. |
+
+<Tip>
+Mulai dengan satu tugas kecil dan jadwal yang tidak terlalu sering. Pastikan hasil **Run now** sesuai kebutuhan sebelum mengandalkan jadwal otomatis.
+</Tip>
